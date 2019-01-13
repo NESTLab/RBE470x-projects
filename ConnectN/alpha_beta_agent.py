@@ -21,6 +21,8 @@ class AlphaBetaAgent(agent.Agent):
     #
     # PARAM [board.Board] brd: the current board state
     # RETURN [int]: the column where the token must be added
+    #
+    # NOTE: make sure the column is legal, or you'll lose the game.
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here

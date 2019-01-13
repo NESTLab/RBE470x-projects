@@ -13,8 +13,8 @@ class Game(object):
     # PARAM [int]         w:  the board width
     # PARAM [int]         h:  the board height
     # PARAM [int]         n:  the number of tokens to line up to win
-    # PARAM [agent.Agent] p1: the agent for player 1
-    # PARAM [agent.Agent] p2: the agent for player 2
+    # PARAM [agent.Agent] p1: the agent for Player 1
+    # PARAM [agent.Agent] p2: the agent for Player 2
     def __init__(self, w, h, n, p1, p2):
         """Class costructor"""
         # Create board
@@ -27,6 +27,7 @@ class Game(object):
     # Execute the game.
     #
     # RETURN [int]: The game outcome.
+    #               1 for Player 1, 2 for Player 2, and 0 for no winner
     def go(self):
         # Current player
         p = 0
