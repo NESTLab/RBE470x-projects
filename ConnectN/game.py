@@ -17,7 +17,7 @@ class Game(object):
     # PARAM [agent.Agent] p1: the agent for Player 1
     # PARAM [agent.Agent] p2: the agent for Player 2
     def __init__(self, w, h, n, p1, p2):
-        """Class costructor"""
+        """Class constructor"""
         # Create board
         self.board = board.Board([[0] * w for i in range(h)], w, h, n)
         # Players
@@ -34,7 +34,8 @@ class Game(object):
         p = 0
         while self.board.free_cols() and self.board.get_outcome() == 0:
             self.board.print_it()
-            x = self.players[p].go(self.board)
+            # Copy board so player can't modify it
+            x = self.players[p].go(self.board.copy())
             print(self.players[p].name, "move:", x)
             if not x in self.board.free_cols():
                 print("Illegal move")
@@ -73,8 +74,8 @@ class Game(object):
         while self.board.free_cols() and self.board.get_outcome() == 0:
             # Get start time
             st = time.time()
-            # Make move
-            x = self.players[p].go(self.board)
+            # Make move and copy board so player can't modify it
+            x = self.players[p].go(self.board.copy())
             # Get elapsed time
             et = time.time() - st
             # Is the move legal and within the time limit?
