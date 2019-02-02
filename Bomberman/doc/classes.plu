@@ -1,0 +1,158 @@
+@startuml
+World "1" -down-* "1" Game
+
+Cell "*" -right-* "1" World
+
+EmptyCell <|-- Cell
+ExitCell <|-- Cell
+WallCell <|-- Cell
+BombCell <|-- Cell
+ExplosionCell <|-- Cell
+MonsterCell <|-- Cell
+CharacterCell <|-- Cell
+
+Entity -left-|> PositionalEntity
+MovableEntity <|-- PositionalEntity
+TimedEntity <|-- Entity
+AIEntity <|-- Entity
+BombEntity <|-- PositonalEntity
+BombEntity <|-- TimedEntity
+ExplosionEntity <|-- PositonalEntity
+ExplosionEntity <|-- TimedEntity
+MonsterEntity <|-- AIEntity
+MonsterEntity <|-- MovableEntity
+CharacterEntity <|-- AIEntity
+CharacterEntity <|-- MovableEntity
+
+BombCell "1" o-- "1" BombEntity
+ExplosionCell "1" o-- "1" ExplosionEntity
+MonsterCell "1" o-- "1" MonsterEntity
+CharacterCell "1" o-- "1" CharacterEntity
+
+class Game {
+  +world : World
+  +monsters : Set
+  +characters : Set
+  +bombs : Set
+  +explosions : Set
+  +__init__(width, height, max_time, bomb_time, expl_duration, expl_range)
+  +go()
+  +step()
+  +draw()
+  +done() : Bool
+  +add_exit(x,y)
+  +add_wall(sx, sy, dx, dy, length)
+  +add_monster(monster)
+  +add_character(character)
+  +add_bomb(x, y)
+  +add_explosion(x, y)
+  +clear_explosion(explosion)
+  -add_explosion_dxdy(explosion, x, y, dx, dy)
+  -clear_explosion_dxdy(explosion, dx, dy)
+  -step_bombs()
+  -step_explosions()
+  -step_monsters()
+  -step_characters()
+}
+
+class World {
+  +width : Int
+  +height : Int
+  +time : Int
+  +data : Cell[]
+  +at(x,y) : Cell
+  +place_empty(x, y)
+  +place_exit(x, y)
+  +place_wall(x, y)
+  +place_monster(monster)
+  +place_character(character)
+  +place_bomb(bomb)
+  +place_explosion(explosion, x, y)
+  +move_entity(e)
+  +draw()
+}
+
+together {
+
+  class Cell {
+    +tpe : Int
+    +data : Object
+    +__init__(tpe, data)
+    +draw()
+  }
+
+  class EmptyCell {
+    +draw()
+  }
+
+  class ExitCell {
+    +draw()
+  }
+
+  class WallCell {
+    +draw()
+  }
+
+  class BombCell {
+    +draw()
+  }
+
+  class ExplosionCell {
+    +draw()
+  }
+
+  class MonsterCell {
+    +draw()
+  }
+
+  class CharacterCell {
+    +draw()
+  }
+}
+
+together {
+
+  abstract class Entity
+
+  class PositionalEntity {
+    +x : Int
+    +y : Int
+    +__init__(x,y)
+  }
+
+  class MovableEntity {
+    +dx : Int
+    +dy : Int
+    +__init__(x,y)
+    +move(dx,dy)
+    +nextpos() : Tuple(Int,Int)
+  }
+
+  class TimedEntity {
+    +timer : Int
+    +__init__(timer)
+    +tick()
+    +expired() : Bool
+  }
+
+  class AIEntity {
+    +do()
+  }
+
+  class BombEntity {
+    +__init__(x,y,timer)
+  }
+
+  class ExplosionEntity {
+    +__init__(x,y,timer)
+  }
+
+  class MonsterEntity {
+    +look_for_character(self, wrld) : Tuple(Bool, Int, Int)
+    +going_to_die(self, wrld) : Bool
+    +look_for_empty_cell(self, wrld) : Cell[]
+    +do(self, wrld):
+  }
+}
+
+@enduml
