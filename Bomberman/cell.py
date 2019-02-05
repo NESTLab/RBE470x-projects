@@ -115,4 +115,4 @@ class CharacterCell(Cell):
 
     def draw(self):
         """Draws the cell"""
-        sys.stdout.write(Fore.GREEN + "C")
+        sys.stdout.write(Back.GREEN + "C")

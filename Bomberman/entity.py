@@ -1,3 +1,5 @@
+from math import copysign
+
 ############
 # Entities #
 ############
@@ -22,6 +24,11 @@ class PositionalEntity(Entity):
 # Movable entity #
 ##################
 
+def __sign__(x):
+    if x == 0.0:
+        return 0
+    return int(copysign(1, x))
+
 class MovableEntity(PositionalEntity):
     """Positional entity that can move"""
 
@@ -33,8 +40,10 @@ class MovableEntity(PositionalEntity):
 
     def move(self, dx, dy):
         """Move character"""
-        self.dx = dx
-        self.dy = dy
+        # Make sure dx is in [-1,1]
+        self.dx = __sign__(dx)
+        # Make sure dy is in [-1,1]
+        self.dy = __sign__(dy)
 
     def nextpos(self):
         """Returns the next position of this entity"""

@@ -16,6 +16,39 @@ class Game:
         self.bombs = set()
         self.explosions = set()
 
+    @classmethod
+    def fromfile(cls, fname):
+        with open(fname, 'r') as fd:
+            # First lines are parameters
+            max_time = int(fd.readline().split()[1])
+            bomb_time = int(fd.readline().split()[1])
+            expl_duration = int(fd.readline().split()[1])
+            expl_range = int(fd.readline().split()[1])
+            # Next line is top border, use it for width
+            width = len(fd.readline()) - 2
+            # Count the rows
+            startpos = fd.tell()
+            height = 0
+            row = fd.readline()
+            while row and row[0] == '|':
+                height = height + 1
+                if len(row) != width + 2:
+                    raise RuntimeError("Row", height, "is not", width, "characters long")
+                row = fd.readline()
+            # Create empty world
+            gm = cls(width, height, max_time, bomb_time, expl_duration, expl_range)
+            # Now parse the data in the world
+            fd.seek(startpos)
+            for y in range(0, height):
+                ln = fd.readline()
+                for x in range(0, width):
+                    if ln[x+1] == 'E':
+                        gm.add_exit(x,y)
+                    elif ln[x+1] == 'W':
+                        gm.world.place_wall(x,y)
+            # All done
+            return gm
+
     def go(self):
         colorama.init(autoreset=True)
         self.draw()
@@ -32,10 +65,12 @@ class Game:
         self.step_explosions()
         # Make sure the game hasn't ended
         if not self.done():
+            # Make world representation for monsters and characters
+            wrld = [[self.world.at(x,y).tpe for y in range(self.world.height)] for x in range(self.world.width)]
             # Update monsters
-            self.step_monsters()
+            self.step_monsters(wrld)
             # Update characters
-            pass
+            self.step_characters(wrld)
         input("Press Enter to continue...")
 
     def draw(self):
@@ -62,6 +97,11 @@ class Game:
         self.characters.add(character)
         self.world.place_character(character)
 
+    def remove_character(self, character):
+        """Remove character from world"""
+        self.characters.add(character)
+        self.world.place_character(character)        
+
     def add_bomb(self, x, y):
         """Add a bomb in the grid"""
         bomb = entity.BombEntity(x, y, self.bomb_time)
@@ -87,7 +127,7 @@ class Game:
                 self.monsters.remove(e.data)
             # Check if a character has been hit
             elif e.tpe == cell.Cell.CHARACTER:
-                self.characters.remove(e.data)
+                self.remove_character(e.data)
             # Check if a bomb has been hit
             elif e.tpe == cell.Cell.BOMB:
                 self.bombs.remove(e.data)
@@ -173,15 +213,15 @@ class Game:
         for e in to_delete:
             self.explosions.remove(e)
 
-    def step_monsters(self):
+    def step_monsters(self, wrld):
         for m in self.monsters:
-            m.do(self.world)
+            m.do(wrld)
             self.world.move_entity(m)
 
-    def step_characters(self):
+    def step_characters(self, wrld):
         for c in self.characters:
-            c.do(self.world)
-            # # If motion
-            # self.world.move_entity(c)
-            # # If place bomb
-            # self.add_bomb(c.x, c.y)
+            c.do(wrld)
+            if c.place_bomb:
+                self.add_bomb(c.x, c.y)
+                c.place_bomb = False
+            self.world.move_entity(c)
