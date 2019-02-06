@@ -109,7 +109,7 @@ class ExplosionEntity(PositionalEntity, TimedEntity, OwnedEntity):
 
     def __init__(self, x, y, timer, character):
         PositionalEntity.__init__(self, x, y)
-        TimedEntity.__init__(self, 1)
+        TimedEntity.__init__(self, timer)
         OwnedEntity.__init__(self, character)
 
 ##################
@@ -122,3 +122,6 @@ class MonsterEntity(AIEntity, MovableEntity):
     def __init__(self, x, y):
         AIEntity.__init__(self)
         MovableEntity.__init__(self, x, y)
+
+    def do(self, wrld):
+        self.move(1,0)

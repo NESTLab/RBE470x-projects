@@ -65,9 +65,8 @@ class World:
             new.characters[k] = ncharacters
         # Copy bombs
         for k, ob in wrld.bombs.items():
-            c = mapping.get(ob.owner)
-            if c:
-                new.bombs[k] = BombEntity(ob.x, ob.y, ob.timer, c)
+            c = mapping.get(ob.owner, ob.owner)
+            new.bombs[k] = BombEntity(ob.x, ob.y, ob.timer, c)
         # Copy explosions
         for k, oe in wrld.explosions.items():
             c = mapping.get(oe.owner)
@@ -185,14 +184,6 @@ class World:
         self.bombs[self.index(x,y)] = BombEntity(x, y, self.bomb_time, character)
 
     def remove_character(self, character):
-        # Remove bombs left by character
-        bfound = None
-        for i, b in self.bombs.items():
-            if b.owner == character:
-                bfound = i
-                break
-        if bfound:
-            del self.bombs[bfound]
         # Remove character
         self.characters[self.index(character.x, character.y)].remove(character)
 
@@ -205,28 +196,30 @@ class World:
         while ((rnge < self.expl_range) and
                (xx >= 0) and (xx < self.width()) and
                (yy >= 0) and (yy < self.height())):
-            # Cannot destroy exit
-            if self.exitcell == (xx,yy):
+            # Cannot destroy exit or another bomb
+            if (self.exitcell == (xx,yy)) or (self.bomb_at(xx, yy)):
                 return []
             # Place explosion
             self.add_explosion(xx, yy, bomb)
-            # Check if a bomb has been hit
-            if self.bomb_at(xx, yy):
-                del self.bombs[self.index(x,y)]
-                return []
             # Check if a wall has been hit
             if self.wall_at(xx, yy):
-                return [Event(Event.BOMB_HIT_WALL, bomb.owner, None)]
+                return [Event(Event.BOMB_HIT_WALL, bomb.owner)]
             # Check if a monster has been hit
-            m = self.monsters_at(xx,yy)
-            if m:
-                self.monsters[self.index(xx,yy)].remove(m)
-                return [Event(Event.BOMB_HIT_MONSTER, bomb.owner, m)]
+            mlist = self.monsters_at(xx,yy)
+            if mlist:
+                ev = []
+                for m in mlist:
+                    ev.append(Event(Event.BOMB_HIT_MONSTER, bomb.owner, m))
+                    self.monsters[self.index(xx,yy)].remove(m)
+                return ev
             # Check if a character has been hit
-            c = self.characters_at(xx,yy)
-            if c:
-                self.remove_character(c)
-                return [Event(Event.BOMB_HIT_CHARACTER, bomb.owner, c)]
+            clist = self.characters_at(xx,yy)
+            if clist:
+                ev = []
+                for c in clist:
+                    ev.append(Event(Event.BOMB_HIT_CHARACTER, bomb.owner, c))
+                    self.remove_character(c)
+                return ev
             # Next cell
             xx = xx + dx
             yy = yy + dy
@@ -265,6 +258,16 @@ class World:
         oi = self.index(monster.x, monster.y)
         # Try to move
         if self.update_movable_entity(monster):
+            ev = []
+            # Check for collision with explosion
+            expl = self.explosion_at(monster.x, monster.y)
+            if expl:
+                ev.append(Event(Event.BOMB_HIT_MONSTER, expl.owner, monster))
+                if update_dict:
+                    # Remove monster
+                    self.monsters[oi].remove(monster)
+                return ev
+            # Otherwise, the monster can walk safely
             if update_dict:
                 # Remove monster from previous position
                 self.monsters[oi].remove(monster)
@@ -272,11 +275,10 @@ class World:
                 ni = self.index(monster.x, monster.y)
                 np = self.monsters.get(ni, [])
                 np.append(monster)
-                self.monsters[ni] = np
+                self.monsters[ni] = np                
             # Check for collisions with characters
             characters = self.characters_at(monster.x, monster.y)
             if characters:
-                ev = []
                 for c in characters:
                     ev.append(Event(Event.CHARACTER_KILLED_BY_MONSTER, c, monster))
                 return ev
@@ -287,6 +289,16 @@ class World:
         oi = self.index(character.x, character.y)
         # Try to move
         if self.update_movable_entity(character):
+            ev = []
+            # Check for collision with explosion
+            expl = self.explosion_at(character.x, character.y)
+            if expl:
+                ev.append(Event(Event.BOMB_HIT_CHARACTER, expl.owner, character))
+                if update_dict:
+                    # Remove character
+                    self.characters[oi].remove(character)
+                return ev
+            # Otherwise, the character can walk
             if update_dict:
                 # Remove character from previous position
                 self.characters[oi].remove(character)
@@ -300,6 +312,9 @@ class World:
             if monsters:
                 return [Event(Event.CHARACTER_KILLED_BY_MONSTER,
                               character, monsters[0])]
+            # Check for exit cell
+            if self.exitcell == (character.x, character.y):
+                return [Event(Event.CHARACTER_FOUND_EXIT, character)]
         return []
 
     def update_explosions(self):

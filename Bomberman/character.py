@@ -1,12 +1,11 @@
-import cell
-import entity
+from entity import AIEntity, MovableEntity
 
-class Character(entity.AIEntity, entity.MovableEntity):
+class Character(AIEntity, MovableEntity):
     """Basic definitions for a custom-made character"""
 
     def __init__(self, name, x, y):
-        entity.AIEntity.__init__(self)
-        entity.MovableEntity.__init__(self, x, y)
+        AIEntity.__init__(self)
+        MovableEntity.__init__(self, x, y)
         # Character name
         self.name = name
         # Whether this character wants to place a bomb
@@ -27,7 +26,7 @@ class Character(entity.AIEntity, entity.MovableEntity):
         return not(self == other)
 
     def do(self, wrld):
-        pass
+        self.move(1,0)
 
     def place_bomb(self):
         """Attempts to place a bomb"""

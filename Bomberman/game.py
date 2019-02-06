@@ -37,7 +37,10 @@ class Game:
                 ln = fd.readline()
                 for x in range(0, width):
                     if ln[x+1] == 'E':
-                        gm.world.add_exit(x,y)
+                        if not gm.world.exitcell:
+                            gm.world.add_exit(x,y)
+                        else:
+                            raise RuntimeError("There can be only one exit cell, first one found at", x, y)
                     elif ln[x+1] == 'W':
                         gm.world.add_wall(x,y)
             # All done
@@ -65,12 +68,10 @@ class Game:
             elif e.tpe == Event.BOMB_HIT_CHARACTER:
                 if e.character != e.other:
                     self.scores[e.character.name] = self.scores[e.character.name] + 100
-                self.world.remove_character(e.other)
             elif e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
                 self.world.remove_character(e.character)
             elif e.tpe == Event.CHARACTER_FOUND_EXIT:
                 self.scores[e.character.name] = self.scores[e.character.name] + 2 * self.world.time
-                self.world.remove_character(e.character)
         for k,clist in self.world.characters.items():
             for c in clist:
                 self.scores[c.name] = self.scores[c.name] + 1

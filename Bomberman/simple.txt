@@ -3,6 +3,16 @@ bomb_time 2
 expl_duration 3
 expl_range 4
 +----------------------------------------+
+|         E                              |
+|                                        |
+|WWWWWWWWWWWWWWWWWWWWWWW                 |
+|                                        |
+|                                        |
+|                                        |
+|                                        |
+|              WWWWWWWWWWWWWWWWWWWWWWWWWW|
+|                                        |
+|                                        |
 |                                        |
 |                                        |
 |WWWWWWWWWWWWWWWWWWWWWWW                 |
@@ -13,14 +23,4 @@ expl_range 4
 |              WWWWWWWWWWWWWWWWWWWWWWWWWW|
 |                                        |
 |                                        |
-|                                        |
-|                                        |
-|WWWWWWWWWWWWWWWWWWWWWWW                 |
-|                                        |
-|                                        |
-|                                        |
-|                                        |
-|              WWWWWWWWWWWWWWWWWWWWWWWWWW|
-|                                        |
-|                                       E|
 +----------------------------------------+

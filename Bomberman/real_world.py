@@ -1,5 +1,6 @@
 from world import World
 from sensed_world import SensedWorld
+from events import Event
 
 class RealWorld(World):
     """The real world state"""
@@ -42,12 +43,15 @@ class RealWorld(World):
                 # Call AI
                 m.do(wrld)
                 # Update position and check for events
-                ev = ev + self.update_monster_move(m, False)
-                # Update new index
-                ni = self.index(m.x, m.y)
-                np = nmonsters.get(ni, [])
-                np.append(m)
-                nmonsters[ni] = np
+                ev2 = self.update_monster_move(m, False)
+                ev = ev + ev2
+                # Monster gets inserted in next step's list unless hit
+                if not (ev2 and ev2[0].tpe == Event.BOMB_HIT_MONSTER):
+                    # Update new index
+                    ni = self.index(m.x, m.y)
+                    np = nmonsters.get(ni, [])
+                    np.append(m)
+                    nmonsters[ni] = np
         # Save new index
         self.monsters = nmonsters
         # Return events
@@ -64,12 +68,16 @@ class RealWorld(World):
                 # Call AI
                 c.do(wrld)
                 # Update position and check for events
-                ev = ev + self.update_character_move(c, False)
-                # Update new index
-                ni = self.index(c.x, c.y)
-                np = ncharacters.get(ni, [])
-                np.append(c)
-                ncharacters[ni] = np
+                ev2 = self.update_character_move(c, False)
+                ev = ev + ev2
+                # Character gets inserted in next step's list unless hit or
+                # escaped
+                if not (ev2 and ev2[0].tpe in [Event.BOMB_HIT_CHARACTER, Event.CHARACTER_FOUND_EXIT]):
+                    # Update new index
+                    ni = self.index(c.x, c.y)
+                    np = ncharacters.get(ni, [])
+                    np.append(c)
+                    ncharacters[ni] = np
         # Save new index
         self.characters = ncharacters
         # Return events
