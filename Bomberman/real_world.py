@@ -21,6 +21,10 @@ class RealWorld(World):
         """Adds the given character to the world"""
         self.characters[self.index(c.x,c.y)] = [c]
 
+    ###################
+    # Private methods #
+    ###################
+
     def next(self):
         """Returns a new world state, along with the events that occurred"""
         new = self.from_world(self)

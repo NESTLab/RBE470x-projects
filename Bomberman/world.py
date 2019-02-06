@@ -154,7 +154,15 @@ class World:
                 elif self.wall_at(x,y):
                     sys.stdout.write(Back.WHITE + " ")
                 else:
-                    sys.stdout.write(" ")
+                    tile = False
+                    for k,clist in self.characters.items():
+                        for c in clist:
+                            if c.tiles.get((x,y)):
+                                sys.stdout.write(c.tiles[(x,y)] + ".")
+                                tile = True
+                                break
+                    if not tile:
+                        sys.stdout.write(" ")
                 sys.stdout.write(Style.RESET_ALL)
             sys.stdout.write("|\n")
         sys.stdout.write(border)

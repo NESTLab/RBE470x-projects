@@ -11,20 +11,15 @@ class Character(AIEntity, MovableEntity):
         # Whether this character wants to place a bomb
         self.maybe_place_bomb = False
         # Debugging elements
-        self.tiles = set()
-        self.rays  = []
+        self.tiles = {}
 
     def place_bomb(self):
         """Attempts to place a bomb"""
         self.maybe_place_bomb = True
 
-    def set_tile_color(self, x, y, r, g, b):
+    def set_tile_color(self, x, y, color):
         """Sets the tile color at (x,y)"""
-        self.tiles[(x,y)] = (r,g,b)
-
-    def draw_ray(self, sx, sy, ex, ey, r, g, b):
-        """Draws a ray from (sx,sy) to (ex,ey)"""
-        self.rays.append((sx, sy, ex, ey, r, g, b))
+        self.tiles[(x,y)] = color
 
     ###################
     # Private methods #

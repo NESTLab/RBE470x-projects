@@ -59,6 +59,10 @@ class Game:
         self.manage_events_and_scores()
         input("Press Enter to continue...")
 
+    ###################
+    # Private methods #
+    ###################
+
     def manage_events_and_scores(self):
         for e in self.events:
             if e.tpe == Event.BOMB_HIT_WALL:
