@@ -2,7 +2,7 @@ import cell
 import entity
 import random
 
-class Monster(entity.AIEntity, entity.MovableEntity):
+class RandomMonster(entity.AIEntity, entity.MovableEntity):
     """A pretty stupid monster"""
 
     def look_for_character(self, wrld):

@@ -78,24 +78,47 @@ class AIEntity(Entity):
         """Pick an action for the entity given the world state"""
         raise NotImplementedError("Please implement this method")
 
+################
+# Owned entity #
+################
+
+class OwnedEntity(Entity):
+    """Entity with an owner"""
+
+    def __init__(self, owner):
+        self.owner = owner
+
 ###############
 # Bomb entity #
 ###############
 
-class BombEntity(PositionalEntity, TimedEntity):
+class BombEntity(PositionalEntity, TimedEntity, OwnedEntity):
     """Bomb entity"""
 
-    def __init__(self, x, y, timer):
+    def __init__(self, x, y, timer, character):
         PositionalEntity.__init__(self, x, y)
         TimedEntity.__init__(self, timer)
+        OwnedEntity.__init__(self, character)
 
 ####################
 # Explosion entity #
 ####################
 
-class ExplosionEntity(PositionalEntity, TimedEntity):
+class ExplosionEntity(PositionalEntity, TimedEntity, OwnedEntity):
     """Explosion entity"""
 
-    def __init__(self, x, y, timer):
+    def __init__(self, x, y, timer, character):
         PositionalEntity.__init__(self, x, y)
-        TimedEntity.__init__(self, timer)
+        TimedEntity.__init__(self, 1)
+        OwnedEntity.__init__(self, character)
+
+##################
+# Monster entity #
+##################
+
+class MonsterEntity(AIEntity, MovableEntity):
+    """Monster Entity"""
+
+    def __init__(self, x, y):
+        AIEntity.__init__(self)
+        MovableEntity.__init__(self, x, y)
