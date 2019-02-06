@@ -1,13 +1,14 @@
-import real_world
-import entity
-import cell
+from real_world import RealWorld
+from events import Event
 import colorama
 
 class Game:
     """Game class"""
 
     def __init__(self, width, height, max_time, bomb_time, expl_duration, expl_range):
-        self.world = real_world.RealWorld.from_params(width, height, max_time, bomb_time, expl_duration, expl_range)
+        self.world = RealWorld.from_params(width, height, max_time, bomb_time, expl_duration, expl_range)
+        self.events = []
+        self.scores = {}
 
     @classmethod
     def fromfile(cls, fname):
@@ -51,24 +52,57 @@ class Game:
         colorama.deinit()
 
     def step(self):
-        (self.world, ev) = self.world.next()
+        (self.world, self.events) = self.world.next()
+        self.manage_events_and_scores()
         input("Press Enter to continue...")
 
+    def manage_events_and_scores(self):
+        for e in self.events:
+            if e.tpe == Event.BOMB_HIT_WALL:
+                self.scores[e.character.name] = self.scores[e.character.name] + 10
+            elif e.tpe == Event.BOMB_HIT_MONSTER:
+                self.scores[e.character.name] = self.scores[e.character.name] + 50
+            elif e.tpe == Event.BOMB_HIT_CHARACTER:
+                if e.character != e.other:
+                    self.scores[e.character.name] = self.scores[e.character.name] + 100
+                self.world.remove_character(e.other)
+            elif e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                self.world.remove_character(e.character)
+            elif e.tpe == Event.CHARACTER_FOUND_EXIT:
+                self.scores[e.character.name] = self.scores[e.character.name] + 2 * self.world.time
+                self.world.remove_character(e.character)
+        for k,clist in self.world.characters.items():
+            for c in clist:
+                self.scores[c.name] = self.scores[c.name] + 1
+            
     def draw(self):
         self.world.printit()
+        print("SCORES")
+        for c,s in self.scores.items():
+            print(c,s)
+        print("EVENTS")
+        for e in self.events:
+            print(e)
 
     def done(self):
-        return self.world.time <= 0
+        # Time's up
+        if self.world.time <= 0:
+            return True
+        # No more characters left
+        if not self.world.characters:
+            return True
+        # Last man standing
+        if not self.world.exitcell:
+            count = 0
+            for k,clist in self.world.characters.items():
+                count = count + len(clist)
+            if count == 0:
+                return True
+        return False
 
-    # def step_monsters(self, wrld):
-    #     for m in self.monsters:
-    #         m.do(wrld)
-    #         self.world.move_entity(m)
+    def add_monster(self, m):
+        self.world.add_monster(m)
 
-    # def step_characters(self, wrld):
-    #     for c in self.characters:
-    #         c.do(wrld)
-    #         if c.place_bomb:
-    #             self.add_bomb(c.x, c.y)
-    #             c.place_bomb = False
-    #         self.world.move_entity(c)
+    def add_character(self, c):
+        self.world.add_character(c)
+        self.scores[c.name] = -self.world.time

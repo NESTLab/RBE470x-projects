@@ -1,37 +1,34 @@
-import cell
-import entity
+from entity import AIEntity, MovableEntity
 import random
 
-class RandomMonster(entity.AIEntity, entity.MovableEntity):
-    """A pretty stupid monster"""
+class SelfPreservingMonster(AIEntity, MovableEntity):
+    """A random monster that walks away from explosions"""
 
     def look_for_character(self, wrld):
         for dx in [-1, 0, 1]:
             # Avoid out-of-bounds access
-            if ((self.x + dx >= 0) and (self.x + dx < len(wrld))):
+            if ((self.x + dx >= 0) and (self.x + dx < wrld.width())):
                 for dy in [-1, 0, 1]:
                     # Avoid out-of-bounds access
-                    if ((self.y + dy >= 0) and (self.y + dy < len(wrld[0]))):
+                    if ((self.y + dy >= 0) and (self.y + dy < wrld.height())):
                         # Is a character at this position?
-                        if (wrld[self.x + dx][self.y + dy] == cell.Cell.CHARACTER):
+                        if (wrld.characters_at(self.x + dx, self.y + dy)):
                             return (True, dx, dy)
         # Nothing found
         return (False, 0, 0)
 
-    def going_to_die(self, wrld):
+    def must_change_direction(self, wrld):
         # Get next desired position
         (nx, ny) = self.nextpos()
         # If next pos is out of bounds, must change direction
-        if ((nx < 0) or (nx >= len(wrld)) or
-            (ny < 0) or (ny >= len(wrld[0]))):
+        if ((nx < 0) or (nx >= wrld.width()) or
+            (ny < 0) or (ny >= wrld.height())):
             return True
-        # Get data of current cell
-        cc = wrld[self.x][self.y]
-        # Get data of next cell
-        nc = wrld[nx][ny]
         # If these cells are an explosion, a wall, or a monster, go away
-        return ((cc == cell.Cell.EXPLOSION) or
-                (nc in [cell.Cell.WALL, cell.Cell.EXPLOSION, cell.Cell.MONSTER, cell.Cell.EXIT]))
+        return (wrld.explosion_at(self.x, self.y) or
+                wrld.wall_at(nx, ny) or
+                wrld.monsters_at(nx, ny) or
+                wrld.exit_at(nx, ny))
 
     def look_for_empty_cell(self, wrld):
         # List of empty cells
@@ -39,12 +36,13 @@ class RandomMonster(entity.AIEntity, entity.MovableEntity):
         # Go through neighboring cells
         for dx in [-1, 0, 1]:
             # Avoid out-of-bounds access
-            if ((self.x + dx >= 0) and (self.x + dx < len(wrld))):
+            if ((self.x + dx >= 0) and (self.x + dx < wrld.width())):
                 for dy in [-1, 0, 1]:
                     # Avoid out-of-bounds access
-                    if ((self.y + dy >= 0) and (self.y + dy < len(wrld[0]))):
+                    if ((self.y + dy >= 0) and (self.y + dy < wrld.height())):
                         # Is this cell safe?
-                        if (wrld[self.x + dx][self.y + dy] == cell.Cell.EMPTY):
+                        if(wrld.exit_at(self.x + dx, self.y + dy) or
+                           wrld.empty_at(self.x + dx, self.y + dy)):
                             # Yes
                             cells.append((dx, dy))
         # All done
@@ -57,9 +55,9 @@ class RandomMonster(entity.AIEntity, entity.MovableEntity):
         if found:
             self.move(dx, dy)
             return
-        # If I'm idle or going to die, change direction
+        # If I'm idle or must change direction, change direction
         if ((self.dx == 0 and self.dy == 0) or
-            self.going_to_die(wrld)):
+            self.must_change_direction(wrld)):
             # Get list of safe moves
             safe = self.look_for_empty_cell(wrld)
             if not safe:
