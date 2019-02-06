@@ -67,6 +67,19 @@ class RealWorld(World):
             for c in clist:
                 # Call AI
                 c.do(wrld)
+                # Attempt to place bomb
+                if c.maybe_place_bomb:
+                    print("maybe place bomb")
+                    c.maybe_place_bomb = False
+                    can_bomb = True
+                    # Make sure this character has not already placed another bomb
+                    for k,b in self.bombs.items():
+                        if b.owner == c:
+                            can_bomb = False
+                            break
+                    if can_bomb:
+                        print("can bomb")
+                        self.add_bomb(c.x, c.y, c)
                 # Update position and check for events
                 ev2 = self.update_character_move(c, False)
                 ev = ev + ev2

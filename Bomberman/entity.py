@@ -122,6 +122,3 @@ class MonsterEntity(AIEntity, MovableEntity):
     def __init__(self, x, y):
         AIEntity.__init__(self)
         MovableEntity.__init__(self, x, y)
-
-    def do(self, wrld):
-        self.move(1,0)
