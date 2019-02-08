@@ -1,0 +1,125 @@
+@startuml
+World "1" -down-* "1" Game
+RealWorld <|-- World
+SensedWorld <|-- World
+
+Entity -left-|> PositionalEntity
+MovableEntity <|-- PositionalEntity
+TimedEntity <|-- Entity
+AIEntity <|-- Entity
+OwnedEntity <|-- Entity
+BombEntity <|-- PositonalEntity
+BombEntity <|-- TimedEntity
+BombEntity <|-- OwnedEntity
+ExplosionEntity <|-- PositonalEntity
+ExplosionEntity <|-- TimedEntity
+ExplosionEntity <|-- OwnedEntity
+MonsterEntity <|-- AIEntity
+MonsterEntity <|-- MovableEntity
+CharacterEntity <|-- AIEntity
+CharacterEntity <|-- MovableEntity
+
+class Event {
+  +BOMB_HIT_WALL : Int
+  +BOMB_HIT_MONSTER : Int
+  +BOMB_HIT_CHARACTER : Int
+  +CHARACTER_KILLED_BY_MONSTER : Int
+  +CHARACTER_FOUND_EXIT : Int
+  +__init__(tpe, character, other=None)
+  +__str__()
+}
+
+class Game {
+  +world : World
+  +events : {}
+  +scores : {}
+  +__init__(width, height, max_time, bomb_time, expl_duration, expl_range)
+  {static} +fromfile(cls, fname)
+  +go()
+  +step()
+  +done() : Bool
+}
+
+class World {
+  +bomb_time : Int
+  +expl_duration : Int
+  +expl_range : Int
+  +exitcell : (Int,Int)
+  +time : Int
+  +grid : [[Int]]
+  +bombs : {}
+  +explosions : {}
+  +monsters : {}
+  +characters : {}
+  {static} +from_params(width, height, max_time, bomb_time, expl_duration, expl_range)
+  {static} +from_world(wrld)
+  +width() : Int
+  +height() : Int
+  +empty_at(x,y) : Bool
+  +exit_at(x,y) : Bool
+  +wall_at(x,y) : Bool
+  +bomb_at(x,y) : Bomb
+  +explosion_at(x,y) : Explosion
+  +monsters_at(x,y) : [Monster]
+  +characters_at(x,y) : [Character]
+  +next() : [Event]
+  +move_monster(monster, dx, dy) : [Event]
+  +move_character(monster, dx, dy) : [Event]
+  +printit()
+}
+
+class RealWorld {
+  +add_exit(x,y)
+  +add_wall(x,y)
+  +add_monster(m)
+  +add_character(c)
+}
+
+class SensedWorld {
+  +next()
+}
+
+together {
+
+  abstract class Entity
+
+  class PositionalEntity {
+    +x : Int
+    +y : Int
+    +__init__(x,y)
+  }
+
+  class MovableEntity {
+    +dx : Int
+    +dy : Int
+    +__init__(x,y)
+    +move(dx,dy)
+    +nextpos() : Tuple(Int,Int)
+  }
+
+  class TimedEntity {
+    +timer : Int
+    +__init__(timer)
+    +tick()
+    +expired() : Bool
+  }
+
+  class AIEntity {
+    +do()
+  }
+
+  class OwnedEntity {
+    +owner : Entity
+    +__init__(owner):
+  }
+
+  class BombEntity {
+    +__init__(x,y,timer,character)
+  }
+
+  class ExplosionEntity {
+    +__init__(x,y,timer,character)
+  }
+}
+
+@enduml

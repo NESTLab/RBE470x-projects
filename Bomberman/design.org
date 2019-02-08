@@ -1,0 +1,44 @@
+#+TITLE: Bomberman code design
+
+* Project
+** Phase 1: Destroy walls and look for exit
+   - Randomly distributed walls
+   - Exit is not hidden by wall, but way to exit is obstructed by walls
+** Phase 2: Destroy walls and look for exit w/ monster
+   - Board with W x H cells
+   - Randomly distributed walls
+   - Exit is not hidden by wall, but way to exit is obstructed by walls
+   - Monster moves randomly or towards AI
+** Phase 3: Kill other AI
+   - Board with W x H cells
+   - Randomly distributed walls
+   - 2-4 players, monsters can be present or not
+
+* Design
+** World
+   - *Grid:* ~w~ x ~h~ cells
+   - *Cell:* each cell stores /nothing/ (~0~), /wall/ (~1~), /bomb/ (~2~), /explosion/ (~3~), /character/ (>= ~4~)
+   - *Explosion:* /delay/ (steps), /duration/ (steps), /range/ (cells)
+** Board generation
+   - *Characters:* start each at one corner, at random
+   - *Exit:* located at equal and maximum Manhattan distance to each character
+   - *Monsters:* randomly added in the middle of the arena
+   - *Walls:*
+       - little "fort" around each character
+       - uniform-randomly added lines of walls (length, direction, start chosen at random)
+** Monster
+   - Chooses randomly between going to the character (~gotocharacter~) and moving at random (~wander~)
+   - Parameter: how long to perform either choice
+** Agent
+   - *Sensing:* Has access to state of the entire board (read-only)
+   - *Actions:*
+       - *Move:* up/down/left/right
+       - *Bomb:* place bomb
+** Game over
+   - *Win:* one character arrives at exit cell
+   - *Lose:*
+       - last character is on an explosion cell
+       - last character and monster are at the same cell
+** Progress for a Character
+   - *Phase 1,2:* $(1000 - \text{distance to wall}) + \text{no. of destroyed walls}$
+   - *Phase 3:* $1000 \times \text{characters who dies before this one}$
