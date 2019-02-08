@@ -20,6 +20,16 @@ class PositionalEntity(Entity):
         self.x = x
         self.y = y
 
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return (self.x, self.y) == (other.x, other.y)
+
+    def __ne__(self, other):
+        return not(self == other)
+
 ##################
 # Movable entity #
 ##################
@@ -49,6 +59,17 @@ class MovableEntity(PositionalEntity):
         """Returns the next position of this entity"""
         return (self.x + self.dx, self.y + self.dy)
 
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return (super().__eq__(other) and
+                (self.dx, self.dy) == (other.dx, other.dy))
+
+    def __ne__(self, other):
+        return not(self == other)
+
 ################
 # Timed entity #
 ################
@@ -67,6 +88,16 @@ class TimedEntity(Entity):
     def expired(self):
         return self.timer < 0
 
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return self.timer == other.timer
+
+    def __ne__(self, other):
+        return not(self == other)
+
 #############
 # AI entity #
 #############
@@ -74,9 +105,22 @@ class TimedEntity(Entity):
 class AIEntity(Entity):
     """Entity with an AI"""
 
+    def __init__(self, name):
+        self.name = name
+
     def do(self, wrld):
         """Pick an action for the entity given the world state"""
-        raise NotImplementedError("Please implement this method")
+        pass
+
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __ne__(self, other):
+        return not(self == other)
 
 ################
 # Owned entity #
@@ -87,6 +131,16 @@ class OwnedEntity(Entity):
 
     def __init__(self, owner):
         self.owner = owner
+
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return self.owner == other.owner
+
+    def __ne__(self, other):
+        return not(self == other)
 
 ###############
 # Bomb entity #
@@ -100,6 +154,18 @@ class BombEntity(PositionalEntity, TimedEntity, OwnedEntity):
         TimedEntity.__init__(self, timer)
         OwnedEntity.__init__(self, character)
 
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return (super(PositionalEntity, self).__eq__(other) and
+                super(TimedEntity, self).__eq__(other) and
+                super(OwnedEntity, self).__eq__(other))
+
+    def __ne__(self, other):
+        return not(self == other)
+
 ####################
 # Explosion entity #
 ####################
@@ -112,6 +178,18 @@ class ExplosionEntity(PositionalEntity, TimedEntity, OwnedEntity):
         TimedEntity.__init__(self, timer)
         OwnedEntity.__init__(self, character)
 
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return (super(PositionalEntity, self).__eq__(other) and
+                super(TimedEntity, self).__eq__(other) and
+                super(OwnedEntity, self).__eq__(other))
+
+    def __ne__(self, other):
+        return not(self == other)
+
 ##################
 # Monster entity #
 ##################
@@ -119,6 +197,74 @@ class ExplosionEntity(PositionalEntity, TimedEntity, OwnedEntity):
 class MonsterEntity(AIEntity, MovableEntity):
     """Monster Entity"""
 
-    def __init__(self, x, y):
-        AIEntity.__init__(self)
+    def __init__(self, name, x, y):
+        AIEntity.__init__(self, name)
         MovableEntity.__init__(self, x, y)
+
+    ###################
+    # Private methods #
+    ###################
+        
+    @classmethod
+    def from_monster(cls, monster):
+        """Clone this monster"""
+        return MonsterEntity(monster.name, monster.x, monster.y)
+
+    ###################
+    # Private methods #
+    ###################
+
+    def __eq__(self, other):
+        return (super(MovableEntity, self).__eq__(other) and
+                super(AIEntity, self).__eq__(other))
+
+    def __ne__(self, other):
+        return not(self == other)
+
+####################
+# Character entity #
+####################
+
+class CharacterEntity(AIEntity, MovableEntity):
+    """Basic definitions for a custom-made character"""
+
+    def __init__(self, name, x, y):
+        AIEntity.__init__(self, name)
+        MovableEntity.__init__(self, x, y)
+        # Whether this character wants to place a bomb
+        self.maybe_place_bomb = False
+        # Debugging elements
+        self.tiles = {}
+
+    def place_bomb(self):
+        """Attempts to place a bomb"""
+        self.maybe_place_bomb = True
+
+    def set_tile_color(self, x, y, color):
+        """Sets the tile color at (x,y)"""
+        self.tiles[(x,y)] = color
+
+    ###################
+    # Private methods #
+    ###################
+        
+    @classmethod
+    def from_character(cls, character):
+        """Clone this character"""
+        new = CharacterEntity(character.name, character.x, character.y)
+        new.dx = character.dx
+        new.dy = character.dy
+        new.maybe_place_bomb = character.maybe_place_bomb
+        return new
+
+    def __hash__(self):
+        return hash((self.name, self.x, self.y))
+
+    def __eq__(self, other):
+        return (self.maybe_place_bomb == other.maybe_place_bomb and
+                super(MovableEntity, self).__eq__(other) and
+                super(AIEntity, self).__eq__(other))
+
+    def __ne__(self, other):
+        return not(self == other)
+

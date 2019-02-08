@@ -1,4 +1,3 @@
-from copy import deepcopy
 from entity import *
 from events import Event
 import sys
@@ -37,43 +36,6 @@ class World:
         new.grid          = [[False for y in range(height)] for x in range(width)]
         return new
         
-    @classmethod
-    def from_world(cls, wrld):
-        """Create a new world state from an existing state"""
-        new = cls()
-        new.bomb_time     = wrld.bomb_time
-        new.expl_duration = wrld.expl_duration
-        new.expl_range    = wrld.expl_range
-        new.exitcell      = wrld.exitcell
-        new.time          = wrld.time
-        # Copy grid
-        new.grid          = [[wrld.wall_at(x,y) for y in range(wrld.height())] for x in range(wrld.width())]
-        # Copy monsters
-        for k, omonsters in wrld.monsters.items():
-            nmonsters = []
-            for m in omonsters:
-                nmonsters.append(deepcopy(m))
-            new.monsters[k] = nmonsters
-        # Copy characters and build a mapping between old and new
-        mapping = {}
-        for k, ocharacters in wrld.characters.items():
-            ncharacters = []
-            for oc in ocharacters:
-                nc = deepcopy(oc)
-                ncharacters.append(nc)
-                mapping[oc] = nc
-            new.characters[k] = ncharacters
-        # Copy bombs
-        for k, ob in wrld.bombs.items():
-            c = mapping.get(ob.owner, ob.owner)
-            new.bombs[k] = BombEntity(ob.x, ob.y, ob.timer, c)
-        # Copy explosions
-        for k, oe in wrld.explosions.items():
-            c = mapping.get(oe.owner)
-            if c:
-                new.explosions[k] = ExplosionEntity(oe.x, oe.y, oe.timer, c)
-        return new
-
     def width(self):
         """Returns the world width"""
         return len(self.grid)
@@ -119,20 +81,6 @@ class World:
         """Returns a new world state, along with the events that occurred"""
         raise NotImplementedError("Method not implemented")
 
-    def move_monster(self, monster, dx, dy):
-        """Moves a monster by (dx, dy), returns event"""
-        # Set desired move
-        monster.move(dx, dy)
-        # Perform move
-        return self.update_monster_move(monster, True)
-
-    def move_character(self, character, dx, dy):
-        """Moves a character by (dx, dy), returns event"""
-        # Set desired move
-        character.move(dx, dy)
-        # Perform move
-        return self.update_character_move(character, True)
-
     def printit(self):
         """Prints the current state of the world"""
         border = "+" + "-" * self.width() + "+\n"
@@ -170,10 +118,17 @@ class World:
         print("CHARACTERS")
         for k,clist in self.characters.items():
             for c in clist:
-                print(k, c)
+                print(k, c.name, c)
+        print("MONSTERS")
+        for k,mlist in self.monsters.items():
+            for m in mlist:
+                print(k, m.name, m)
         print("BOMBS")
         for k,b in self.bombs.items():
             print(k, b, b.owner)
+        print("EXPLOSIONS")
+        for k,e in self.explosions.items():
+            print(k, e, e.owner)
 
     ###################
     # Private methods #

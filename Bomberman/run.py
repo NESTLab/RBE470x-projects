@@ -10,6 +10,8 @@ g = Game.fromfile('simple.txt')
 
 c = TestCharacter("me", 0, 0)
 g.add_character(c)
+# c = TestCharacter("you", 0, 1)
+# g.add_character(c)
 # g.world.add_bomb(8,0,c)
 
 g.go()

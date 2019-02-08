@@ -27,16 +27,14 @@ class RealWorld(World):
 
     def next(self):
         """Returns a new world state, along with the events that occurred"""
-        new = self.from_world(self)
-        new.time = new.time - 1
-        new.update_explosions()
-        ev = new.update_bombs()
-        sensed = SensedWorld.from_world(self)
-        ev = ev + new.update_monsters(sensed)
-        ev = ev + new.update_characters(sensed)
-        return (new,ev)
+        self.time = self.time - 1
+        self.update_explosions()
+        ev = self.update_bombs()
+        ev = ev + self.update_monsters()
+        ev = ev + self.update_characters()
+        return (self,ev)
 
-    def update_monsters(self, wrld):
+    def update_monsters(self):
         """Update monster state"""
         # Event list
         ev = []
@@ -45,7 +43,7 @@ class RealWorld(World):
         for i, mlist in self.monsters.items():
             for m in mlist:
                 # Call AI
-                m.do(wrld)
+                m.do(SensedWorld.from_world(self))
                 # Update position and check for events
                 ev2 = self.update_monster_move(m, False)
                 ev = ev + ev2
@@ -61,7 +59,7 @@ class RealWorld(World):
         # Return events
         return ev
 
-    def update_characters(self, wrld):
+    def update_characters(self):
         """Update character state"""
         # Event list
         ev = []
@@ -70,10 +68,9 @@ class RealWorld(World):
         for i, clist in self.characters.items():
             for c in clist:
                 # Call AI
-                c.do(wrld)
+                c.do(SensedWorld.from_world(self))
                 # Attempt to place bomb
                 if c.maybe_place_bomb:
-                    print("maybe place bomb")
                     c.maybe_place_bomb = False
                     can_bomb = True
                     # Make sure this character has not already placed another bomb
@@ -82,7 +79,6 @@ class RealWorld(World):
                             can_bomb = False
                             break
                     if can_bomb:
-                        print("can bomb")
                         self.add_bomb(c.x, c.y, c)
                 # Update position and check for events
                 ev2 = self.update_character_move(c, False)
