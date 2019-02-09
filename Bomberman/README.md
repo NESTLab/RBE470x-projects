@@ -57,6 +57,7 @@ Each character has a score calculated as follows:
 3. Every wall destroyed awards 10 extra points
 4. Every monster killed awards 50 extra points
 5. Every character killed awards 100 extra points
+6. If your character escapes the world, it gets `2 * time` extra points
 
 # Coding Your Agent #
 
@@ -142,14 +143,14 @@ methods to do this:
   `CharacterEntity` object, and each monster is cloned into a dummy
   `MonsterEntity`. This is to prevent your code from modifying or peeking other
   agents' private information.
-- `SensedWorld.next()` returns a tuple `new_world, events`. The first element of
-  the tuple is a clone created by `SensedWorld.from_world()` advanced by one
+- `SensedWorld.next()` returns a tuple `(new_world, events)`. The first element
+  of the tuple is a clone created by `SensedWorld.from_world()` advanced by one
   step. In `new_world` time has decreased by one, bombs whose timer expired have
   exploded, explosions have disappeared, etc. according to the logic of the
-  game. If modified the actions of the agents (e.g, you called `move()` on a
+  game. If you modified the actions of the agents (e.g, you called `move()` on a
   monster), `SensedWorld.next()` will take care of that, too. The second element
-  in the tuple, `events`, is a list of events that occurred at that time
-  step. Refer to
+  in the tuple, `events`, is a list of events that occurred in that world
+  configuration. Refer to
   [events.py](https://github.com/NESTLab/CS4341-projects/blob/master/Bomberman/bomberman/events.py)
   for a list of possible events.
 
@@ -189,7 +190,7 @@ monsters, and characters.
 
 You can modify the maps to change their configuration. The standard maps that
 are given to you are those that define the goals of your work, but if you want
-to play around other maps for testinf purposes, the format is as follows.
+to play around other maps for testing purposes, the format is as follows.
 
 The first four lines must be in format `param value`, where `value` is a
 positive integer. For example:
@@ -208,7 +209,7 @@ This configures the game as follows:
 These four lines are followed by the grid configuration. For example:
 
     +----------+
-    |          |
+    |         E|
     |WWWWW     |
     |       WWW|
     +----------+
@@ -220,7 +221,8 @@ between to match the width defined by the first line.
 - The last line must be identical to the first line.
 - The allowed characters between the top and bottom lines are spaces (for
   walkable cells), `W` for walls, and `E` for the exit cell. Only one exit cell
-  is allowed in any map. Maps can also have no exit cells.
+  is allowed in any map. Maps can also have no exit cells, and that corresponds
+  to the Last-Man-Standing mode.
 
 Any character or monster must be added in a Python file that runs the scenario.
 
