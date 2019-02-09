@@ -40,8 +40,6 @@ class SensedWorld(World):
                 ncharacters.append(nc)
                 # Add to mapping
                 mapping[oc] = nc
-                # Copy score
-                new.scores[oc.name] = wrld.scores[oc.name]
             new.characters[k] = ncharacters
         # Copy bombs
         for k, ob in wrld.bombs.items():
@@ -52,6 +50,9 @@ class SensedWorld(World):
             c = mapping.get(oe.owner)
             if c:
                 new.explosions[k] = ExplosionEntity(oe.x, oe.y, oe.timer, c)
+        # Copy scores
+        for name,score in wrld.scores:
+            new.scores[name] = score
         return new
 
     def me(self, character):
