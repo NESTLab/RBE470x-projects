@@ -57,7 +57,7 @@ Each character has a score calculated as follows:
 3. Every wall destroyed awards 10 extra points
 4. Every monster killed awards 50 extra points
 5. Every character killed awards 100 extra points
-6. If your character escapes the world, it gets `2 * time` extra points
+6. If your character escapes the world, it gets `2 * time` extra points, where `time` is the time left
 
 # Coding Your Agent #
 
