@@ -1,4 +1,4 @@
-# Required software #
+# Required Software #
 
 To run Bomberman, you'll need Python 3 with the `colorama` package. To install it, type either
 
@@ -124,7 +124,10 @@ current position of the character. The bomb will start ticking and eventually
 will explode when the timer expires. When a bomb explodes, it creates a number
 of explosion cells. If a wall, a character, or a monster are touched by an
 explosion cell, they are removed from the board. Bombs, exit cells, and other
-explosions are immune to explosion cells.
+explosions are immune to explosion cells. A character can have only one bomb
+ticking at any given time. Any attempt to place a bomb when another one has been
+placed by the same character is ignored. The action of placing a bomb is reset
+at each time step, whether or not the action was successful.
 
 ## Searching through World Configurations ##
 
