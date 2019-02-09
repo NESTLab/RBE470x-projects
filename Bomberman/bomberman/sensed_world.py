@@ -60,20 +60,6 @@ class SensedWorld(World):
                 if c.name == character.name:
                     return c
 
-    def move_monster(self, monster, dx, dy):
-        """Moves a monster by (dx, dy), returns event"""
-        # Set desired move
-        monster.move(dx, dy)
-        # Perform move
-        return self.update_monster_move(monster, True)
-
-    def move_character(self, character, dx, dy):
-        """Moves a character by (dx, dy), returns event"""
-        # Set desired move
-        character.move(dx, dy)
-        # Perform move
-        return self.update_character_move(character, True)
-
     def next(self):
         """Returns a new world state, along with the events that occurred"""
         new = SensedWorld.from_world(self)

@@ -252,8 +252,8 @@ class CharacterEntity(AIEntity, MovableEntity):
         """Attempts to place a bomb"""
         self.maybe_place_bomb = True
 
-    def set_tile_color(self, x, y, color):
-        """Sets the tile color at (x,y)"""
+    def set_cell_color(self, x, y, color):
+        """Sets the cell color at (x,y)"""
         self.tiles[(x,y)] = color
 
     ###################
