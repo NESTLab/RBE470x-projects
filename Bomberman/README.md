@@ -194,8 +194,8 @@ evaluate each of them. You'd write something like this:
                                 # Set move in wrld
                                 m.move(dx, dy)
                                 # Get new world
-                                newwrld = wrld.next()
-                                # TODO: do something with newworld
+                                (newwrld,events) = wrld.next()
+                                # TODO: do something with newworld and events
 
 ## Visual Debugging ##
 
