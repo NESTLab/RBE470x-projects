@@ -1,12 +1,16 @@
 from real_world import RealWorld
 from events import Event
 import colorama
+import pygame
+import math
 
 class Game:
     """Game class"""
 
     def __init__(self, width, height, max_time, bomb_time, expl_duration, expl_range):
         self.world = RealWorld.from_params(width, height, max_time, bomb_time, expl_duration, expl_range)
+        self.sprite_dir = "../../bomberman/sprites/"
+        self.load_gui(width, height)
 
     @classmethod
     def fromfile(cls, fname):
@@ -44,11 +48,57 @@ class Game:
             # All done
             return gm
 
+    def load_gui(self, board_width, board_height):
+        pygame.init()
+        self.height = 24 * board_height
+        self.width = 24 * board_width
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.block_height = int(math.floor(self.height / board_height))
+        self.block_width = int(math.floor(self.width / board_width))
+        rect = (self.block_height, self.block_width)
+        self.wall_sprite = pygame.image.load(self.sprite_dir + "wall.png")
+        self.wall_sprite = pygame.transform.scale(self.wall_sprite, rect)
+        self.bomberman_sprite = pygame.image.load(self.sprite_dir + "bomberman.png")
+        self.bomberman_sprite = pygame.transform.scale(self.bomberman_sprite, rect)
+        self.monster_sprite = pygame.image.load(self.sprite_dir + "monster.png")
+        self.monster_sprite = pygame.transform.scale(self.monster_sprite, rect)
+        self.portal_sprite = pygame.image.load(self.sprite_dir + "portal.png")
+        self.portal_sprite = pygame.transform.scale(self.portal_sprite, rect)
+        self.bomb_sprite = pygame.image.load(self.sprite_dir + "bomb.png")
+        self.bomb_sprite = pygame.transform.scale(self.bomb_sprite, rect)
+        self.explosion_sprite = pygame.image.load(self.sprite_dir + "explosion.png")
+        self.explosion_sprite = pygame.transform.scale(self.explosion_sprite, rect)
+
+    def display_gui(self):
+        pygame.event.clear()
+        for x in range(self.world.width()):
+            for y in range(self.world.height()):
+                top = self.block_height * y
+                left = self.block_width * x
+                pygame.draw.rect(self.screen, (65, 132, 15), [left, top, self.block_width, self.block_height])
+                rect = (left, top, self.block_width, self.block_height)
+                if self.world.wall_at(x, y): # Walls
+                    self.screen.blit(self.wall_sprite, rect)
+                if self.world.explosion_at(x, y): # Explosion
+                    self.screen.blit(self.explosion_sprite, rect)
+                if self.world.characters_at(x, y): # Player
+                    self.screen.blit(self.bomberman_sprite, rect)
+                if self.world.monsters_at(x, y): # Monster
+                    self.screen.blit(self.monster_sprite, rect)
+                if self.world.exit_at(x, y): # Portal
+                    self.screen.blit(self.portal_sprite, rect)
+                if self.world.bomb_at(x, y): # Bomb
+                    self.screen.blit(self.bomb_sprite, rect)
+        pygame.display.flip()
+
     def go(self):
         colorama.init(autoreset=True)
+        self.display_gui()
         self.draw()
         while not self.done():
+            self.display_gui()
             self.step()
+            self.display_gui()
             self.draw()
         colorama.deinit()
 
