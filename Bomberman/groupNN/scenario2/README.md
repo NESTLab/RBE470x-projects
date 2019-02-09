@@ -1,6 +1,6 @@
 # Your goal #
 
-In this scenario, you must plan the route of your agent from the top-right
+In this scenario, you must plan the route of your agent from the top-left
 corner to the exit. However, your route is obstructed - you need to use the bomb
 to create a path to the exit.
 
