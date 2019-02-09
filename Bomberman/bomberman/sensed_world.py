@@ -51,7 +51,7 @@ class SensedWorld(World):
             if c:
                 new.explosions[k] = ExplosionEntity(oe.x, oe.y, oe.timer, c)
         # Copy scores
-        for name,score in wrld.scores:
+        for name,score in wrld.scores.items():
             new.scores[name] = score
         return new
 
