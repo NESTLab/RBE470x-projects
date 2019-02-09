@@ -207,7 +207,7 @@ class World:
         nx = max(0, min(self.width() - 1, nx))
         ny = max(0, min(self.height() - 1, ny))
         # Make sure we are actually moving
-        if((nx != e.x) or (ny != e.y) and (not self.wall_at(nx, ny))):
+        if(((nx != e.x) or (ny != e.y)) and (not self.wall_at(nx, ny))):
             # Save new entity position
             e.x = nx
             e.y = ny
