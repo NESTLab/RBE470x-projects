@@ -22,6 +22,6 @@ class Event:
             else:
                 return self.character.name + " killed itself"
         if self.tpe == self.CHARACTER_KILLED_BY_MONSTER:
-            return self.character.name + " was killed by a monster"
+            return self.character.name + " was killed by " + self.other.name
         if self.tpe == self.CHARACTER_FOUND_EXIT:
             return self.character.name + " found the exit"

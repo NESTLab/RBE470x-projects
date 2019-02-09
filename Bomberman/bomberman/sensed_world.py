@@ -26,7 +26,7 @@ class SensedWorld(World):
                 nmonsters.append(MonsterEntity.from_monster(m))
             # Set list of monsters at k
             new.monsters[k] = nmonsters
-        # Copy characters and build a mapping between old and new
+        # Copy characters, scores, and build a mapping between old and new
         mapping = {}
         for k, ocharacters in wrld.characters.items():
             # Make a new list of characters at k
@@ -35,9 +35,13 @@ class SensedWorld(World):
             # This way, every character instance can be manipulated individually
             # Plus, you can't peek into other characters' variables
             for oc in ocharacters:
+                # Add to new list of characters
                 nc = CharacterEntity.from_character(oc)
                 ncharacters.append(nc)
+                # Add to mapping
                 mapping[oc] = nc
+                # Copy score
+                new.scores[oc.name] = wrld.scores[oc.name]
             new.characters[k] = ncharacters
         # Copy bombs
         for k, ob in wrld.bombs.items():
@@ -78,6 +82,8 @@ class SensedWorld(World):
         ev = new.update_bombs()
         ev = ev + new.update_monsters()
         ev = ev + new.update_characters()
+        new.manage_events_and_scores(ev)
+        new.events = ev
         return (new,ev)
 
     ###################

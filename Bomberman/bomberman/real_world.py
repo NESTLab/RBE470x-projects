@@ -20,6 +20,7 @@ class RealWorld(World):
     def add_character(self, c):
         """Adds the given character to the world"""
         self.characters[self.index(c.x,c.y)] = [c]
+        self.scores[c.name] = -self.time
 
     ###################
     # Private methods #
@@ -32,6 +33,8 @@ class RealWorld(World):
         ev = self.update_bombs()
         ev = ev + self.update_monsters()
         ev = ev + self.update_characters()
+        self.manage_events_and_scores(ev)
+        self.events = ev
         return (self,ev)
 
     def update_monsters(self):

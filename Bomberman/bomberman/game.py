@@ -7,8 +7,6 @@ class Game:
 
     def __init__(self, width, height, max_time, bomb_time, expl_duration, expl_range):
         self.world = RealWorld.from_params(width, height, max_time, bomb_time, expl_duration, expl_range)
-        self.events = []
-        self.scores = {}
 
     @classmethod
     def fromfile(cls, fname):
@@ -19,14 +17,14 @@ class Game:
             expl_duration = int(fd.readline().split()[1])
             expl_range = int(fd.readline().split()[1])
             # Next line is top border, use it for width
-            width = len(fd.readline()) - 2
+            width = len(fd.readline()) - 3
             # Count the rows
             startpos = fd.tell()
             height = 0
             row = fd.readline()
             while row and row[0] == '|':
                 height = height + 1
-                if len(row) != width + 2:
+                if len(row) != width + 3:
                     raise RuntimeError("Row", height, "is not", width, "characters long")
                 row = fd.readline()
             # Create empty world
@@ -56,38 +54,14 @@ class Game:
 
     def step(self):
         (self.world, self.events) = self.world.next()
-        self.manage_events_and_scores()
         input("Press Enter to continue...")
 
     ###################
     # Private methods #
     ###################
 
-    def manage_events_and_scores(self):
-        for e in self.events:
-            if e.tpe == Event.BOMB_HIT_WALL:
-                self.scores[e.character.name] = self.scores[e.character.name] + 10
-            elif e.tpe == Event.BOMB_HIT_MONSTER:
-                self.scores[e.character.name] = self.scores[e.character.name] + 50
-            elif e.tpe == Event.BOMB_HIT_CHARACTER:
-                if e.character != e.other:
-                    self.scores[e.character.name] = self.scores[e.character.name] + 100
-            elif e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                self.world.remove_character(e.character)
-            elif e.tpe == Event.CHARACTER_FOUND_EXIT:
-                self.scores[e.character.name] = self.scores[e.character.name] + 2 * self.world.time
-        for k,clist in self.world.characters.items():
-            for c in clist:
-                self.scores[c.name] = self.scores[c.name] + 1
-            
     def draw(self):
         self.world.printit()
-        print("SCORES")
-        for c,s in self.scores.items():
-            print(c,s)
-        print("EVENTS")
-        for e in self.events:
-            print(e)
 
     def done(self):
         # Time's up
@@ -110,4 +84,3 @@ class Game:
 
     def add_character(self, c):
         self.world.add_character(c)
-        self.scores[c.name] = -self.world.time

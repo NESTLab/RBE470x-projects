@@ -15,6 +15,8 @@ class Entity(object):
 class PositionalEntity(Entity):
     """Entity with a position"""
 
+    # PARAM x [int]: x coordinate in the grid
+    # PARAM y [int]: y coordinate in the grid
     def __init__(self, x, y):
         """Class constructor"""
         self.x = x
@@ -42,19 +44,26 @@ def __sign__(x):
 class MovableEntity(PositionalEntity):
     """Positional entity that can move"""
 
+    # PARAM x [int]: x coordinate in the grid
+    # PARAM y [int]: y coordinate in the grid
     def __init__(self, x, y):
         """Class constructor"""
         super().__init__(x, y)
         self.dx = 0
         self.dy = 0
 
+    # Sets the desired direction of the entity
+    # PARAM dx [int]: delta x
+    # PARAM dy [int]: delta y
+    # The passed values are clamped in [-1,1]
     def move(self, dx, dy):
-        """Move character"""
+        """Move entity"""
         # Make sure dx is in [-1,1]
         self.dx = __sign__(dx)
         # Make sure dy is in [-1,1]
         self.dy = __sign__(dy)
 
+    # Returns the next position of this entity as a tuple (x,y)
     def nextpos(self):
         """Returns the next position of this entity"""
         return (self.x + self.dx, self.y + self.dy)
@@ -105,8 +114,11 @@ class TimedEntity(Entity):
 class AIEntity(Entity):
     """Entity with an AI"""
 
-    def __init__(self, name):
+    # PARAM name [string]: A unique name for this entity
+    # PARAM rep [character]: A single character used to draw the entity
+    def __init__(self, name, avatar):
         self.name = name
+        self.avatar = avatar[0]
 
     def do(self, wrld):
         """Pick an action for the entity given the world state"""
@@ -197,8 +209,8 @@ class ExplosionEntity(PositionalEntity, TimedEntity, OwnedEntity):
 class MonsterEntity(AIEntity, MovableEntity):
     """Monster Entity"""
 
-    def __init__(self, name, x, y):
-        AIEntity.__init__(self, name)
+    def __init__(self, name, avatar, x, y):
+        AIEntity.__init__(self, name, avatar)
         MovableEntity.__init__(self, x, y)
 
     ###################
@@ -208,7 +220,7 @@ class MonsterEntity(AIEntity, MovableEntity):
     @classmethod
     def from_monster(cls, monster):
         """Clone this monster"""
-        return MonsterEntity(monster.name, monster.x, monster.y)
+        return MonsterEntity(monster.name, monster.avatar, monster.x, monster.y)
 
     ###################
     # Private methods #
@@ -228,8 +240,8 @@ class MonsterEntity(AIEntity, MovableEntity):
 class CharacterEntity(AIEntity, MovableEntity):
     """Basic definitions for a custom-made character"""
 
-    def __init__(self, name, x, y):
-        AIEntity.__init__(self, name)
+    def __init__(self, name, avatar, x, y):
+        AIEntity.__init__(self, name, avatar)
         MovableEntity.__init__(self, x, y)
         # Whether this character wants to place a bomb
         self.maybe_place_bomb = False
@@ -251,7 +263,7 @@ class CharacterEntity(AIEntity, MovableEntity):
     @classmethod
     def from_character(cls, character):
         """Clone this character"""
-        new = CharacterEntity(character.name, character.x, character.y)
+        new = CharacterEntity(character.name, character.avatar, character.x, character.y)
         new.dx = character.dx
         new.dy = character.dy
         new.maybe_place_bomb = character.maybe_place_bomb

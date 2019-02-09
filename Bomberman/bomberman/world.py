@@ -24,6 +24,10 @@ class World:
         self.explosions = {}
         self.monsters   = {}
         self.characters = {}
+        # Scores
+        self.scores = {}
+        # Events
+        self.events = []
 
     @classmethod
     def from_params(cls, width, height, max_time, bomb_time, expl_duration, expl_range):
@@ -90,13 +94,15 @@ class World:
             sys.stdout.write("|")
             for x in range(self.width()):
                 if self.characters_at(x,y):
-                    sys.stdout.write(Back.GREEN + "C")
+                    for c in self.characters_at(x,y):
+                        sys.stdout.write(Back.GREEN + c.avatar)
                 elif self.monsters_at(x,y):
-                    sys.stdout.write(Back.BLUE + "M")
+                    for m in self.monsters_at(x,y):
+                        sys.stdout.write(Back.BLUE + m.avatar)
                 elif self.exit_at(x,y):
-                    sys.stdout.write(Back.YELLOW + "E")
+                    sys.stdout.write(Back.YELLOW + "#")
                 elif self.bomb_at(x,y):
-                    sys.stdout.write(Back.MAGENTA + "B")
+                    sys.stdout.write(Back.MAGENTA + "@")
                 elif self.explosion_at(x,y):
                     sys.stdout.write(Fore.RED + "*")
                 elif self.wall_at(x,y):
@@ -115,20 +121,12 @@ class World:
             sys.stdout.write("|\n")
         sys.stdout.write(border)
         sys.stdout.flush()
-        print("CHARACTERS")
-        for k,clist in self.characters.items():
-            for c in clist:
-                print(k, c.name, c)
-        print("MONSTERS")
-        for k,mlist in self.monsters.items():
-            for m in mlist:
-                print(k, m.name, m)
-        print("BOMBS")
-        for k,b in self.bombs.items():
-            print(k, b, b.owner)
-        print("EXPLOSIONS")
-        for k,e in self.explosions.items():
-            print(k, e, e.owner)
+        print("SCORES")
+        for c,s in self.scores.items():
+            print(c,s)
+        print("EVENTS")
+        for e in self.events:
+            print(e)
 
     ###################
     # Private methods #
@@ -303,3 +301,21 @@ class World:
         for i in todelete:
             del self.bombs[i]
         return ev
+
+    def manage_events_and_scores(self, events):
+        for e in events:
+            if e.tpe == Event.BOMB_HIT_WALL:
+                self.scores[e.character.name] = self.scores[e.character.name] + 10
+            elif e.tpe == Event.BOMB_HIT_MONSTER:
+                self.scores[e.character.name] = self.scores[e.character.name] + 50
+            elif e.tpe == Event.BOMB_HIT_CHARACTER:
+                if e.character != e.other:
+                    self.scores[e.character.name] = self.scores[e.character.name] + 100
+            elif e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                self.remove_character(e.character)
+            elif e.tpe == Event.CHARACTER_FOUND_EXIT:
+                self.scores[e.character.name] = self.scores[e.character.name] + 2 * self.time
+        for k,clist in self.characters.items():
+            for c in clist:
+                self.scores[c.name] = self.scores[c.name] + 1
+            

@@ -1,14 +1,20 @@
-from entity import AIEntity, MovableEntity
+# import sys
+# sys.path.insert(0, '..')
+from entity import MonsterEntity
 import random
 
-class SelfPreservingMonster(AIEntity, MovableEntity):
+class SelfPreservingMonster(MonsterEntity):
     """A random monster that walks away from explosions"""
 
+    def __init__(self, name, avatar, x, y, rnge):
+        super().__init__(name, avatar, x, y)
+        self.rnge = rnge
+
     def look_for_character(self, wrld):
-        for dx in [-1, 0, 1]:
+        for dx in [-self.rnge, 0, self.rnge]:
             # Avoid out-of-bounds access
             if ((self.x + dx >= 0) and (self.x + dx < wrld.width())):
-                for dy in [-1, 0, 1]:
+                for dy in [-self.rnge, 0, self.rnge]:
                     # Avoid out-of-bounds access
                     if ((self.y + dy >= 0) and (self.y + dy < wrld.height())):
                         # Is a character at this position?
