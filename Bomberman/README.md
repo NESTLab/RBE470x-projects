@@ -1,12 +1,13 @@
 # Required Software #
 
-To run Bomberman, you'll need Python 3 with the `colorama` package. To install it, type either
+To run Bomberman, you'll need Python 3 with the `colorama` and `pygame`
+packages. To install them, type either
 
-    pip install colorama
+    pip install colorama pygame
     
 if Python 3 is your default version, or
 
-    pip3 install colorama
+    pip3 install colorama pygame
     
 if you have both Python 2 and Python 3 installed on your system.
 
