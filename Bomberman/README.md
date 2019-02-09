@@ -150,9 +150,52 @@ methods to do this:
   game. If you modified the actions of the agents (e.g, you called `move()` on a
   monster), `SensedWorld.next()` will take care of that, too. The second element
   in the tuple, `events`, is a list of events that occurred in that world
-  configuration. Refer to
-  [events.py](https://github.com/NESTLab/CS4341-projects/blob/master/Bomberman/bomberman/events.py)
-  for a list of possible events.
+  configuration.
+  
+### About Events ###
+
+The relevant definitions for events is in
+[events.py](https://github.com/NESTLab/CS4341-projects/blob/master/Bomberman/bomberman/events.py). An
+event is an object of the `Event` class. The class contains the following attributes:
+
+- `Event.tpe`: the type of the event. It is one of `Event.BOMB_HIT_WALL`,
+  `Event.BOMB_HIT_MONSTER`, `Event.BOMB_HIT_CHARACTER`,
+  `Event.CHARACTER_KILLED_BY_MONSTER`, `Event.CHARACTER_FOUND_EXIT`.
+- `Event.character`: the character the event refers to:
+  - For `Event.BOMB_HIT_WALL`, `character` is the owner of the bomb
+  - For `Event.BOMB_HIT_MONSTER`, `character` is the owner of the bomb
+  - For `Event.BOMB_HIT_CHARACTER`, `character` is the owner of the bomb
+  - For `Event.CHARACTER_KILLED_BY_MONSTER`, `character` is the killed one
+  - For `Event.CHARACTER_FOUND_EXIT`, `character` is the escaped one
+- `Event.other`: the character or monster the event refers to:
+  - For `Event.BOMB_HIT_WALL`, `other` is `None`
+  - For `Event.BOMB_HIT_MONSTER`, `other` is the killed monster
+  - For `Event.BOMB_HIT_CHARACTER`, `other` is the killed character
+  - For `Event.CHARACTER_KILLED_BY_MONSTER`, `other` is the monster
+  - For `Event.CHARACTER_FOUND_EXIT`, `other` is `None`
+  
+You can print an event `e` simply writing `print(e)`.
+
+### Example: Searching through States ###
+
+Say that you want to loop through all the possible 8-moves of a monster, and
+evaluate each of them. You'd write something like this:
+
+    class TestCharacter(CharacterEntity):
+        def do(self, wrld):
+            # Get first monster in the world
+            m = next(iter(wrld.monsters().values()))
+            # Go through the possible 8-moves of the monster
+            for dx in [-1, 0, 1]:
+                if (m.x+dx >=0) and (m.x+dx < wrld.width()):
+                    for dy in [-1, 0, 1]:
+                        if (m.y+dy >=0) and (m.y+dy < wrld.height()):
+                            if not wrld.wall_at(m.x+dx, m.y+dy):
+                                # Set move in wrld
+                                m.move(dx, dy)
+                                # Get new world
+                                newwrld = wrld.next()
+                                # TODO: do something with newworld
 
 ## Visual Debugging ##
 
