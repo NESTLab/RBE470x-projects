@@ -148,6 +148,27 @@ class World:
         # Remove character
         self.characters[self.index(character.x, character.y)].remove(character)
 
+    def check_blast(self, bomb, x, y):
+        # Check if a wall has been hit
+        if self.wall_at(x, y):
+            return [Event(Event.BOMB_HIT_WALL, bomb.owner)]
+        # Check monsters and characters
+        ev = []
+        # Check if a monster has been hit
+        mlist = self.monsters_at(x,y)
+        if mlist:
+            for m in mlist:
+                ev.append(Event(Event.BOMB_HIT_MONSTER, bomb.owner, m))
+                self.monsters[self.index(x,y)].remove(m)
+        # Check if a character has been hit
+        clist = self.characters_at(x,y)
+        if clist:
+            for c in clist:
+                ev.append(Event(Event.BOMB_HIT_CHARACTER, bomb.owner, c))
+                self.remove_character(c)
+        # Return collected events
+        return ev
+
     def add_blast_dxdy(self, bomb, dx, dy):
         # Current position
         xx = bomb.x + dx
@@ -162,24 +183,9 @@ class World:
                 return []
             # Place explosion
             self.add_explosion(xx, yy, bomb)
-            # Check if a wall has been hit
-            if self.wall_at(xx, yy):
-                return [Event(Event.BOMB_HIT_WALL, bomb.owner)]
-            # Check if a monster has been hit
-            mlist = self.monsters_at(xx,yy)
-            if mlist:
-                ev = []
-                for m in mlist:
-                    ev.append(Event(Event.BOMB_HIT_MONSTER, bomb.owner, m))
-                    self.monsters[self.index(xx,yy)].remove(m)
-                return ev
-            # Check if a character has been hit
-            clist = self.characters_at(xx,yy)
-            if clist:
-                ev = []
-                for c in clist:
-                    ev.append(Event(Event.BOMB_HIT_CHARACTER, bomb.owner, c))
-                    self.remove_character(c)
+            # Check what has been killed, stop if so
+            ev = self.check_blast(bomb, xx, yy)
+            if ev:
                 return ev
             # Next cell
             xx = xx + dx
@@ -192,6 +198,10 @@ class World:
         """Add blast, return hit events"""
         # Add explosion at current position
         self.add_explosion(bomb.x, bomb.y, bomb)
+        # Check what has been killed, stop if so
+        ev = self.check_blast(bomb, bomb.x, bomb.y)
+        if ev:
+            return ev
         # Add explosions within range
         ev =      self.add_blast_dxdy(bomb, 1, 0)
         ev = ev + self.add_blast_dxdy(bomb,-1, 0)
