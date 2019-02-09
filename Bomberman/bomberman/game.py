@@ -75,6 +75,7 @@ class Game:
         self.explosion_sprite = pygame.transform.scale(self.explosion_sprite, (int(self.block_width), int(self.block_height)))
 
     def display_gui(self):
+        pygame.event.clear()
         pygame.display.flip()
 
         for col in range(len(self.world.grid)):
