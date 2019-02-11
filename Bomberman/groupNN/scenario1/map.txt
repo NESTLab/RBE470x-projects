@@ -1,0 +1,25 @@
+max_time 5000
+bomb_time 10
+expl_duration 2
+expl_range 4
++--------+
+|        |
+|        |
+|        |
+|WWWW    |
+|        |
+|        |
+|        |
+|    WWWW|
+|        |
+|        |
+|        |
+|WWWW    |
+|        |
+|        |
+|        |
+|    WWWW|
+|        |
+|        |
+|       E|
++--------+
