@@ -9,4 +9,9 @@ class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
         # Your code here
+
+        self.move(1, 0)
+
+        # Prints the current position of the character after the character moves
+        print(self.x, self.y)
         pass
