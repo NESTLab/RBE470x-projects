@@ -9,15 +9,21 @@ from game import Game
 # TODO This is your code!
 sys.path.insert(1, '../group25')
 from testcharacter import TestCharacter
+from scen2var1character import Scen2Var1Character
 
 
 # Create the game
 g = Game.fromfile('map.txt')
 
 # TODO Add your character
-g.add_character(TestCharacter("me", # name
+#g.add_character(TestCharacter("me", # name
+#                              "C",  # avatar
+#                              0, 0  # position
+#))
+g.add_character(Scen2Var1Character("me", # name
                               "C",  # avatar
-                              0, 0  # position
+                              0, 0,  # position
+                              2 #depth
 ))
 
 # Run!
