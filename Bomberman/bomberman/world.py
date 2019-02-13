@@ -145,8 +145,9 @@ class World:
         self.bombs[self.index(x,y)] = BombEntity(x, y, self.bomb_time, character)
 
     def remove_character(self, character):
-        # Remove character
-        self.characters[self.index(character.x, character.y)].remove(character)
+        # Remove character if it exists
+        if self.index(character.x, character.y) in self.characters and character in self.characters[self.index(character.x, character.y)]:
+            self.characters[self.index(character.x, character.y)].remove(character)
 
     def check_blast(self, bomb, x, y):
         # Check if a wall has been hit
