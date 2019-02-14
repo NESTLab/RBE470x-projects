@@ -11,25 +11,19 @@ class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
         # Your code here
-        self.move(0,1)
-        # shreeja was here something
-        # jose attacks
-
-        pass
+        self.move(1, 1)
+        self.get_exit(wrld)
+        self.get_my_location(wrld)
 
     @staticmethod
     def get_exit(wrld):
-        x1 = -1
-        y1 = -1
         # Find the exit to use for heuristic A*
-        for x in range(0, wrld.width()):
-            for y in range(0, wrld.height()):
+        for x in range(wrld.width()):
+            for y in range(wrld.height()):
                 if wrld.exit_at(x, y):
-                    x1 = x
-                    y1 = y
-        if x1 == -1:
-            return -1
-        return x1, y1
+                    print(x, y)
+                    return x, y
+        pass
 
     # @staticmethod
     # def make_graph(wrld):
@@ -38,6 +32,23 @@ class TestCharacter(CharacterEntity):
     #     for i in range(0, wrld.width):
     #         for j in range(0, wrld.height):
     #             if wrld(i, j)
+
+    def get_neighbors(self, wrld):
+        pass
+
+    def get_my_location(self, wrld):
+        # Find the exit to use for heuristic A*
+        for x in range(0, wrld.width()):
+            for y in range(0, wrld.height()):
+                if wrld.characters_at(x, y):
+                    print(x, y)
+                    return x, y
+        pass
+
+    def best_move(self, wrld):
+        pass
+
+
 
     # Determining the heuristic value, being Euclidean Distance
     @staticmethod
@@ -65,7 +76,9 @@ class TestCharacter(CharacterEntity):
             if current == goal:
                 break
 
-            # NEED WAY TO FIND NEIGHBORS
+            # NEED WAY TO FIND NEIGHBORS - utilize wrld
+            neighbors = {}
+
             for neighbor in graphNEIGHBORS(current):
                 cost = cumulative_cost[current] + COST[current, neighbor]
                 if neighbor not in cumulative_cost or cost < cumulative_cost[neighbor]:
