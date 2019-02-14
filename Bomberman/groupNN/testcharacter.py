@@ -4,7 +4,7 @@ sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
 from colorama import Fore, Back
-import PriorityQueue
+import heapq
 
 
 class TestCharacter(CharacterEntity):
@@ -31,6 +31,14 @@ class TestCharacter(CharacterEntity):
             return -1
         return x1, y1
 
+    # @staticmethod
+    # def make_graph(wrld):
+    #     graph_wrld = [wrld.width][wrld.height]
+    #
+    #     for i in range(0, wrld.width):
+    #         for j in range(0, wrld.height):
+    #             if wrld(i, j)
+
     # Determining the heuristic value, being Euclidean Distance
     @staticmethod
     def heuristic(start, goal):
@@ -43,6 +51,27 @@ class TestCharacter(CharacterEntity):
         value = (x1 + x2)**2 + (y1 + y2)**2
         return value
 
-    @staticmethod
-    def a_star(wrld, start, goal):
-        frontier = PriorityQueue()
+    def a_star(self, wrld, start, goal):
+        frontier = heapq()
+        frontier.push(start, 0)
+        came_from = {}
+        cumulative_cost = {}
+        came_from[start] = None
+        cumulative_cost[start] = 0
+
+        while not frontier.empty():
+            current = frontier.pop()
+
+            if current == goal:
+                break
+
+            # NEED WAY TO FIND NEIGHBORS
+            for neighbor in graphNEIGHBORS(current):
+                cost = cumulative_cost[current] + COST[current, neighbor]
+                if neighbor not in cumulative_cost or cost < cumulative_cost[neighbor]:
+                    cumulative_cost[neighbor] = cost
+                    priority = cost + self.heuristic(neighbor, goal)
+                    frontier.push(neighbor, priority)
+                    came_from[neighbor] = current
+
+        return came_from, cumulative_cost
