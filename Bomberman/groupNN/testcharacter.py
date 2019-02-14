@@ -19,6 +19,6 @@ class TestCharacter(CharacterEntity):
                 if wrld.exit_at(x, y):
                     x1 = x
                     y1 = y
-        
+        self.move(1,0)
         print(x1, y1)
         pass
