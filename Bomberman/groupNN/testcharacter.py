@@ -11,6 +11,7 @@ class TestCharacter(CharacterEntity):
     def do(self, wrld):
         # Your code here
         self.move(0,1)
+        # shreeja was here something
         # jose attacks
 
         pass
