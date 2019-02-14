@@ -11,6 +11,10 @@ class TestCharacter(CharacterEntity):
     def do(self, wrld):
         # Your code here
 
+        pass
+
+    @staticmethod
+    def get_exit(wrld):
         x1 = 0
         y1 = 0
         # Find the exit to use for heuristic A*
@@ -19,6 +23,4 @@ class TestCharacter(CharacterEntity):
                 if wrld.exit_at(x, y):
                     x1 = x
                     y1 = y
-        self.move(1,0)
-        print(x1, y1)
-        pass
+        return x1, y1
