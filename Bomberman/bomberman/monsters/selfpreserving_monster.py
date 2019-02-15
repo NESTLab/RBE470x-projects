@@ -11,10 +11,10 @@ class SelfPreservingMonster(MonsterEntity):
         self.rnge = rnge
 
     def look_for_character(self, wrld):
-        for dx in [-self.rnge, 0, self.rnge]:
+        for dx in range(-self.rnge, self.rnge+1):
             # Avoid out-of-bounds access
             if ((self.x + dx >= 0) and (self.x + dx < wrld.width())):
-                for dy in [-self.rnge, 0, self.rnge]:
+                for dy in range(-self.rnge, self.rnge+1):
                     # Avoid out-of-bounds access
                     if ((self.y + dy >= 0) and (self.y + dy < wrld.height())):
                         # Is a character at this position?
