@@ -146,8 +146,9 @@ class World:
 
     def remove_character(self, character):
         # Remove character if it exists
-        if self.index(character.x, character.y) in self.characters and character in self.characters[self.index(character.x, character.y)]:
-            self.characters[self.index(character.x, character.y)].remove(character)
+        i = self.index(character.x, character.y)
+        if (i in self.characters) and (character in self.characters[i]):
+            self.characters[i].remove(character)
 
     def check_blast(self, bomb, x, y):
         # Check if a wall has been hit
