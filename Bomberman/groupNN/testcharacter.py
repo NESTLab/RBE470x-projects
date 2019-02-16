@@ -159,8 +159,6 @@ class TestCharacter(CharacterEntity):
     #
     def findPath(self, start, goal, wrld, a_star_graph):
         path = []
-
-        initVal = -1
         lastMove = []
 
         possibleGoalEnds = self.getAllMoves(wrld, goal)
