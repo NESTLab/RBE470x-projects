@@ -32,6 +32,11 @@ class TestCharacter(CharacterEntity):
 
         print(nextMove[0] - self.x, nextMove[1] - self.y)
 
+
+        print((goal[0], goal[1] - 1))
+        if start == (goal[0], goal[1] - 1):
+            self.move(0, 1)
+
         pass
 
 
