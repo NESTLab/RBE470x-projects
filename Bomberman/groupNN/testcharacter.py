@@ -32,13 +32,42 @@ class TestCharacter(CharacterEntity):
 
         print(nextMove[0] - self.x, nextMove[1] - self.y)
 
-
-        print((goal[0], goal[1] - 1))
-        if start == (goal[0], goal[1] - 1):
-            self.move(0, 1)
+        # Go to the goal state if the path leads to a space next to it.
+        self.goToGoal(start, goal)
 
         pass
 
+    # Goes to the goal / exit
+    #
+    # PARAM: [[int, int], [int, int]]: [start.x, start.y]: the x and y coordinated the agent is located at
+    #                                  [goal.x, goal.y]: the x and y coordinated of the goal / exit
+    # RETURNS: [int, int] x, y: the x and y coordinates of the direction the of the goal
+    #
+    def goToGoal(self, start, goal):
+        # Move Vertical Down
+        if start == (goal[0], goal[1] - 1):
+            return self.move(0, 1)
+        # Move Vertical Up
+        elif start == (goal[0], goal[1] + 1):
+            return self.move(0, -1)
+        # Move Horizontal Right
+        elif start == (goal[0] - 1, goal[1]):
+            return self.move(1, 0)
+        # Move Horizontal Left
+        elif start == (goal[0] + 1, goal[1]):
+            return self.move(-1, 0)
+        # Move Diagonal Right-Down
+        elif start == (goal[0] - 1, goal[1] - 1):
+            return self.move(1, 1)
+        # Move Diagonal Right-Up
+        elif start == (goal[0] - 1, goal[1] + 1):
+            return self.move(1, -1)
+        # Move Diagonal Left-Down
+        elif start == (goal[0] + 1, goal[1] - 1):
+            return self.move(-1, 1)
+        # Move Diagonal Left-Up
+        elif start == (goal[0] - 1, goal[1] - 1):
+            return self.move(-1, -1)
 
     # Finds the goal / exit to the world
     #
