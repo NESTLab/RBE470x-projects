@@ -78,7 +78,7 @@ class TestCharacter(CharacterEntity):
         # return came_from, cost_so_far
 
 
-    # Returns list of all the possible moves for agent (up, down, left, right)
+    # Returns list of all the possible moves for agent (up, down, left, right, diagonal)
     #
     # PARAM: [world, [int, int]] wrld: the current world configuration
     #        [start.x, start.y] currentLocation: the x and y coordinated the agent is located at
@@ -107,5 +107,25 @@ class TestCharacter(CharacterEntity):
         if ((currentLocation[1] + 1) < wrld.height()):
             if (wrld.empty_at(currentLocation[0], currentLocation[1] + 1)):
                 movesList.append((currentLocation[0], currentLocation[1] + 1))
+        # Look diagonal right, up
+        # Avoid out of bound look ups
+        if ((currentLocation[0] + 1) < wrld.width() and (currentLocation[1] + 1) < wrld.height()):
+            if (wrld.empty_at(currentLocation[0] + 1, currentLocation[1] + 1)):
+                movesList.append((currentLocation[0] + 1, currentLocation[1] + 1))
+        # Look diagonal right, down
+        # Avoid out of bound look ups
+        if ((currentLocation[0] + 1) < wrld.width() and (currentLocation[1] - 1) >= 0):
+            if (wrld.empty_at(currentLocation[0] + 1, currentLocation[1] - 1)):
+                movesList.append((currentLocation[0] + 1, currentLocation[1] - 1))
+        # Look diagonal left, up
+        # Avoid out of bound look ups
+        if ((currentLocation[0] - 1) >= 0 and (currentLocation[1] + 1) < wrld.height()):
+            if (wrld.empty_at(currentLocation[0] - 1, currentLocation[1] + 1)):
+                movesList.append((currentLocation[0] - 1, currentLocation[1] + 1))
+        # Look diagonal left, down
+        # Avoid out of bound look ups
+        if ((currentLocation[0] - 1) >= 0 and (currentLocation[1] - 1) >= 0):
+            if (wrld.empty_at(currentLocation[0] - 1, currentLocation[1] - 1)):
+                movesList.append((currentLocation[0] - 1, currentLocation[1] - 1))
 
         return movesList
