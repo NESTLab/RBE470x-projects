@@ -48,10 +48,11 @@ class Scen2Var2Character(CharacterEntity):
         if not self.bomb == (-1,-1) and not wrld.bomb_at(self.bomb[0],self.bomb[1]):
             self.bomb = (-1,-1)
         move = self.alpha_beta_search(wrld)[1]
-        print(move)
         if move == self.BOMB:
             self.place_bomb()
             self.bomb = (self.x,self.y)
+            # Stops moving after it places a bomb, so it doesn't walk into an explosion.
+            # TODO: The character can place a bomb and move on the same turn. Probably best to use this to my advantage.
             self.move(0,0)
         else:
             self.move(move[0],move[1])
@@ -233,6 +234,7 @@ class Scen2Var2Character(CharacterEntity):
             fraction = self.BOMBRANGE + 1 - bombdistance
             dangercost = -9999*fraction
         # If any neighboring cell contains a monster, the character is considered within monster range
+        # NOTE: Monsters can have a bigger detection range than 1. May need to account for this.
         for dx in [-1,0,1]:
             # Avoid out-of-bound indexing
             if (wrld.me(self).x + dx >= 0) and (wrld.me(self).x + dx < wrld.width()):
