@@ -51,6 +51,7 @@ class Scen2Var1Character(CharacterEntity):
         if move == self.BOMB:
             self.place_bomb()
             self.bomb = (self.x,self.y)
+            self.move(0, 0)
         else:
             self.move(move[0],move[1])
 

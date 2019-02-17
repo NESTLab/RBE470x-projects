@@ -48,9 +48,11 @@ class Scen2Var2Character(CharacterEntity):
         if not self.bomb == (-1,-1) and not wrld.bomb_at(self.bomb[0],self.bomb[1]):
             self.bomb = (-1,-1)
         move = self.alpha_beta_search(wrld)[1]
+        print(move)
         if move == self.BOMB:
             self.place_bomb()
             self.bomb = (self.x,self.y)
+            self.move(0,0)
         else:
             self.move(move[0],move[1])
 
@@ -241,6 +243,11 @@ class Scen2Var2Character(CharacterEntity):
         # Escaping monsters should be equal priority to escaping explosions
         if withinmonsterrange:
             dangercost = dangercost - 9999
+
+        # As should escaping explosions
+        # if wrld.explosion_at(wrld.me(self).x,wrld.me(self).y):
+        #    dangercost = dangercost -9999
+
         # Distance made negative for return value so shorter distances are of higher value
         # print(distance*-1+dangercost)
         return distance * -1 + dangercost
