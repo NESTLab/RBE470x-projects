@@ -21,6 +21,7 @@ class TestCharacter(CharacterEntity):
         start = (self.x, self.y)
         goal = self.findGoal(wrld)
 
+
         a_star_path = self.a_star_search(wrld, start, goal)
         print(a_star_path)
 
@@ -32,7 +33,7 @@ class TestCharacter(CharacterEntity):
 
         print(nextMove[0] - self.x, nextMove[1] - self.y)
 
-        # Go to the goal state if the path leads to a space next to it.
+        # Go to the goal state if the path leads to a space next to it. ie Terminal Test
         self.goToGoal(start, goal)
 
         pass
@@ -114,7 +115,7 @@ class TestCharacter(CharacterEntity):
                 new_cost = cost_so_far[current] + 1 # + graph.cost(current, next)
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    priority = new_cost + self.heuristic(goal, next)
+                    priority = new_cost + self.a_star_heuristic(goal, next)
                     frontier.put(next, priority)
                     came_from[next] = current
 
@@ -127,7 +128,7 @@ class TestCharacter(CharacterEntity):
     #        [start.x, start.y] current: the x and y coordinated the agent is located at
     # RETURNS: [int] distance: distance between the current agent location and the goal
     #
-    def heuristic(self, goal, next):
+    def a_star_heuristic(self, goal, next):
         return abs(goal[0] - next[0]) + abs(goal[1] - next[1])
 
     # Returns list of all the possible moves for agent (up, down, left, right, diagonal)
@@ -201,13 +202,6 @@ class TestCharacter(CharacterEntity):
                 if (next == endMove):
                     lastMove = endMove
 
-
-        # for next in a_star_graph[1]:
-        #     val = a_star_graph[1][next]
-        #     if(val >= initVal):
-        #         initVal = val
-        #         lastMove = next
-
         path.append(lastMove)
 
         while (lastMove != start):
@@ -215,23 +209,5 @@ class TestCharacter(CharacterEntity):
                 if(next == a_star_graph[0][lastMove]):
                     lastMove = next
                     path.append(lastMove)
-
-        # x = 0
-        # for x in range(12):
-        #     if (initDist == -1):
-        #         for next in moves:
-        #                 dist = a_star_graph[1][next]
-        #
-        #                 if(dist > initDist):
-        #                     initDist = dist
-        #                     bestMove = next
-        #                     path.append(bestMove)
-        #                     print(bestMove)
-        #     else:
-        #         for next in a_star_graph[0]:
-        #             if(a_star_graph[0][next] == bestMove):
-        #                 bestMove = next
-        #                 path.append(bestMove)
-        #                 print(bestMove)
 
         return path
