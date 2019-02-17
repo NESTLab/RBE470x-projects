@@ -171,7 +171,7 @@ class Scen2Var1Character(CharacterEntity):
             return (self.distance_evaluation(wrld),(0,0))
         # Default move is no move at all
         v = (99999, (0,0))
-        for (newwrld, newevents) in self.get_nextworlds(wrld):
+        for (newwrld, newevents, move) in self.get_nextworlds(wrld):
             # Adapted from example code, but I don't know if it will really move.
             #self.move(action[0], action[1])
             # Get new wrld
