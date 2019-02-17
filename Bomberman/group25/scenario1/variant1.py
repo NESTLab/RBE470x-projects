@@ -8,7 +8,7 @@ from game import Game
 
 # TODO This is your code!
 sys.path.insert(1, '../group25')
-from testcharacter import TestCharacter
+from aStarCharacter import TestCharacter
 
 
 # Create the game
@@ -19,6 +19,8 @@ g.add_character(TestCharacter("me", # name
                               "C",  # avatar
                               0, 0  # position
 ))
+
+
 
 # Run!
 g.go()
