@@ -70,7 +70,6 @@ class Game:
         self.explosion_sprite = pygame.transform.scale(self.explosion_sprite, rect)
 
     def display_gui(self):
-        pygame.event.clear()
         for x in range(self.world.width()):
             for y in range(self.world.height()):
                 top = self.block_height * y
@@ -92,6 +91,7 @@ class Game:
         pygame.display.flip()
 
     def go(self):
+        """ Main game loop that waits for confirmation each step. """
         colorama.init(autoreset=True)
         self.display_gui()
         self.draw()
@@ -102,9 +102,27 @@ class Game:
             self.draw()
         colorama.deinit()
 
+    def go_timed(self, wait):
+        """ Main game loop that steps automatically. """
+        colorama.init(autoreset=True)
+        self.display_gui()
+        self.draw()
+        while not self.done():
+            self.display_gui()
+            self.step_timed(wait)
+            self.display_gui()
+            self.draw()
+        colorama.deinit()
+
     def step(self):
+        """ Game loop step that waits for user confirmation. """
         (self.world, self.events) = self.world.next()
         input("Press Enter to continue...")
+
+    def step_timed(self, wait):
+        """ Game loop step that runs automatically. """
+        (self.world, self.events) = self.world.next()
+        pygame.time.wait(wait)
 
     ###################
     # Private methods #
