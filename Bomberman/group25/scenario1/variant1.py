@@ -8,8 +8,7 @@ from game import Game
 
 # TODO This is your code!
 sys.path.insert(1, '../group25')
-from testcharacter import TestCharacter
-from scen2var1character import Scen2Var1Character
+from aStarCharacter import AStarCharacter
 
 
 # Create the game
@@ -20,11 +19,13 @@ g = Game.fromfile('map.txt')
 #                              "C",  # avatar
 #                              0, 0  # position
 #))
-g.add_character(Scen2Var1Character("me", # name
+g.add_character(TestCharacter("me", # name
                               "C",  # avatar
                               0, 0,  # position
                               2 #depth
 ))
+
+
 
 # Run!
 g.go()

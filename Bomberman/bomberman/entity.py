@@ -254,7 +254,7 @@ class CharacterEntity(AIEntity, MovableEntity):
 
     def set_cell_color(self, x, y, color):
         """Sets the cell color at (x,y)"""
-        self.tiles[(x,y)] = color
+        self.tiles[(x, y)] = color
 
     ###################
     # Private methods #
