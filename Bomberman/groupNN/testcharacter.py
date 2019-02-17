@@ -6,6 +6,7 @@ from entity import CharacterEntity
 from colorama import Fore, Back
 # Imports for code implementation
 from queue import PriorityQueue
+import math
 
 class TestCharacter(CharacterEntity):
 
@@ -22,11 +23,8 @@ class TestCharacter(CharacterEntity):
         # Get all possible directions fro agent
         allDirections = self.getAllDirections(wrld, start)
 
-        # Gets the move recommended by A*
-        a_star_move = self.get_a_star_move(wrld, start, goal)
-
         # Find the current best move for the agent
-        bestScoreMove = self.scoreMoves(wrld, allDirections, a_star_move)
+        bestScoreMove = self.scoreMoves(wrld, start, goal, allDirections)
         self.move(bestScoreMove[0], bestScoreMove[1])
 
         # Go to the goal state if the path leads to a space next to it. ie Terminal Test
@@ -37,22 +35,37 @@ class TestCharacter(CharacterEntity):
     # Chooses the best direction to go in based on heuristics
     #
     # PARAM: [ world, [int, int], (int, int)]: wrld: the current state of the world
+    #                                          [start.x, start.y]: the x and y coordinated the agent is located at
+    #                                          [goal.x, goal.y]: the x and y coordinated of the goal / exit
     #                                          allDirections: a list of all the directions the agent can go
-    #                                          a_star_move: the direction recommended by A*
     #
     # RETRUNS: the best move for the agent
     #
-    def scoreMoves(self, wrld, allDirections, a_star_move):
+    def scoreMoves(self, wrld, start, goal, allDirections):
+        enemies = self.getEnemy(wrld)
+
+        # Gets the move recommended by A*
+        a_star_move = self.get_a_star_move(wrld, start, goal)
+
         bestMove = -1
         highestScore = -1
         for i in range(len(allDirections)):
             livingScore = abs(wrld.time)
 
+            enemyScore = 0
+            for enemyLoc in enemies:
+                futureX = (self.x + allDirections[i][0])
+                futureY = (self.y + allDirections[i][1])
+
+                enemyDis = math.sqrt((enemyLoc[0] - futureX) ** 2 + (enemyLoc[1] - futureY) ** 2)
+                if(enemyDis < 4):
+                    enemyScore = enemyScore - ((4 - enemyDis) * 3)
+
             a_star_score = 0
             if(a_star_move == allDirections[i]):
                 a_star_score = 5
 
-            totalScore = livingScore + a_star_score
+            totalScore = livingScore + a_star_score + enemyScore
             print(totalScore)
             if(totalScore > highestScore):
                 highestScore = totalScore
@@ -61,6 +74,23 @@ class TestCharacter(CharacterEntity):
         return bestMove
 
 
+    # Gets the locations of the enemies location
+    #
+    # PARAM: [world] wrld: the current state of the world
+    #
+    # RETURNS: [list [entities]] enemies: a list of enemies
+    #
+    def getEnemy(self, wrld):
+        enemies = []
+
+        x = 0
+        y = 0
+        for y in range(wrld.height()):
+            for x in range(wrld.width()):
+                if(wrld.monsters_at(x, y)):
+                    enemies.append((x, y))
+
+        return enemies
 
 
     # Goes to the goal / exit
