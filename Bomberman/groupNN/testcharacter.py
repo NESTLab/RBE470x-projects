@@ -23,19 +23,21 @@ class TestCharacter(CharacterEntity):
 
         while not len(frontier) == 0:
             frontier.sort(key=lambda tup: tup[1])  # check that
-            print(frontier)
-            #frontier.sort()
             current = frontier.pop(0)
             if (current[0][0], current[0][1]) == ex:
                 break
             for next in get_adjacent(current[0], wrld):
                 if wrld.wall_at(next[0], next[1]):
+                    cost_so_far[(next[0], next[1])] = 999
                     break
                 new_cost = self.manhattan_distance(next[0], next[1], ex[0], ex[1]) + cost_so_far[current[0]]
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    frontier.append((next, new_cost + self.heuristic(current[0], next)))
+                    frontier.append((next, new_cost))
                     came_from[next] = current[0]
+                    
+        
+        self.printOurWorld(wrld, cost_so_far)
 
         cursor = ex
         path = []
@@ -74,6 +76,30 @@ class TestCharacter(CharacterEntity):
                 if wrld.exit_at(x, y):
                     return (x, y)
 
+    def printOurWorld(self,wrld, cost_so_far):
+        w, h = len(wrld.grid), len(wrld.grid[0])
+        print('\n\n')
+        world = [[0 for x in range(w)] for y in range(h)] 
+       
+        # for row in world:
+        #     print(row)
+        keys = cost_so_far.keys()
+
+        for key in keys:
+            # x,y = val[0][0], val[0][1]
+            # print(x, y)
+            # print("Set value at " + str(val[0][0]-1) + " , " + str(val[0][1] -1) + " to: " + str(val[1]) )
+
+            k = str(key).split(',')
+
+            world[key[1]][key[0]] = "{0:03d}".format(cost_so_far[key])
+        world[self.y][self.x] = "X"
+        
+                
+        for row in world:
+            print(row)
+
+
 # Returns a list of coordinates in the world surrounding the current one.
 # param current: An (x, y) point
 def get_adjacent(current, wrld):
@@ -102,3 +128,10 @@ def get_adjacent(current, wrld):
             neighbors.append((x + 1, y + 1))  # bottom right
 
     return neighbors
+
+
+def printFrontier(frontier):
+    for val in frontier:
+        print(val)
+
+
