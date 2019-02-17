@@ -260,12 +260,12 @@ class TestCharacter(CharacterEntity):
         return directionList
 
 
-    # Determines which direction for the agent to move
+    # Finds the A* path to the goal
     #
     # PARAM: [start.x, start.y] currentLocation: the x and y coordinated the agent is located at
     #        [world] wrld: the current world configuration
     #        [world] a_star_grpah: a graph representing the a_star path fro the agent
-    # RETURNS: [list [int, int]] allMoves: a list of all the possible moves for agent
+    # RETURNS: [list [int, int]] path: a list of the path to the goal
     #
     def findPath(self, start, goal, wrld, a_star_graph):
         path = []
