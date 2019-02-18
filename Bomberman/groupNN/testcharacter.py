@@ -33,8 +33,20 @@ class TestCharacter(CharacterEntity):
     #         for j in range(0, wrld.height):
     #             if wrld(i, j)
 
-    def get_neighbors(self, wrld):
-        pass
+    # PARAM [tuple (int, int)] start: tuple with x and y coordinates of current position in board
+    # PARAM [SensedWorld] wrld: wrld grid, used to get boundries
+    # RETURN [list of (int x, int y)]: coordinate positions of neighbors, it doesn't return a neighbor that has a
+    def get_neighbors(self, start, wrld):
+        x = start[0]
+        y = start[1]
+        neighbors = [(x+1, y), (x, y-1), (x-1, y), (x, y+1)]
+        result = []
+        # check that neighbors are inside wrld bounds and are not walls
+        for neighbor in neighbors:
+            if neighbor[0] >= 0 and neighbor < wrld.height() and neighbor[1] >= 0 and neighbor[1] < wrld.width():
+                if wrld.wall_at(neighbor[0], neighbor[1]):
+                    result.append(neighbor)
+        return result
 
     def get_my_location(self, wrld):
         # Find the exit to use for heuristic A*
@@ -63,8 +75,8 @@ class TestCharacter(CharacterEntity):
         return value
 
     def a_star(self, wrld, start, goal):
-        frontier = heapq()
-        frontier.push(start, 0)
+        frontier = heapq() # Priority Queue - How is this implemented?? How to check the value of the nodes. Value comes from optimal path to reach + heuristic
+        frontier.push(start, 0) # what is this zero??
         came_from = {}
         cumulative_cost = {}
         came_from[start] = None
@@ -76,8 +88,7 @@ class TestCharacter(CharacterEntity):
             if current == goal:
                 break
 
-            # NEED WAY TO FIND NEIGHBORS - utilize wrld
-            neighbors = {}
+            neighbors = self.get_neighbors(start, wrld)
 
             for neighbor in graphNEIGHBORS(current):
                 cost = cumulative_cost[current] + COST[current, neighbor]
