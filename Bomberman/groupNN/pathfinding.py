@@ -80,7 +80,7 @@ def greedyBFS(start, end, wrld):
                 #if the postition is in world bounds
                 if not (x + i >= width or x + i <= 0 or y + j >= height or y + j <= 0):
                     #if the checked position has not already been checked, and there is not a wall at the location
-                    if [x + i, y + j] not in evaluated and not wrld.wall_at(x + i, y + j):
+                    if [x + i, y + j] not in evaluated and not wrld.wall_at(x + i, y + j) :
                         #create a new gridcell, with the previous postition being the gridcell used in this for for loop
                         #to reach the position
                         current = gridcell([x + i, y + j], popped)
