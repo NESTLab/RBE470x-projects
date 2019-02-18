@@ -1,6 +1,7 @@
 # This is necessary to find the main code
 import sys
 import math
+
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
@@ -14,7 +15,7 @@ class TestCharacter(CharacterEntity):
         frontier = []
         frontier.append(((self.x, self.y), 0))
         came_from = {}
-        cost_so_far ={}
+        cost_so_far = {}
         came_from[(self.x, self.y)] = None
         cost_so_far[(self.x, self.y)] = 0
         move = 1
@@ -29,14 +30,14 @@ class TestCharacter(CharacterEntity):
             for next in get_adjacent(current[0], wrld):
                 if wrld.wall_at(next[0], next[1]):
                     cost_so_far[(next[0], next[1])] = 999
-                    break
-                new_cost = self.manhattan_distance(next[0], next[1], ex[0], ex[1]) + cost_so_far[current[0]]
+                    new_cost = 1000
+                else:
+                    new_cost = self.cost_to(current[0], next) + cost_so_far[current[0]]
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    frontier.append((next, new_cost))
+                    frontier.append((next, new_cost + self.manhattan_distance(next[0], next[1], ex[0], ex[1])))
                     came_from[next] = current[0]
-                    
-        
+
         self.printOurWorld(wrld, cost_so_far)
 
         cursor = ex
@@ -58,16 +59,14 @@ class TestCharacter(CharacterEntity):
     def manhattan_distance(self, x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2)
 
-    def heuristic(self, current, next):
+    # Prioritizes downward
+    def cost_to(self, current, next):
         diff = (next[0] - current[0], next[1] - current[1])
         val = abs(diff[0]) + abs(diff[1])
         if val == 2:
-            return 0
-        if val == 1:
-            return 5
-        if val == 0:
-            return 20
-
+            return 2
+        else:
+            return 1
 
     # This is probably unnecessary, assuming all scenarios remain as provided, but good to double check!
     def find_exit(self, wrld):
@@ -76,11 +75,11 @@ class TestCharacter(CharacterEntity):
                 if wrld.exit_at(x, y):
                     return (x, y)
 
-    def printOurWorld(self,wrld, cost_so_far):
+    def printOurWorld(self, wrld, cost_so_far):
         w, h = len(wrld.grid), len(wrld.grid[0])
         print('\n\n')
-        world = [[0 for x in range(w)] for y in range(h)] 
-       
+        world = [[0 for x in range(w)] for y in range(h)]
+
         # for row in world:
         #     print(row)
         keys = cost_so_far.keys()
@@ -94,8 +93,7 @@ class TestCharacter(CharacterEntity):
 
             world[key[1]][key[0]] = "{0:03d}".format(cost_so_far[key])
         world[self.y][self.x] = "X"
-        
-                
+
         for row in world:
             print(row)
 
@@ -110,19 +108,19 @@ def get_adjacent(current, wrld):
 
     if x >= 1:
         if y >= 1:
-            neighbors.append((x-1, y-1))  # top left
-        neighbors.append((x-1, y))  # middle left
+            neighbors.append((x - 1, y - 1))  # top left
+        neighbors.append((x - 1, y))  # middle left
         if y < wrld.height() - 1:
-            neighbors.append((x-1, y+1))  # bottom left
+            neighbors.append((x - 1, y + 1))  # bottom left
 
     if y >= 1:
-        neighbors.append((x, y-1))  # top middle
+        neighbors.append((x, y - 1))  # top middle
     if y < wrld.height() - 1:
-        neighbors.append((x, y+1))  # bottom middle
+        neighbors.append((x, y + 1))  # bottom middle
 
     if x < wrld.width() - 1:
         if y >= 1:
-            neighbors.append((x + 1, y-1))  # top right
+            neighbors.append((x + 1, y - 1))  # top right
         neighbors.append((x + 1, y))  # middle right
         if y < wrld.height() - 1:
             neighbors.append((x + 1, y + 1))  # bottom right
