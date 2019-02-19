@@ -9,9 +9,7 @@ from sensed_world import SensedWorld
 import math
 
 class Scen2Var1Character(CharacterEntity):
-
     BOMB = 0
-
     def __init__(self, name, avatar, x, y, depth):
         AIEntity.__init__(self, name, avatar)
         MovableEntity.__init__(self, x, y)
