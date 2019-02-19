@@ -21,7 +21,7 @@ class Game(object):
         # Create board
         self.board = board.Board([[0] * w for i in range(h)], w, h, n)
         # Players
-        self.players = [ p1, p2 ]
+        self.players = [p1, p2]
         p1.player = 1
         p2.player = 2
 

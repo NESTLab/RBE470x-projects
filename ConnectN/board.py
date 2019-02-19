@@ -4,6 +4,7 @@ import copy
 # Game Board #
 ##############
 
+
 class Board(object):
 
     # Class constructor.
@@ -74,7 +75,7 @@ class Board(object):
         """Returns the winner of the game: 1 for Player 1, 2 for Player 2, and 0 for no winner"""
         for x in range(self.w):
             for y in range(self.h):
-                if (self.board[y][x] != 0) and self.is_any_line_at(x,y):
+                if (self.board[y][x] != 0) and self.is_any_line_at(x, y):
                     return self.board[y][x]
         return 0
 
@@ -101,7 +102,7 @@ class Board(object):
     # RETURN [list of int]: the columns with at least one free slot
     def free_cols(self):
         """Returns a list of the columns with at least one free slot"""
-        return [x for x in range(self.w) if self.board[-1][x] == 0 ]
+        return [x for x in range(self.w) if self.board[-1][x] == 0]
 
     # Prints the current board state.
     def print_it(self):
