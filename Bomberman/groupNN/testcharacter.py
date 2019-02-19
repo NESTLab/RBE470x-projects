@@ -11,7 +11,6 @@ init(autoreset=True)
 class TestCharacter(CharacterEntity):
     def do(self, wrld):
         self.reset_cells(wrld)
-        ex = self.find_exit(wrld)
         # A*
         frontier = []
         frontier.append(((self.x, self.y), 0))
@@ -23,7 +22,16 @@ class TestCharacter(CharacterEntity):
         print("SELFX " + str(self.x))
         print("SELFY " + str(self.y))
 
-        monsters = self.monster_tiles(wrld)
+        monsters = []
+        ex = (7, 18)
+
+        # Iterates through board to find monsters and exit
+        for x in range(0, wrld.width()):
+            for y in range(0, wrld.height()):
+                if wrld.monsters_at(x, y):  # Finds all the monsters in the board
+                    monsters.append((x, y))
+                if wrld.exit_at(x, y):  # Just in case exit is not where we expect it to be in the bottom right corner
+                    ex = (x, y)
 
         for t in monsters:
             self.set_cell_color(t[0], t[1], Fore.RED + Back.RED)
@@ -94,20 +102,6 @@ class TestCharacter(CharacterEntity):
             for y in range(0, wrld.height()):
                 self.set_cell_color(x, y, Fore.RESET + Back.RESET)
 
-    # Prints a list of the monsters in the world. Useful for debugging and not much else.
-    def findMonsters(self, wrld):
-        for x in range(0, wrld.width()):
-            for y in range(0, wrld.height()):
-                if wrld.monsters_at(x, y):
-                    print("Monster at: " + str(x) + ", " + str(y))
-
-    # This is probably unnecessary, assuming all scenarios remain as provided, but good to double check!
-    def find_exit(self, wrld):
-        for x in range(0, wrld.width()):
-            for y in range(0, wrld.height()):
-                if wrld.exit_at(x, y):
-                    return (x, y)
-
     def printOurWorld(self, wrld, cost_so_far):
         w, h = len(wrld.grid), len(wrld.grid[0])
         print('\n\n')
@@ -143,6 +137,24 @@ class TestCharacter(CharacterEntity):
         print(tiles)
         return tiles
 
+    # ==================== FEATURES ==================== #
+    #   - Distance to closest bomb
+    #   - Distance to closest monster
+    #   - 1 / (Distance to exit)^2
+
+    # Returns an integer representing the Manhattan distance to the closest bomb.
+    def closest_bomb(self):
+        return 1
+
+    # Returns an integer representing the Manhattan distance to the closest monster.
+    def closest_monster(self):
+        return 1
+
+    # Returns the 1/(A* distance to exit)^2.
+    def distance_to_exit(self):
+        return 1
+
+
 # Returns a list of coordinates in the world surrounding the current one.
 # param current: An (x, y) point
 def get_adjacent(current, wrld):
@@ -171,7 +183,6 @@ def get_adjacent(current, wrld):
             neighbors.append((x + 1, y + 1))  # bottom right
 
     return neighbors
-
 
 def printFrontier(frontier):
     for val in frontier:
