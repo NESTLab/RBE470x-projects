@@ -93,8 +93,8 @@ class Game:
 
     def go(self):
         colorama.init(autoreset=True)
-        self.display_gui()
-        self.draw()
+        #self.display_gui()
+        #self.draw()
         while not self.done():
             self.display_gui()
             self.step()
