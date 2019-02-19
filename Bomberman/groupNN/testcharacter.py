@@ -56,7 +56,12 @@ class TestCharacter(CharacterEntity):
             self.set_cell_color(cursor[0], cursor[1], Fore.RED + Back.GREEN)
             move = cursor
             path.append(cursor)
-            cursor = came_from[cursor]
+            try:
+                cursor = came_from[cursor]
+            except KeyError:
+                self.move(0, 0)
+                pass
+                break
         print("PATH: ")
         print(path)
 
