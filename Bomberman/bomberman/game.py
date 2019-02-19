@@ -90,39 +90,26 @@ class Game:
                     self.screen.blit(self.bomb_sprite, rect)
         pygame.display.flip()
 
-    def go(self):
-        """ Main game loop that waits for confirmation each step. """
+    def go(self, wait=0):
+        """ Main game loop. """
+
+        if wait is 0:
+            def step():
+                input("Press Enter to continue...")
+        else:
+            def step():
+                pygame.time.wait(abs(wait))
+
         colorama.init(autoreset=True)
         self.display_gui()
         self.draw()
         while not self.done():
             self.display_gui()
-            self.step()
+            (self.world, self.events) = self.world.next()
+            step()
             self.display_gui()
             self.draw()
         colorama.deinit()
-
-    def go_timed(self, wait):
-        """ Main game loop that steps automatically. """
-        colorama.init(autoreset=True)
-        self.display_gui()
-        self.draw()
-        while not self.done():
-            self.display_gui()
-            self.step_timed(wait)
-            self.display_gui()
-            self.draw()
-        colorama.deinit()
-
-    def step(self):
-        """ Game loop step that waits for user confirmation. """
-        (self.world, self.events) = self.world.next()
-        input("Press Enter to continue...")
-
-    def step_timed(self, wait):
-        """ Game loop step that runs automatically. """
-        (self.world, self.events) = self.world.next()
-        pygame.time.wait(wait)
 
     ###################
     # Private methods #
