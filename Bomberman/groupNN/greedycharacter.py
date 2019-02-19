@@ -25,7 +25,7 @@ class GreedyCharacter(CharacterEntity):
                     exit = [i, j]
 
         #get the [x,y] coords of the next cell to go to
-        goTo = greedyBFS.getNextStep([meX, meY], exit, wrld)
+        goTo = greedyBFS.getNextStep([meX, meY], exit, wrld,1)
 
         #move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])

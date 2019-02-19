@@ -70,14 +70,8 @@ def greedyBFS(start, end, wrld,w):
 
         #check 8 connected. The current position is already in evaluated, so checking the current position
         #has no effect, not slow enought to require optimizeation
-        for i in range(3):
+        for i, j in [[-1,0],[1,0],[0,-1],[0,1]]:
 
-            i -= 1
-
-            for j in range(3):
-
-                j -= 1
-                
                 #if the postition is in world bounds
                 if not (x + i >= width or x + i < 0 or y + j >= height or y + j < 0):
                     #if the checked position has not already been checked, and there is not a wall at the location

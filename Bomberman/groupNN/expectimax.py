@@ -1,14 +1,14 @@
 
-def startExp(world, char1,char2)
-    grid[x,y]='a'
-    grid[x,y]='b'
 
 
 def expectimax_search(grid):
 
-    return max()
+    return expVal
+
+def expVal():
 
 def find_player(grid):
+
 
 
 def find_actions(state, x, y):
