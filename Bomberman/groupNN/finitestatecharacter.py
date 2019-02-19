@@ -9,12 +9,20 @@ from colorama import Fore, Back
 class FiniteStateCharacter(CharacterEntity):
 
     def do(self, wrld):
-        # TODO: Code this.  Concept:
-        # Figure out where you are and who is around you.
-        # Create an if statement different states, such as 'alone', 'with bomb', etc.
-        # Call different other algorithms based on which state it is.
-
         # This method calls different algorithms to find the next position to
         # move based on the finite state the character is in.
         if()
+        # Character is alone and able to push forward unimpeded by wall
+        elif()
+        # Character is alone but there is a wall impeding movement
+        elif()
+        # There is at least 1 bomb within 2 steps
+        elif()
+        # There is at least 1 monster within 2 steps
+        elif()
+        # There are 2 monsters within 2 steps
+        elif()
+        # There is both at least 1 bomb and 1 monster within 2 steps
+        else()
+        # there should be nothing left, if anything gets to this point, fix it
         pass
