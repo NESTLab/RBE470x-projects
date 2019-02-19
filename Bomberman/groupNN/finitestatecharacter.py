@@ -13,4 +13,8 @@ class FiniteStateCharacter(CharacterEntity):
         # Figure out where you are and who is around you.
         # Create an if statement different states, such as 'alone', 'with bomb', etc.
         # Call different other algorithms based on which state it is.
+
+        # This method calls different algorithms to find the next position to
+        # move based on the finite state the character is in.
+        if()
         pass
