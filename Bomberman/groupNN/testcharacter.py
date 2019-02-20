@@ -5,15 +5,56 @@ sys.path.insert(0, '../bomberman')
 from entity import CharacterEntity
 from colorama import Fore, Back
 import heapq
+import operator
 
 
 class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
         # Your code here
-        self.move(1, 1)
-        self.get_exit(wrld)
-        self.get_my_location(wrld)
+        # self.move(1, 0)
+
+        goal = self.get_exit(wrld)
+        start = self.get_my_location(wrld)
+
+        nextMove = self.a_star(wrld,start,goal) # returns (x,y) coordinate of next move
+        print("my next move is:")
+        print(nextMove)
+        dx = nextMove[0] - start[0]
+        dy = nextMove[1] - start[1]
+        print("my dx is {} and my dy is: {}".format(dx,dy))
+        if wrld.wall_at(nextMove[0], nextMove[1]):
+            # do stuff with wall
+            # put  - 11 ticks to explode
+            # move diagonally
+
+            wallNeighbors = []
+            if wrld.wall_at(start[0] +1, start[1]):
+                if wrld.wall_at(start[0], start[1] + 1):
+                    self.place_bomb()
+                    self.move(-1, -1)
+                    #move back
+                else:
+                    self.move(0, 1)
+                    self.place_bomb()
+                    self.move(0, -1)
+            else:
+                self.move(1,0)
+                self.place_bomb()
+                self.move(-1, 0)
+
+            self.place_bomb()
+            self.move(-1,-1)
+            start = (start[0]+dx,start[1]+dy)
+            print('a')
+        else:
+            # there is no wall
+            if wrld.bomb_at(nextMove[0], nextMove[1]) or wrld.explosion_at(nextMove[0], nextMove[1]):
+                self.move(0, 0)
+            else:
+                self.move(dx, dy)
+                start = (start[0] + dx, start[1] + dy)
+
 
     @staticmethod
     def get_exit(wrld):
@@ -39,13 +80,13 @@ class TestCharacter(CharacterEntity):
     def get_neighbors(self, start, wrld):
         x = start[0]
         y = start[1]
-        neighbors = [(x+1, y), (x, y-1), (x-1, y), (x, y+1)]
+        neighbors = [(x+1, y), (x, y-1), (x-1, y), (x, y+1),
+                     (x+1 , y+1), (x+1, y-1), (x-1, y+1), (x-1, y-1)]
         result = []
         # check that neighbors are inside wrld bounds and are not walls
         for neighbor in neighbors:
-            if neighbor[0] >= 0 and neighbor < wrld.height() and neighbor[1] >= 0 and neighbor[1] < wrld.width():
-                if wrld.wall_at(neighbor[0], neighbor[1]):
-                    result.append(neighbor)
+            if 0 <= neighbor[0] < wrld.height() and 0 <= neighbor[1] < wrld.width():
+                result.append(neighbor)
         return result
 
     def get_my_location(self, wrld):
@@ -53,14 +94,7 @@ class TestCharacter(CharacterEntity):
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
                 if wrld.characters_at(x, y):
-                    print(x, y)
                     return x, y
-        pass
-
-    def best_move(self, wrld):
-        pass
-
-
 
     # Determining the heuristic value, being Euclidean Distance
     @staticmethod
@@ -71,31 +105,20 @@ class TestCharacter(CharacterEntity):
         # Euclidean distance is the hypotenuse
         # We add the squared values, and finding the sqrt is
         # not necessary as it will never effect the outcome
-        value = (x1 + x2)**2 + (y1 + y2)**2
+        value = (x2 - x1)**2 + (y2 - y1)**2
         return value
 
+    # PARAM [SensedWorld] wrld: wrld grid, used to get boundries
+    # PARAM [tuple (int, int)] start: tuple with x and y coordinates of starting position in board
+    # PARAM [tuple (int, int)] goal: tuple with x and y coordinates of exit position in board
+    # RETURN [?????]: Possibly return list with tuples of (int, int). This would be the optimal path to traverse
     def a_star(self, wrld, start, goal):
-        frontier = heapq() # Priority Queue - How is this implemented?? How to check the value of the nodes. Value comes from optimal path to reach + heuristic
-        frontier.push(start, 0) # what is this zero??
-        came_from = {}
-        cumulative_cost = {}
-        came_from[start] = None
-        cumulative_cost[start] = 0
-
-        while not frontier.empty():
-            current = frontier.pop()
-
-            if current == goal:
-                break
-
-            neighbors = self.get_neighbors(start, wrld)
-
-            for neighbor in graphNEIGHBORS(current):
-                cost = cumulative_cost[current] + COST[current, neighbor]
-                if neighbor not in cumulative_cost or cost < cumulative_cost[neighbor]:
-                    cumulative_cost[neighbor] = cost
-                    priority = cost + self.heuristic(neighbor, goal)
-                    frontier.push(neighbor, priority)
-                    came_from[neighbor] = current
-
-        return came_from, cumulative_cost
+        neighbors = self.get_neighbors(start, wrld)
+        neighbors_values = []
+        for neighbor in neighbors: # shouldn't this be for neighbor in neighbors: ???s
+            neighbors_values.append((neighbor[0], neighbor[1], self.heuristic(neighbor, goal)))
+        neighbors_values.sort(key=operator.itemgetter(2))
+        print(neighbors_values)
+        # return came_from, cumulative_cost
+        # return 2,2
+        return neighbors_values[0][0], neighbors_values[0][1]
