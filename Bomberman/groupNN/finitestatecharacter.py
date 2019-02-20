@@ -94,7 +94,7 @@ class FiniteStateCharacter(CharacterEntity):
                 # if this is not the space the character is in
                 if i != 0 and j != 0:
                     # if the postition is in world bounds
-                    if not meX + i >= wrld.width() or meX + i <= 0 or meY + j >= wrld.height() or meY + j <= 0:
+                    if not meX + i >= wrld.width() and meX + i <= 0 and meY + j >= wrld.height() and meY + j <= 0:
                         # check if there is a wall there and append if so
                         if wrld.wall_at(meX + i, meY + j):
                             closeObjects.append([0, meX + i, meY + j])
