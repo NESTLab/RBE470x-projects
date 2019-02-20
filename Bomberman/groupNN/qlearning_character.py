@@ -23,23 +23,26 @@ class QCharacter(CharacterEntity):
         self.qtable = qtable
 
     def do(self, wrld):
-        self.updateQ(wrld)
+        valid_moves = self.updateQ(wrld)
         print("QTABLE: " + str(self.qtable))
         # path = self.aStar(wrld, (7, 18), True)
         # move = path[len(path) - 1]
 
-        print("MAX: " + str(max(self.qtable)))
+        #print("MAX: " + str(max(self.qtable)))
 
         global bestmove
         bestmove = (0, 0)
+        maxval = 0
 
-        move = max(self.qtable.items(), key=operator.itemgetter(1))[0]
+        print("Valid moves:")
+        for m in valid_moves:
+            if self.qtable[m] > maxval:
+                bestmove = m
 
-        print(move)
-        move = move[1]
+        print("BEST:")
+        print(bestmove)
 
-
-        self.move(move[0], move[1])
+        self.move(bestmove[1][0], bestmove[1][1])
 
         print("Calculated state before moving: ")
         print(self.calculate_state(wrld))
@@ -85,6 +88,9 @@ class QCharacter(CharacterEntity):
                 else:
                     print("Xcoord: " + str(c.x) + ", Ycoord: " + str(c.y))
                     self.qtable[(self.calculate_state(wrld), (m[0] - self.x, m[1] - self.y), calculate_state(c, wrld))] = distance_to_exit(c, wrld)
+                    possible_moves.append((self.calculate_state(wrld), (m[0] - self.x, m[1] - self.y), calculate_state(c, wrld)))
+                    print("Added " + str((self.calculate_state(wrld), (m[0] - self.x, m[1] - self.y), calculate_state(c, wrld))) + " to valid moves")
+        return possible_moves
 
     # Resets styling for each cell. Prevents unexpected/inconsistent behavior that otherwise appears with coloring.
     def reset_cells(self, wrld):

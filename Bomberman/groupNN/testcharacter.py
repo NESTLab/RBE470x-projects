@@ -71,13 +71,6 @@ class TestCharacter(CharacterEntity):
 
         return path
 
-    def eval(self, state, action):
-
-
-    def calculateMove(self, wrld):
-        xcoord = self.x
-        ycoord = self.x
-
     def manhattan_distance(self, x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2)
 
