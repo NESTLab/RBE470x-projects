@@ -38,6 +38,8 @@ class QCharacter(CharacterEntity):
     def select_best_move(self, state):
         keys = self.qtable.keys()
         candidates = []
+        # Check all keys in table to see if they tell us what to do from current state. This is prooobably one of the
+        # reasons our code doesn't work.
         for k in keys:
             if state in k:
                 print("KEY FOUND: " + str(k))
@@ -57,8 +59,7 @@ class QCharacter(CharacterEntity):
         print(move)
         return move
 
-
-
+    # Updates the QTable.
     def updateQ(self, wrld):
         alpha = 0.3
         moves = get_adjacent((self.x, self.y), wrld)
@@ -80,11 +81,8 @@ class QCharacter(CharacterEntity):
                     for event in s[1]:
                         if event.tpe == Event.CHARACTER_KILLED_BY_MONSTER and event.character.name == self.name:
                             self.qtable[calculate_state(wrld.exitcell, wrld), m] = -5
-                            #self.qtable[self.calculate_state(wrld), 5] = -100
                         elif event.tpe == Event.CHARACTER_FOUND_EXIT and event.character.name == self.name:
                             self.qtable[("dead"), m] = -5
-                            #self.qtable[self.calculate_state(wrld), 4] = 100  #  We don't really care about move, just state.
-
                 else:
                     print("Xcoord: " + str(c.x) + ", Ycoord: " + str(c.y))
                     self.qtable[(calculate_state((c.x, c.y), wrld), m)] = distance_to_exit((c.x, c.y), wrld)

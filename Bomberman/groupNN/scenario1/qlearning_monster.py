@@ -1,3 +1,5 @@
+# The sole purpose of this class is to be able to carry q-table over between iterations of the game.
+
 # This is necessary to find the main code
 import sys
 sys.path.insert(0, '../../bomberman')
