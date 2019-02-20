@@ -23,6 +23,7 @@ class Scen2Var3Character(CharacterEntity):
         # Debugging elements
         self.tiles = {}
         self.max_depth = depth
+        # TODO: (Here and in other character code) get rid of variables that are no longer needed
         # List of cells already visited
         # self.visited = []
         self.foundexit = False
@@ -64,8 +65,9 @@ class Scen2Var3Character(CharacterEntity):
         # Checks if a bomb is still at the last bomb position and resets self.bomb if it isn't
         if not self.bomb == (-1,-1) and not wrld.bomb_at(self.bomb[0],self.bomb[1]):
             self.bomb = (-1,-1)
+        # print(self.alpha_beta_search(wrld)[0])
         move = self.alpha_beta_search(wrld)[1]
-        print(move)
+        # print(move)
         if move == self.BOMB:
             self.place_bomb()
             self.bomb = (self.x,self.y)
@@ -110,6 +112,7 @@ class Scen2Var3Character(CharacterEntity):
         # place a bomb
         clonewrld = SensedWorld.from_world(wrld)
         clonewrld.me(self).place_bomb()
+        clonewrld.me(self).move(0, 0)
         (newwrld, events) = clonewrld.next()
         nextworlds.append((newwrld,events,self.BOMB))
         return nextworlds
@@ -157,7 +160,7 @@ class Scen2Var3Character(CharacterEntity):
             return nextworlds
 
     def alpha_beta_search(self,wrld):
-        # Alpha beta functio
+        # Alpha beta function
         v = self.max_value(wrld,[],-99999,99999,self.max_depth)
         return v
 
@@ -276,6 +279,15 @@ class Scen2Var3Character(CharacterEntity):
         # Uses distance formula to calculate distance between position and exit
         distance = math.sqrt(math.pow(position[0]-self.exit[0],2) + math.pow(position[1]-self.exit[1],2))
 
+        # Looks for bomb
+        bombx = -1
+        bomby = -1
+        for x in range(0, wrld.width()):
+            for y in range(0, wrld.height()):
+                if wrld.bomb_at(x, y):
+                    bombx = x
+                    bomby = y
+
         bombdistance = 99999
         xbombdistance = 99999
         ybombdistance = 99999
@@ -283,10 +295,10 @@ class Scen2Var3Character(CharacterEntity):
         ymonsterdistance = 99999
         withinmonsterrange = False
         dangercost = 0
-        if not self.bomb == (-1,-1):
+        if not bombx == -1 and not bomby == -1 and not self.bomb == (-1,-1):
             # bombdistance = max(abs(self.bomb[0]-wrld.me(self).x),abs(self.bomb[1]-wrld.me(self).y)
-            xbombdistance = abs(self.bomb[0]-wrld.me(self).x)
-            ybombdistance = abs(self.bomb[1]-wrld.me(self).y)
+            xbombdistance = abs(bombx-wrld.me(self).x)
+            ybombdistance = abs(bomby-wrld.me(self).y)
         # If within range of a bomb, getting away from it should be top priority.
         if (xbombdistance <= self.BOMBRANGE and ybombdistance == 0) or (ybombdistance <= self.BOMBRANGE and xbombdistance == 0):
             bombdistance = max(xbombdistance,ybombdistance)
@@ -294,14 +306,17 @@ class Scen2Var3Character(CharacterEntity):
             dangercost = -9999*fraction
         # If any neighboring cell contains a monster, the character is considered within monster range
         # NOTE: Monsters can have a bigger detection range than 1. May need to account for this.
-        for dx in [-1,0,1]:
+        # TODO: Make this variable for when monsters have bigger detection ranges. Maybe use detection range + 1?
+        # Changed range to 2 to see if it helps the character escape danger at all.
+        for dx in [-2,-1,0,1,2]:
             # Avoid out-of-bound indexing
             if (wrld.me(self).x + dx >= 0) and (wrld.me(self).x + dx < wrld.width()):
-                for dy in [-1,0,1]:
+                for dy in [-2,-1,0,1,2]:
                     # Avoid out-of-bound indexing
                     if (wrld.me(self).y+dy >= 0) and (wrld.me(self).y+dy < wrld.height()) and wrld.monsters_at(wrld.me(self).x+dx,wrld.me(self).y+dy):
                             withinmonsterrange = True
         # Escaping monsters should be equal priority to escaping explosions
+        # However, the way this is implemented currently, escaping explosions is a greater priority.
         if withinmonsterrange:
             dangercost = dangercost - 9999
 
