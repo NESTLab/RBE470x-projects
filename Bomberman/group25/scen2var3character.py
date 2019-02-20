@@ -24,7 +24,7 @@ class Scen2Var3Character(CharacterEntity):
         self.tiles = {}
         self.max_depth = depth
         # List of cells already visited
-        self.visited = []
+        # self.visited = []
         self.foundexit = False
         self.exit = (0,0)
         # Location of bomb on board. (-1,-1) means there is no bomb.
@@ -38,7 +38,7 @@ class Scen2Var3Character(CharacterEntity):
         # Your code here
         #pass
         # Adds current position to cells already visited
-        self.visited.append((self.x, self.y))
+        # self.visited.append((self.x, self.y))
 
         # On the first move, searches through whole board to find exit
         # Would have to modify if we want to do last man standing, but I think we'd use a different map for that
@@ -116,25 +116,42 @@ class Scen2Var3Character(CharacterEntity):
 
     def get_nextworlds_monster(self,wrld):
         nextworlds=[]
+        monsterx = -1
+        monstery = -1
         # Adapted from example code on Github
+
+        # Checks that the map contains a monster. If it does, saves its position.
+        # TODO: In future versions of this (for variants 4 and 5), account for more than one monster.
+        for x in range(0, wrld.width()):
+            for y in range(0, wrld.height()):
+                if wrld.monsters_at(x, y):
+                    monsterx = x
+                    monstery = y
+                    # monster = clonewrld.monsters_at(x, y)
+                    # monster.move(dx, dy)
+        if monsterx == -1 and monstery == -1:
+            clonewrld = SensedWorld.from_world(wrld)
+            (newwrld, events) = clonewrld.next()
+            nextworlds.append((newwrld, events, (0, 0)))
+            return nextworlds
         # Loop through delta x
         for dx in [-1, 0, 1]:
             # Avoid out-of-bound indexing
-            if (self.monster[0] + dx >= 0) and (self.monster[0] + dx < wrld.width()):
+            if (monsterx + dx >= 0) and (monsterx + dx < wrld.width()):
                 # Loop through delta y
                 for dy in [-1, 0, 1]:
-                    # Originally wrapped below in a check that the position was not the character's current position
-                    # But in some cases, not moving at all may be necessary
-                    # Still can't stay still, however; move isn't counted as possible if a character is there
                     # Avoid out-of-bound indexing
-                    if (self.monster[1] + dy >= 0) and (self.monster[1] + dy < wrld.height()) and (
-                            wrld.empty_at(self.monster[0] + dx, self.monster[1] + dy) or wrld.characters_at(self.monster[0] + dx, self.monster[1] + dy)):
+                    if (monstery + dy >= 0) and (monstery + dy < wrld.height()) and (
+                            wrld.empty_at(monsterx + dx, monstery + dy) or wrld.characters_at(monsterx + dx, monstery + dy)):
 
-                        # TODO: Fix bug where it tries to get a monster from a space where there isn't one.
-                        clonewrld = SensedWorld.from_world(wrld)
+                        """
                         if clonewrld.monsters_at(self.monster[0],self.monster[1]):
                             monster = clonewrld.monsters_at(self.monster[0],self.monster[1])[0]
                             monster.move(dx, dy)
+                        """
+                        clonewrld = SensedWorld.from_world(wrld)
+                        monster = clonewrld.monsters_at(monsterx, monstery)[0]
+                        monster.move(dx, dy)
                         (newwrld, events) = clonewrld.next()
                         nextworlds.append((newwrld, events, (dx, dy)))
             return nextworlds

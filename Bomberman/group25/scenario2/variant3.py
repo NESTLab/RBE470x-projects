@@ -26,7 +26,7 @@ g.add_monster(SelfPreservingMonster("monster", # name
 g.add_character(Scen2Var3Character("me", # name
                               "C",  # avatar
                               0, 0,  # position
-                              2 # depth
+                              3 # depth
 ))
 
 # Run!
