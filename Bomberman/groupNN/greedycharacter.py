@@ -30,4 +30,4 @@ class GreedyCharacter(CharacterEntity):
         #move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
-        self.place_bomb()
+        
