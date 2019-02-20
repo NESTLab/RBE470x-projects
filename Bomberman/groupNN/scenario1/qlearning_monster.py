@@ -11,9 +11,9 @@ sys.path.insert(1, '../groupNN')
 from qlearning_character import QCharacter
 from monsters.stupid_monster import StupidMonster
 
-qtable = {"q" : 1}
+qtable = {}
 
-for i in range(0, 2):
+for i in range(0, 11):
     # Create the game
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("monster",  # name

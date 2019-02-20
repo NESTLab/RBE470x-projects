@@ -10,7 +10,7 @@ from game import Game
 sys.path.insert(1, '../groupNN')
 from qlearning_character import QCharacter
 
-qtable = {"q" : 1}
+qtable = {}
 
 for i in range(0, 2):
     # Create the game

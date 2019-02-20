@@ -1,3 +1,5 @@
+# THIS IS A MODIFIED VERSION OF GAME that allows for auto-playing.
+
 from real_world import RealWorld
 from events import Event
 import colorama
@@ -70,7 +72,6 @@ class Game:
         self.explosion_sprite = pygame.transform.scale(self.explosion_sprite, rect)
 
     def display_gui(self):
-        pygame.event.clear()
         for x in range(self.world.width()):
             for y in range(self.world.height()):
                 top = self.block_height * y
@@ -91,20 +92,26 @@ class Game:
                     self.screen.blit(self.bomb_sprite, rect)
         pygame.display.flip()
 
-    def go(self):
+    def go(self, wait=0):
+        """ Main game loop. """
+
+        if wait is 0:
+            def step():
+                input("Press Enter to continue...")
+        else:
+            def step():
+                pygame.time.wait(abs(wait))
+
         colorama.init(autoreset=True)
         self.display_gui()
         self.draw()
         while not self.done():
             self.display_gui()
-            self.step()
+            (self.world, self.events) = self.world.next()
+            step()
             self.display_gui()
             self.draw()
         colorama.deinit()
-
-    def step(self):
-        (self.world, self.events) = self.world.next()
-        input("Press Enter to continue...")
 
     ###################
     # Private methods #
@@ -114,6 +121,10 @@ class Game:
         self.world.printit()
 
     def done(self):
+        # User Exit
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
         # Time's up
         if self.world.time <= 0:
             return True
