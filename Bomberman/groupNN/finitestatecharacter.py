@@ -1,5 +1,6 @@
 # This is necessary to find the main code
 import sys
+import pathfinding as greedyBFS
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -23,12 +24,15 @@ class FiniteStateCharacter(CharacterEntity):
                 if wrld.exit_at(i, j):
                     exit = [i, j]
 
+        #get current position
+        meX = wrld.me(self).x
+        meY = wrld.me(self).y
 
         # A list of objects within the perimeter of 2 spaces
-        closeObjects = self.checkPerimeter2(wrld)
+        closeObjects = self.checkPerimeter2(wrld, meX, meY)
         # True if there is an impassable wall within 1 space,
         # False otherwise
-        isThereWall = self.impassableWall(wrld)
+        isThereWall = self.impassableWall(wrld, meX, meY)
         # True if there is at least 1 bomb within 2 steps
         isThereBomb = isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
@@ -38,37 +42,37 @@ class FiniteStateCharacter(CharacterEntity):
 
         if not closeObjects and not isThereWall:
             # Character is alone and able to push forward unimpeded by wall
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif not closeObjects and isThereWall:
             # Character is alone but there is a wall impeding movement
-            self.greedy(wlrd, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster and isThereExplosion:
             # There at least 1 bomb, 1 monster, and 1 explosion within 2 steps
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster:
             # There is both at least 1 bomb and 1 monster within 2 steps
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereExplosion:
             # There is both at least 1 bomb and 1 explosion within 2 steps
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif isThereExplosion and isThereMonster:
             # There is both at least 1 explosion and 1 monster within 2 steps
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif isThereMonster:
             # There is at least 1 monster within 2 steps
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif isThereBomb:
             # There is at least 1 bomb within 2 steps
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         elif isThereExplosion:
             # There is at least 1 explosion within 2 steps
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
         else:
             # there should be nothing left, if anything gets to this point,
             # fix it
-            self.greedy(wrld, exit)
+            self.greedy(wrld, exit, meX, meY)
 
-    def checkPerimeter2(self, wrld):
+    def checkPerimeter2(self, wrld, meX, meY):
         # Check the perimeter around the character at a depth of 2 for any other
         # objects, return a list of tuples [typeNum, x, y] that represents anything
         # found
@@ -84,13 +88,9 @@ class FiniteStateCharacter(CharacterEntity):
         # The list to be returned
         closeObjects = {}
 
-        # Get the position of the character
-        meX = wrld.me(self).x
-        meY = wrld.me(self).y
-
         # Go through each space in the box around the character
-        for i in range -2 to 2:
-            for j in range -2 to 2:
+        for i in range(-2,2):
+            for j in range(-2,2):
                 # if this is not the space the character is in
                 if i != 0 and j != 0:
                     # if the postition is in world bounds
@@ -110,18 +110,38 @@ class FiniteStateCharacter(CharacterEntity):
 
         return closeObjects
 
-    def impassableWall(self, wrld):
+    def impassableWall(self, wrld, meX, meY):
         # Check to see if there is an impassable wall a step ahead of the
         # character
+
+        # Note: checks for horizontal wall below or vertical wall to the right
+        # but can be edited to check less or more
+
+        # Note: can also be changed to be closer or farther away from wall
+
         isThereWall = False
 
-        # Note: can be changed to be closer or farther away from wall
+        # Check all positions from left to right in 'front' of the character
+        for i in range(wrld.width()):
+            isThereWall = isThereWall or wrld.wall_at(i, meY + 1)
+
+        # Check all positions from top to bottom to the 'right' of the character
+        for j in range(wrld.height()):
+            isThereWall = isThereWall or wrld.wall_at(meX + 1, j)
+
         return isThereWall
 
     def isThereBomb(closeObjects):
         # Use the established list of objects within the perimeter to see if
         # there is a bomb nearby
         isThereBomb = False
+
+        # Extract all the bombs
+        bmbs = [item for item in closeObjects if item[0] == 1]
+
+        # If there are bombs, set isThereBomb to True
+        if len(bmbs):
+            isThereBomb = True
 
         return isThereBomb
 
@@ -130,14 +150,47 @@ class FiniteStateCharacter(CharacterEntity):
         # there is a wall nearby
         isThereWall = False
 
+        # Extract all the bombs
+        wlls = [item for item in closeObjects if item[0] == 0]
+
+        # If there are bombs, set isThereWall to True
+        if len(wlls):
+            isThereWall = True
+
         return isThereWall
+
+    def isThereMonster(closeObjects):
+        # Use the established list of objects within the perimeter to see if
+        # there is a wall nearby
+        isThereMonster = False
+
+        # Extract all the bombs
+        mnstrs = [item for item in closeObjects if item[0] == 2]
+
+        # If there are bombs, set isThereMonster to True
+        if len(mnstrs):
+            isThereMonster = True
+
+        return isThereMonster
 
     def isThereExplosion(closeObjects):
         # Use the established list of objects within the perimeter to see if
         # there is an explosion nearby
         isThereExplosion = False
 
+        # Extract all the bombs
+        exps = [item for item in closeObjects if item[0] == 3]
+
+        # If there are bombs, set isThereExplosion to True
+        if len(exps):
+            isThereExplosion = True
+
         return isThereExplosion
 
-    def greedy(self, wrld, exit):
+    def greedy(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
+        # Get the [x,y] coords of the next cell to go to
+        goTo = greedyBFS.getNextStep([meX, meY], exit, wrld)
+
+        #move in direction to get to x,y found in prev step
+        self.move(-meX + goTo[0], -meY + goTo[1])
