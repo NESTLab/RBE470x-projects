@@ -11,9 +11,8 @@ class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
         # Your code here
-        self.move(1, 1)
-        self.get_exit(wrld)
-        self.get_my_location(wrld)
+        exit = self.get_exit(wrld)
+        start = self.get_my_location(wrld)
 
     @staticmethod
     def get_exit(wrld):
@@ -39,28 +38,26 @@ class TestCharacter(CharacterEntity):
     def get_neighbors(self, start, wrld):
         x = start[0]
         y = start[1]
-        neighbors = [(x+1, y), (x, y-1), (x-1, y), (x, y+1)]
+        neighbors = [(x+1, y), (x, y-1), (x-1, y), (x, y+1), (x+1, y+1),
+                     (x+1, y-1), (x-1, y+1), (x-1, y-1)]
         result = []
         # check that neighbors are inside wrld bounds and are not walls
         for neighbor in neighbors:
-            if neighbor[0] >= 0 and neighbor < wrld.height() and neighbor[1] >= 0 and neighbor[1] < wrld.width():
-                if wrld.wall_at(neighbor[0], neighbor[1]):
-                    result.append(neighbor)
+            if 0 <= neighbor[0] < wrld.height() and 0 <= neighbor[1] < wrld.width():
+                result.append(neighbor)
         return result
 
-    def get_my_location(self, wrld):
+    @staticmethod
+    def get_my_location(wrld):
         # Find the exit to use for heuristic A*
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
                 if wrld.characters_at(x, y):
-                    print(x, y)
                     return x, y
         pass
 
     def best_move(self, wrld):
         pass
-
-
 
     # Determining the heuristic value, being Euclidean Distance
     @staticmethod
@@ -75,27 +72,4 @@ class TestCharacter(CharacterEntity):
         return value
 
     def a_star(self, wrld, start, goal):
-        frontier = heapq() # Priority Queue - How is this implemented?? How to check the value of the nodes. Value comes from optimal path to reach + heuristic
-        frontier.push(start, 0) # what is this zero??
-        came_from = {}
-        cumulative_cost = {}
-        came_from[start] = None
-        cumulative_cost[start] = 0
 
-        while not frontier.empty():
-            current = frontier.pop()
-
-            if current == goal:
-                break
-
-            neighbors = self.get_neighbors(start, wrld)
-
-            for neighbor in graphNEIGHBORS(current):
-                cost = cumulative_cost[current] + COST[current, neighbor]
-                if neighbor not in cumulative_cost or cost < cumulative_cost[neighbor]:
-                    cumulative_cost[neighbor] = cost
-                    priority = cost + self.heuristic(neighbor, goal)
-                    frontier.push(neighbor, priority)
-                    came_from[neighbor] = current
-
-        return came_from, cumulative_cost
