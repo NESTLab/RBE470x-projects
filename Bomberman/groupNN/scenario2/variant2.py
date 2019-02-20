@@ -10,10 +10,10 @@ from monsters.stupid_monster import StupidMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
-from testcharacter import TestCharacter
+from greedycharacterS2 import GreedyCharacter
 
 # Create the game
-random.seed(123) # TODO Change this if you want different random choices
+random.seed(1) # TODO Change this if you want different random choices
 g = Game.fromfile('map.txt')
 g.add_monster(StupidMonster("monster", # name
                             "M",       # avatar
@@ -21,7 +21,7 @@ g.add_monster(StupidMonster("monster", # name
 ))
 
 # TODO Add your character
-g.add_character(TestCharacter("me", # name
+g.add_character(GreedyCharacter("me", # name
                               "C",  # avatar
                               0, 0  # position
 ))
