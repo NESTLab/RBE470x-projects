@@ -10,8 +10,12 @@ init(autoreset=True)
 
 class TestCharacter(CharacterEntity):
     def do(self, wrld):
-        self.reset_cells(wrld)
-        # A*
+        path = self.aStar(wrld, (7, 18))
+        move = path[len(path) - 1]
+        self.move(move[0] - self.x, move[1] - self.y)
+        pass
+
+    def aStar(self, wrld, goal):
         frontier = []
         frontier.append(((self.x, self.y), 0))
         came_from = {}
@@ -23,24 +27,18 @@ class TestCharacter(CharacterEntity):
         print("SELFY " + str(self.y))
 
         monsters = []
-        ex = (7, 18)
 
-        # Iterates through board to find monsters and exit
+        # Iterates through board to find monsters and exit85
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
                 if wrld.monsters_at(x, y):  # Finds all the monsters in the board
                     monsters.append((x, y))
-                if wrld.exit_at(x, y):  # Just in case exit is not where we expect it to be in the bottom right corner
-                    ex = (x, y)
-
-        for t in monsters:
-            self.set_cell_color(t[0], t[1], Fore.RED + Back.RED)
 
         while not len(frontier) == 0:
             frontier.sort(key=lambda tup: tup[1])  # check that
             current = frontier.pop(0)
             self.set_cell_color(current[0][0], current[0][1], Fore.RESET + Back.RESET)  # resets color
-            if (current[0][0], current[0][1]) == ex:
+            if (current[0][0], current[0][1]) == goal:
                 break
             for next in get_adjacent(current[0], wrld):
                 if wrld.wall_at(next[0], next[1]):
@@ -53,12 +51,10 @@ class TestCharacter(CharacterEntity):
                     new_cost = self.cost_to(current[0], next) + cost_so_far[current[0]]
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    frontier.append((next, new_cost + self.manhattan_distance(next[0], next[1], ex[0], ex[1])))
+                    frontier.append((next, new_cost + self.manhattan_distance(next[0], next[1], goal[0], goal[1])))
                     came_from[next] = current[0]
 
-        self.printOurWorld(wrld, cost_so_far)
-
-        cursor = ex
+        cursor = goal
         path = []
         while not cursor == (self.x, self.y):
             self.set_cell_color(cursor[0], cursor[1], Fore.RED + Back.GREEN)
@@ -73,12 +69,10 @@ class TestCharacter(CharacterEntity):
         print("PATH: ")
         print(path)
 
-        if not len(path) == 0:
-            move = path[len(path) - 1]
+        return path
 
-        # carries momentum? mayhaps not the best
-        self.move(move[0] - self.x, move[1] - self.y)
-        pass
+    def eval(self, state, action):
+
 
     def calculateMove(self, wrld):
         xcoord = self.x

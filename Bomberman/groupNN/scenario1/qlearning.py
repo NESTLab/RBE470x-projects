@@ -8,20 +8,21 @@ from game import Game
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
-from testcharacter import TestCharacter
+from qlearning_character import QCharacter
 
-qtable = []
+qtable = {"q" : 1}
 
 for i in range(0, 2):
     # Create the game
     g = Game.fromfile('map.txt')
     # TODO Add your character
-    g.add_character(TestCharacter("me", # name
-                                    "C",  # avatar
-                                    0, 0  # position
+    g.add_character(QCharacter("Q", # name
+                                    "Q",  # avatar
+                                    0, 0,  # position
+                                    qtable  # starting Q table
                                     ))
     # Run!
     g.go()
-    qtable.append(i)
+
 
 print(qtable)
