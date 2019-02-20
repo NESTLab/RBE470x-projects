@@ -34,11 +34,11 @@ class FiniteStateCharacter(CharacterEntity):
         # False otherwise
         isThereWall = self.impassableWall(wrld, meX, meY)
         # True if there is at least 1 bomb within 2 steps
-        isThereBomb = isThereBomb(closeObjects)
+        isThereBomb = self.isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
-        isThereMonster = isThereMonster(closeObjects)
+        isThereMonster = self.isThereMonster(closeObjects)
         # True if there is at least 1 explosion within 2 steps
-        isThereExplosion = isThereExplosion(closeObjects)
+        isThereExplosion = self.isThereExplosion(closeObjects)
 
         if not closeObjects and not isThereWall:
             # Character is alone and able to push forward unimpeded by wall
@@ -74,7 +74,7 @@ class FiniteStateCharacter(CharacterEntity):
 
     def checkPerimeter2(self, wrld, meX, meY):
         # Check the perimeter around the character at a depth of 2 for any other
-        # objects, return a list of tuples [typeNum, x, y] that represents anything
+        # objects, return a list of lists [typeNum, x, y] that represents anything
         # found
 
         # TypeNum represents each type of object as follows:
@@ -86,7 +86,7 @@ class FiniteStateCharacter(CharacterEntity):
         # Does not currently detect other characters or exit, but can be made to
 
         # The list to be returned
-        closeObjects = {}
+        closeObjects = []
 
         # Go through each space in the box around the character
         for i in range(-2,2):
@@ -94,7 +94,7 @@ class FiniteStateCharacter(CharacterEntity):
                 # if this is not the space the character is in
                 if i != 0 and j != 0:
                     # if the postition is in world bounds
-                    if not meX + i >= width or meX + i <= 0 or meY + j >= height or meY + j <= 0:
+                    if not meX + i >= wrld.width() or meX + i <= 0 or meY + j >= wrld.height() or meY + j <= 0:
                         # check if there is a wall there and append if so
                         if wrld.wall_at(meX + i, meY + j):
                             closeObjects.append([0, meX + i, meY + j])
@@ -121,17 +121,19 @@ class FiniteStateCharacter(CharacterEntity):
 
         isThereWall = False
 
-        # Check all positions from left to right in 'front' of the character
-        for i in range(wrld.width()):
-            isThereWall = isThereWall or wrld.wall_at(i, meY + 1)
+        # Check all positions from left to right in 'front' of the character (if possible)
+        if meY < wrld.height() - 1:
+            for i in range(wrld.width()):
+                isThereWall = isThereWall or wrld.wall_at(i, meY + 1)
 
-        # Check all positions from top to bottom to the 'right' of the character
-        for j in range(wrld.height()):
-            isThereWall = isThereWall or wrld.wall_at(meX + 1, j)
+        # Check all positions from top to bottom to the 'right' of the character (if possible)
+        if meX < wrld.width() - 1:
+            for j in range(wrld.height()):
+                isThereWall = isThereWall or wrld.wall_at(meX + 1, j)
 
         return isThereWall
 
-    def isThereBomb(closeObjects):
+    def isThereBomb(self, closeObjects):
         # Use the established list of objects within the perimeter to see if
         # there is a bomb nearby
         isThereBomb = False
@@ -145,7 +147,7 @@ class FiniteStateCharacter(CharacterEntity):
 
         return isThereBomb
 
-    def isThereWall(closeObjects):
+    def isThereWall(self, closeObjects):
         # Use the established list of objects within the perimeter to see if
         # there is a wall nearby
         isThereWall = False
@@ -159,7 +161,7 @@ class FiniteStateCharacter(CharacterEntity):
 
         return isThereWall
 
-    def isThereMonster(closeObjects):
+    def isThereMonster(self, closeObjects):
         # Use the established list of objects within the perimeter to see if
         # there is a wall nearby
         isThereMonster = False
@@ -173,7 +175,7 @@ class FiniteStateCharacter(CharacterEntity):
 
         return isThereMonster
 
-    def isThereExplosion(closeObjects):
+    def isThereExplosion(self, closeObjects):
         # Use the established list of objects within the perimeter to see if
         # there is an explosion nearby
         isThereExplosion = False
