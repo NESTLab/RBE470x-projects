@@ -7,6 +7,8 @@ sys.path.insert(1, '..')
 import random
 from game import Game
 from monsters.selfpreserving_monster import SelfPreservingMonster
+from scen2var3character import Scen2Var3Character
+
 
 # TODO This is your code!
 sys.path.insert(1, '../group25')
@@ -22,9 +24,10 @@ g.add_monster(SelfPreservingMonster("monster", # name
 ))
 
 # TODO Add your character
-g.add_character(TestCharacter("me", # name
+g.add_character(Scen2Var3Character("me", # name
                               "C",  # avatar
-                              0, 0  # position
+                              0, 0,  # position
+                              3 # depth
 ))
 
 # Run!

@@ -11,9 +11,6 @@ import math
 class Scen2Var2Character(CharacterEntity):
 
     BOMB = 0
-    # Not sure if hard coding in the bomb range would be considered cheating
-    # Also, constant or variable? Does it matter?
-    BOMBRANGE = 4
 
     def __init__(self, name, avatar, x, y, depth):
         AIEntity.__init__(self, name, avatar)
@@ -229,9 +226,9 @@ class Scen2Var2Character(CharacterEntity):
             xbombdistance = abs(self.bomb[0]-wrld.me(self).x)
             ybombdistance = abs(self.bomb[1]-wrld.me(self).y)
         # If within range of a bomb, getting away from it should be top priority.
-        if (xbombdistance <= self.BOMBRANGE and ybombdistance == 0) or (ybombdistance <= self.BOMBRANGE and xbombdistance == 0):
+        if (xbombdistance <= wrld.expl_range and ybombdistance == 0) or (ybombdistance <= wrld.expl_range and xbombdistance == 0):
             bombdistance = max(xbombdistance,ybombdistance)
-            fraction = self.BOMBRANGE + 1 - bombdistance
+            fraction = wrld.expl_range + 1 - bombdistance
             dangercost = -9999*fraction
         # If any neighboring cell contains a monster, the character is considered within monster range
         # NOTE: Monsters can have a bigger detection range than 1. May need to account for this.
