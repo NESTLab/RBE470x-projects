@@ -40,7 +40,7 @@ class TestCharacter(CharacterEntity):
                     break
 
         self.prev_state = self.state
-        if self.get_distance_to_exit((self.x, self.y), (monster[0], monster[1])) < 6:
+        if self.get_distance_to_exit((self.x, self.y), (monster[0], monster[1])) < 4:
             self.state = MONSTER
         else:
             self.state = NORMAL
@@ -48,6 +48,7 @@ class TestCharacter(CharacterEntity):
         frontier = PQueue()
         frontier.put((self.x, self.y), 0)
         cost_so_far = {(self.x, self.y): 0}
+        print(self.state)
 
         if self.state == NORMAL:
             if self.x == self.start[0] and self.y == self.start[1] or self.state is not NORMAL:
@@ -167,7 +168,7 @@ class TestCharacter(CharacterEntity):
         return array
 
     def get_distance_to_exit(self, position, exit_position):
-        returnmath.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
+        return math.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
                         (position[0] - exit_position[0]) * (position[0] - exit_position[0]))
 
 
