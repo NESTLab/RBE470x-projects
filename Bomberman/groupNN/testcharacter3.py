@@ -20,6 +20,7 @@ class TestCharacter(CharacterEntity):
         self.came_from = {self.start: None}
         self.state = NORMAL
         self.prev_state = None
+        self.monster_dist = 0
 
     def do(self, wrld):
         if self.exit_position is None:
@@ -40,7 +41,9 @@ class TestCharacter(CharacterEntity):
                     break
 
         self.prev_state = self.state
-        if self.get_distance_to_exit((self.x, self.y), (monster[0], monster[1])) < 4:
+        self.monster_dist = self.get_distance_between((self.x, self.y), (monster[0], monster[1]))
+        if self.monster_dist < 5:
+            print()
             self.state = MONSTER
         else:
             self.state = NORMAL
@@ -73,7 +76,7 @@ class TestCharacter(CharacterEntity):
                 new_cost = cost_so_far[(self.x, self.y)] + 1 - expected
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    priority = new_cost + (20 - self.get_distance_to_exit(next, self.exit_position))
+                    priority = new_cost + (20 - self.get_distance_between(next, self.exit_position))
                     frontier.put((next[0], next[1]), priority)
                     self.came_from[next] = current
 
@@ -92,7 +95,7 @@ class TestCharacter(CharacterEntity):
         if (char_x, char_y) == (monster_x, monster_y):
             return -100000
         elif depth > 0:
-            return -1 * self.get_distance_to_exit((char_x, char_y), (monster_x, monster_y))
+            return -1 * self.get_distance_between((char_x, char_y), (monster_x, monster_y))
         value = -1000000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
@@ -125,9 +128,9 @@ class TestCharacter(CharacterEntity):
                                 array.append((x + dx, y + dy))
         return array
 
-    def get_distance_to_exit(self, position, exit_position):
-        return math.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
-                        (position[0] - exit_position[0]) * (position[0] - exit_position[0]))
+    def get_distance_between(self, position, position2):
+        return math.sqrt((position[1] - position2[1]) * (position[1] - position2[1]) +
+                         (position[0] - position2[0]) * (position[0] - position2[0]))
 
 
 class PQueue:
