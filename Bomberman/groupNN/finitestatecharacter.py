@@ -1,6 +1,7 @@
 # This is necessary to find the main code
 import sys
 import pathfinding as greedyBFS
+import expectimax as EM
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -36,17 +37,21 @@ class FiniteStateCharacter(CharacterEntity):
         # True if there is at least 1 bomb within 2 steps
         isThereBomb = self.isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
-        isThereMonster = self.isThereMonster(closeObjects)
+        m = next(iter(wrld.monsters.values()))[0]
+        if self.manhattandist([meX,meY], [m.x,m.y]) <= 5:
+            isThereMonster = True#self.isThereMonster(closeObjects)
+        else:
+            isThereMonster = False
         # True if there is at least 1 explosion within 2 steps
         isThereExplosion = self.isThereExplosion(closeObjects)
 
-        if not closeObjects and not isThereWall:
-            # Character is alone and able to push forward unimpeded by wall
-            self.greedy(wrld, exit, meX, meY)
-        elif not closeObjects and isThereWall:
-            # Character is alone but there is a wall impeding movement
-            self.greedy(wrld, exit, meX, meY)
-        elif isThereBomb and isThereMonster and isThereExplosion:
+        # if not closeObjects and not isThereWall:
+        #     # Character is alone and able to push forward unimpeded by wall
+        #     self.greedy(wrld, exit, meX, meY)
+        # elif not closeObjects and isThereWall:
+        #     # Character is alone but there is a wall impeding movement
+        #     self.greedy(wrld, exit, meX, meY)
+        if isThereBomb and isThereMonster and isThereExplosion:
             # There at least 1 bomb, 1 monster, and 1 explosion within 2 steps
             self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster:
@@ -60,7 +65,7 @@ class FiniteStateCharacter(CharacterEntity):
             self.greedy(wrld, exit, meX, meY)
         elif isThereMonster:
             # There is at least 1 monster within 2 steps
-            self.greedy(wrld, exit, meX, meY)
+            self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
             # There is at least 1 bomb within 2 steps
             self.greedy(wrld, exit, meX, meY)
@@ -71,6 +76,9 @@ class FiniteStateCharacter(CharacterEntity):
             # there should be nothing left, if anything gets to this point,
             # fix it
             self.greedy(wrld, exit, meX, meY)
+
+    def manhattandist(self, start, end):
+        return max(abs(start[0] - end[0]), abs(start[1] - end[1]))
 
     def checkPerimeter2(self, wrld, meX, meY):
         # Check the perimeter around the character at a depth of 2 for any other
@@ -188,6 +196,15 @@ class FiniteStateCharacter(CharacterEntity):
             isThereExplosion = True
 
         return isThereExplosion
+
+    def expectimax(self, wrld, exit, meX, meY):
+        # Complete the greedy algorithm
+        # Get the [x,y] coords of the next cell to go to
+        goTo = EM.exptectiMax(wrld, 2)
+
+        # move in direction to get to x,y found in prev step
+        self.move(-meX + goTo[0], -meY + goTo[1])
+
 
     def greedy(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm

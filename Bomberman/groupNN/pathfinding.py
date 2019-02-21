@@ -14,9 +14,9 @@ class gridcell():
 #Given a start tuple [x,y], end tuple [x,y] and the world
 #returns a tuple [x,y] that is the next position to move to using the current algorithm 
 #Currently GREEDYBFS
-def getNextStep(start, end, wrld, w):
+def getNextStep(start, end, wrld):
     #Call pathing algorithm, returns Gridcell with complete path to be reconstructed
-    pathNode = greedyBFS(start, end, wrld,w)
+    pathNode = greedyBFS(start, end, wrld, 1)
 
     prev = pathNode
 

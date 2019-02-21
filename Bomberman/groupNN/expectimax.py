@@ -1,11 +1,14 @@
 import sys
+import math
 
 def cost(wrld):
     m = next(iter(wrld.monsters.values()))[0]
     try:
         c = next(iter(wrld.characters.values()))[0]
     except IndexError:
-        return  -100
+        return -100
+    except StopIteration:
+        return 1
 
     exit = [7, 18]#wildly inefficent
     # get current position
@@ -18,15 +21,16 @@ def cost(wrld):
     #             exit = [i, j]
     #if at goal, return high reward
     if c.x == exit[0] and c.y == exit[1]:
-        return 10
+        return 1
 
     #if not at goal, prioritize getting to the goal linearly and staying away from the monster exponentially,
     #monster only has real effect when 3 away (may need to make 4)
-    cost = -manhattandist([c.x,  c.y], [exit[0],exit[1]]) - 5**(3-manhattandist( [c.x,  c.y], [m.x,m.y]))
+    # cost = -manhattandist([c.x,  c.y], [exit[0],exit[1]]) - 10**(3-manhattandist( [c.x,  c.y], [m.x,m.y]))
+    cost = - 5 ** (4 - manhattandist([c.x, c.y], [m.x, m.y])) -5**(8-len(find_actions(wrld, c.x, c.y)))
     return cost
 
 def manhattandist(start, end):
-    return abs(start[0] - end[0]) + abs(start[1] - end[1])
+    return max(abs(start[0] - end[0]), abs(start[1] - end[1]))
 
 def exptectiMax(wrld, Depth):
 
@@ -59,6 +63,8 @@ def expVal(wrld, Depth, dM):
         c = next(iter(wrld.characters.values()))[0]
     except IndexError:
         Dead = True
+    except StopIteration:
+        Dead = True
     if Depth >= dM or Dead:
         v = cost(wrld)
         return v
@@ -87,6 +93,8 @@ def maxValue(wrld, Depth, dM):
     try:
         c = next(iter(wrld.characters.values()))[0]
     except IndexError:
+        Dead = True
+    except StopIteration:
         Dead = True
 
     if Depth >= dM or Dead:
