@@ -67,13 +67,13 @@ class TestCharacter(CharacterEntity):
 
             possible_moves = self.get_possible_moves(current[0], current[1], wrld)
             for next in possible_moves:
-                new_cost = cost_so_far[(self.x, self.y)] + 1
+                expected = 0
+                if self.state == MONSTER:
+                    expected = self.exp_value(wrld, self.exit_position, next[0], next[1], monster[0], monster[1], 0)
+                new_cost = cost_so_far[(self.x, self.y)] + 1 - expected
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    expected = 0
-                    if self.state == MONSTER:
-                        expected = self.exp_value(wrld, self.exit_position, next[0], next[1], monster[0], monster[1], 0)
-                    priority = new_cost + (20 - self.get_distance_to_exit(next, self.exit_position)) + expected
+                    priority = new_cost + (20 - self.get_distance_to_exit(next, self.exit_position))
                     frontier.put((next[0], next[1]), priority)
                     self.came_from[next] = current
 
@@ -91,8 +91,8 @@ class TestCharacter(CharacterEntity):
     def max_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
         if (char_x, char_y) == (monster_x, monster_y):
             return -100000
-        elif depth > 1:
-            return 0
+        elif depth > 0:
+            return -1 * self.get_distance_to_exit((char_x, char_y), (monster_x, monster_y))
         value = -1000000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
