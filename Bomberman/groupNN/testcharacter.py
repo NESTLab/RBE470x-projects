@@ -17,44 +17,61 @@ class TestCharacter(CharacterEntity):
         goal = self.get_exit(wrld)
         start = self.get_my_location(wrld)
 
-        nextMove = self.a_star(wrld,start,goal) # returns (x,y) coordinate of next move
+        nextMove = self.a_star(wrld, start, goal) # returns (x,y) coordinate of next move
+        print("my start move is:")
+        print(start)
         print("my next move is:")
         print(nextMove)
         dx = nextMove[0] - start[0]
         dy = nextMove[1] - start[1]
         print("my dx is {} and my dy is: {}".format(dx,dy))
-        if wrld.wall_at(nextMove[0], nextMove[1]):
-            # do stuff with wall
-            # put  - 11 ticks to explode
-            # move diagonally
+        try:
+            if wrld.wall_at(nextMove[0], nextMove[1]):
+                # do stuff with wall
+                # put  - 11 ticks to explode
+                # move diagonally
 
-            wallNeighbors = []
-            if wrld.wall_at(start[0] +1, start[1]):
-                if wrld.wall_at(start[0], start[1] + 1):
-                    self.place_bomb()
+                # wallNeighbors = []
+                # if wrld.wall_at(start[0] +1, start[1]):
+                #     if wrld.wall_at(start[0], start[1] + 1):
+                #         self.place_bomb()
+                #         self.move(-1, -1)
+                #         #move back
+                #     else:
+                #         self.move(0, 1)
+                #         self.place_bomb()
+                #         self.move(0, -1)
+                # else:
+                #     self.move(1,0)
+                #     self.place_bomb()
+                #     self.move(-1, 0)
+
+                # start = (start[0] + dx, start[1] + dy)
+
+                if (nextMove[0] + 1) >= wrld.width() and wrld.bomb_at(start[0], start[1]):
                     self.move(-1, -1)
-                    #move back
-                else:
-                    self.move(0, 1)
-                    self.place_bomb()
-                    self.move(0, -1)
-            else:
-                self.move(1,0)
+
+                if not (nextMove[0] + 1) >= wrld.width() and wrld.bomb_at(start[0], start[1]):
+                    self.move(1, -1)
+
                 self.place_bomb()
-                self.move(-1, 0)
+                pass
 
-            self.place_bomb()
-            self.move(-1,-1)
-            start = (start[0]+dx,start[1]+dy)
-            print('a')
-        else:
-            # there is no wall
-            if wrld.bomb_at(nextMove[0], nextMove[1]) or wrld.explosion_at(nextMove[0], nextMove[1]):
-                self.move(0, 0)
+                print('a')
             else:
-                self.move(dx, dy)
-                start = (start[0] + dx, start[1] + dy)
+                # there is no wall
+                if wrld.bomb_at(nextMove[0], nextMove[1]) or wrld.explosion_at(nextMove[0], nextMove[1]):
+                    self.move(0, 0)
+                else:
+                    start = (start[0] + dx, start[1] + dy)
+                    self.move(dx, dy)
 
+            print(start[0], start[1], nextMove[0], nextMove[1])
+        except IndexError:
+            pass
+
+    def check_monster(self, start, radius):
+        pass
 
     @staticmethod
     def get_exit(wrld):
@@ -62,7 +79,6 @@ class TestCharacter(CharacterEntity):
         for x in range(wrld.width()):
             for y in range(wrld.height()):
                 if wrld.exit_at(x, y):
-                    print(x, y)
                     return x, y
         pass
 
@@ -81,15 +97,16 @@ class TestCharacter(CharacterEntity):
         x = start[0]
         y = start[1]
         neighbors = [(x+1, y), (x, y-1), (x-1, y), (x, y+1),
-                     (x+1 , y+1), (x+1, y-1), (x-1, y+1), (x-1, y-1)]
+                     (x+1, y+1), (x+1, y-1), (x-1, y+1), (x-1, y-1)]
         result = []
         # check that neighbors are inside wrld bounds and are not walls
         for neighbor in neighbors:
-            if 0 <= neighbor[0] < wrld.height() and 0 <= neighbor[1] < wrld.width():
+            if 0 <= neighbor[0] < wrld.width() and 0 <= neighbor[1] < wrld.height():
                 result.append(neighbor)
         return result
 
-    def get_my_location(self, wrld):
+    @staticmethod
+    def get_my_location(wrld):
         # Find the exit to use for heuristic A*
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
@@ -119,6 +136,5 @@ class TestCharacter(CharacterEntity):
             neighbors_values.append((neighbor[0], neighbor[1], self.heuristic(neighbor, goal)))
         neighbors_values.sort(key=operator.itemgetter(2))
         print(neighbors_values)
-        # return came_from, cumulative_cost
-        # return 2,2
+
         return neighbors_values[0][0], neighbors_values[0][1]
