@@ -11,12 +11,64 @@ import queue
 
 class TestCharacter(CharacterEntity):
 
+    # def expectimax(self, wrld):
+    #     exit_position = None
+    #     monster = None
+    #     for x in range(0, wrld.width()):
+    #         for y in range(0, wrld.height()):
+    #             if wrld.exit_at(x, y):
+    #                 exit_position = (x, y)
+    #             if wrld.monsters_at(x, y):
+    #                 monster = (x, y)
+    #             if exit_position is not None and monster is not None:
+    #                 break
+    #         if exit_position is not None and monster is not None:
+    #             break
+    #
+    #     moves = {}
+    #     for move in self.get_possible_moves(self.x, self.y, wrld):
+    #         moves[(move[0], move[1])] = self.exp_value(wrld, exit_position, move[0], move[1], monster[0], monster[1], 0)
+    #     # for move, value in moves.items():
+    #         # print("POSITION:", move, "value:", value)
+    #     best_move = max(moves, key=moves.get)
+    #     return (best_move[0] - self.x, best_move[1] - self.y)
+
+    def exp_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
+        if (char_x, char_y) == exit_position:
+            return 100000
+        value = 0
+        monster_moves = self.get_possible_moves(monster_x, monster_y, wrld)
+        for move in monster_moves:
+            prob = 1 / len(monster_moves)
+            v = self.max_value(wrld, exit_position, char_x, char_y, move[0], move[1], depth)
+            value = value + prob * v
+        # print("Value: ", value)
+        return value
+
+    def max_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
+        if (char_x, char_y) == (monster_x, monster_y):
+            return -100000
+        elif depth > 1:
+            dist = self.get_distance_to_exit((char_x, char_y), exit_position)
+            # print("Character: ", (char_x, char_y), "Distance: ", dist)
+            return 0
+        value = -1000000000
+        character_moves = self.get_possible_moves(char_x, char_y, wrld)
+        for move in character_moves:
+            value = max(value, self.exp_value(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1))
+        # print("Character:" , (char_x, char_y), "Value: ", value)
+        return value
+
     def do(self, wrld):
         exit_position = None
+        monster = None
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
                 if wrld.exit_at(x, y):
                     exit_position = (x, y)
+                if wrld.monsters_at(x, y):
+                    monster = (x, y)
+                if exit_position is not None and monster is not None:
                     break
             if exit_position is not None:
                 break
@@ -27,7 +79,6 @@ class TestCharacter(CharacterEntity):
         cost_so_far = {}
         came_from[(self.x, self.y)] = None
         cost_so_far[(self.x, self.y)] = 0
-
 
         while not frontier.empty():
             current = frontier.get()
@@ -43,7 +94,10 @@ class TestCharacter(CharacterEntity):
                 new_cost = cost_so_far[(self.x, self.y)] + 1
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
-                    priority = new_cost + self.get_distance_to_exit(next, exit_position)
+                    expected = 0
+                    if self.get_distance_to_exit((self.x, self.y), (monster[0], monster[1])) < 6:
+                        expected = self.exp_value(wrld, exit_position, next[0], next[1], monster[0], monster[1], 0)
+                    priority = new_cost + self.get_distance_to_exit(next, exit_position) + expected
                     frontier.put((next[0], next[1]), priority)
                     came_from[next] = current
 
@@ -65,21 +119,21 @@ class TestCharacter(CharacterEntity):
         array = []
         for dx in [-1, 0, 1]:
             # Avoid out-of-bound indexing
-            if (x+dx >=0) and (x+dx < wrld.width()):
+            if (x + dx >= 0) and (x + dx < wrld.width()):
                 # Loop through delta y
                 for dy in [-1, 0, 1]:
                     # Make sure the monster is moving
                     if (dx != 0) or (dy != 0):
                         # Avoid out-of-bound indexing
-                        if (y+dy >=0) and (y+dy < wrld.height()):
+                        if (y + dy >= 0) and (y + dy < wrld.height()):
                             # No need to check impossible moves
-                            if not wrld.wall_at(x+dx, y+dy):
+                            if not wrld.wall_at(x + dx, y + dy):
                                 array.append((x + dx, y + dy))
         return array
-        
+
     def get_distance_to_exit(self, position, exit_position):
-        return math.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
-                         (position[0] - exit_position[0]) * (position[0] - exit_position[0]))
+        return 20 - (math.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
+                         (position[0] - exit_position[0]) * (position[0] - exit_position[0])))
 
 
 class PQueue:
