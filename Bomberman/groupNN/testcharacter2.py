@@ -72,7 +72,7 @@ class TestCharacter(CharacterEntity):
                     expected = 0
                     if self.state == MONSTER:
                         expected = self.exp_value(wrld, self.exit_position, next[0], next[1], monster[0], monster[1], 0)
-                    priority = new_cost + self.get_distance_to_exit(next, self.exit_position) + expected
+                    priority = new_cost + (20 - self.get_distance_to_exit(next, self.exit_position)) + expected
                     frontier.put((next[0], next[1]), priority)
                     self.came_from[next] = current
 
@@ -167,8 +167,8 @@ class TestCharacter(CharacterEntity):
         return array
 
     def get_distance_to_exit(self, position, exit_position):
-        return 20 - (math.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
-                         (position[0] - exit_position[0]) * (position[0] - exit_position[0])))
+        returnmath.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
+                        (position[0] - exit_position[0]) * (position[0] - exit_position[0]))
 
 
 class PQueue:
