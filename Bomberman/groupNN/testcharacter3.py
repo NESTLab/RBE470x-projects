@@ -43,7 +43,7 @@ class TestCharacter(CharacterEntity):
         self.prev_state = self.state
         self.monster_dist = self.get_distance_between((self.x, self.y), (monster[0], monster[1]))
         if self.monster_dist < 5:
-            print()
+
             self.state = MONSTER
         else:
             self.state = NORMAL
@@ -82,24 +82,25 @@ class TestCharacter(CharacterEntity):
 
     def exp_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
         if (char_x, char_y) == exit_position:
-            return 100000
+            return (0.9 ** depth) * 100000
         value = 0
         monster_moves = self.get_possible_moves(monster_x, monster_y, wrld)
         for move in monster_moves:
             prob = 1 / len(monster_moves)
-            v = self.max_value(wrld, exit_position, char_x, char_y, move[0], move[1], depth)
+            v = (0.9 ** depth) * self.max_value(wrld, exit_position, char_x, char_y, move[0], move[1], depth)
             value = value + prob * v
         return value
 
     def max_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
         if (char_x, char_y) == (monster_x, monster_y):
-            return -100000
+            return (0.9 ** depth) * -10000
         elif depth > 0:
             return -1 * self.get_distance_between((char_x, char_y), (monster_x, monster_y))
         value = -1000000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
-            value = max(value, self.exp_value(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1))
+            v = (0.9 ** depth) * self.exp_value(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1)
+            value = max(value, v)
         return value
 
     def find_next_move(self, came_from, exit_position):
