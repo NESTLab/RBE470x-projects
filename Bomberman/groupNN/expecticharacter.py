@@ -15,6 +15,6 @@ class ExpectiCharacter(CharacterEntity):
         meX = wrld.me(self).x
         meY = wrld.me(self).y
 
-        goTo = EM.exptectiMax(wrld,1)
+        goTo = EM.exptectiMax(wrld,2)
         self.move(-meX + goTo[0], -meY + goTo[1])
 
