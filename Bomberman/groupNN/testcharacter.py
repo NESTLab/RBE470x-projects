@@ -87,6 +87,7 @@ class TestCharacter(CharacterEntity):
     # RETURN (int x, int y): best next move coordinates taking in account monsters and bomb range
     def bestMove_Monster(self, start, wrld, monsterList):
         moves = self.get_neighbors(start, wrld) # possible moves within board bounds (no need to check for bounds again)
+        moves.append(start)
         result = []
         newWorld = wrld.next()[0]
 
@@ -94,7 +95,9 @@ class TestCharacter(CharacterEntity):
         for neighbor in moves:
             # print("Is there a explosion???")
             # print(wrld.next()[0].explosion_at(*neighbor))
-            if wrld.wall_at(*neighbor) or newWorld.explosion_at(*neighbor):
+            # if wrld.wall_at(*neighbor) or newWorld.explosion_at(*neighbor) or newWorld.monsters_at(*
+            # todo TO CHECK FOR EXPLOSION IN THE BOARD WE DONT NEED TO GET THE NEXT BOARD
+            if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor):
             # if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor):
                 print("Found wall or explosion")
             elif newWorld.explosion_at(*neighbor):
@@ -105,8 +108,10 @@ class TestCharacter(CharacterEntity):
                 print("Neighbor is not wall or explosion")
                 result.append(neighbor)
 
-
-
+        if not result:
+            # there is no escape, you are dead
+            print("WE DIEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+            return 0,0
         return self.a_star_monsters(wrld,result,monsterList)
 
 
