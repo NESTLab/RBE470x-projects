@@ -200,7 +200,7 @@ class FiniteStateCharacter(CharacterEntity):
     def expectimax(self, wrld, exit, meX, meY):
         # Complete the greedy algorithm
         # Get the [x,y] coords of the next cell to go to
-        goTo = EM.exptectiMax(wrld, 2)
+        goTo = EM.exptectiMax(wrld, 1)
 
         # move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
