@@ -1,7 +1,7 @@
 # This is necessary to find the main code
 import sys
 import pathfinding as greedyBFS
-import expectimax as EM
+import expectimaxV4 as EM
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -38,7 +38,7 @@ class FiniteStateCharacter(CharacterEntity):
         isThereBomb = self.isThereBomb(closeObjects)
         # True if there is at least 1 monster within 2 steps
         m = next(iter(wrld.monsters.values()))[0]
-        if self.manhattandist([meX,meY], [m.x,m.y]) <= 5:
+        if self.MoveDist([meX, meY], [m.x, m.y]) <= 5:
             isThereMonster = True#self.isThereMonster(closeObjects)
         else:
             isThereMonster = False
@@ -77,7 +77,7 @@ class FiniteStateCharacter(CharacterEntity):
             # fix it
             self.greedy(wrld, exit, meX, meY)
 
-    def manhattandist(self, start, end):
+    def MoveDist(self, start, end):
         return max(abs(start[0] - end[0]), abs(start[1] - end[1]))
 
     def checkPerimeter2(self, wrld, meX, meY):
