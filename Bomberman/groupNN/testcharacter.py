@@ -24,12 +24,7 @@ class TestCharacter(CharacterEntity):
         monstersNear = self.check_monster(start, wrld) # list of monsters near
 
         try:
-            if wrld.wall_at(start[0], start[1] + 1) and not wrld.next()[0].explosion_at(start[0] - 1, start[1] - 1):
-                print("STATE: 1")
-                self.place_bomb()
-                self.move(-1, -1)
-
-            elif monstersNear:
+            if monstersNear:
                 # STATE: MONSTER ( There are a monsters within our range)
                 print("STATE: MONSTER")
                 self.place_bomb()
@@ -41,10 +36,11 @@ class TestCharacter(CharacterEntity):
                 print("Move: {}, {}".format(dx, dy))
                 self.move(dx, dy)
 
-            # elif monster_move_away[0] != 0 and monster_move_away[1] != 0:
-            #     print('monster_move_away')
-            #     self.place_bomb()
-            #     self.move(*monster_move_away)
+            elif wrld.wall_at(start[0], start[1] + 1) and not wrld.next()[0].explosion_at(start[0] - 1, start[1] - 1):
+                print("STATE: 1")
+                self.place_bomb()
+                self.move(-1, -1)
+
             elif wrld.wall_at(*next_move) or wrld.next()[0].explosion_at(*start):
                 print("STATE: 3")
                 self.move(x_dir, y_dir)
@@ -97,7 +93,7 @@ class TestCharacter(CharacterEntity):
             # print(wrld.next()[0].explosion_at(*neighbor))
             # if wrld.wall_at(*neighbor) or newWorld.explosion_at(*neighbor) or newWorld.monsters_at(*
             # todo TO CHECK FOR EXPLOSION IN THE BOARD WE DONT NEED TO GET THE NEXT BOARD
-            if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor):
+            if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor) or newWorld.monsters_at(*neighbor):
             # if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor):
                 print("Found wall or explosion")
             elif newWorld.explosion_at(*neighbor):
