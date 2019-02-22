@@ -10,7 +10,7 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
-from finitestatecharacter import FiniteStateCharacter
+from finitestatecharacterV3 import FiniteStateCharacter
 
 
 # Create the game
