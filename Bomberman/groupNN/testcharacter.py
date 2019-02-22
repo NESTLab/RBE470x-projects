@@ -12,66 +12,74 @@ class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
         # Your code here
-        # self.move(1, 0)
-
         goal = self.get_exit(wrld)
         start = self.get_my_location(wrld)
-
-        nextMove = self.a_star(wrld, start, goal) # returns (x,y) coordinate of next move
-        print("my start move is:")
-        print(start)
-        print("my next move is:")
-        print(nextMove)
-        dx = nextMove[0] - start[0]
-        dy = nextMove[1] - start[1]
-        print("my dx is {} and my dy is: {}".format(dx,dy))
+        bomb = self.get_bomb(wrld)
+        x_dir, y_dir = self.get_direction(start, wrld)
+        monster_move_away = self.check_monster(start, wrld)
+        monster = self.get_monster(wrld)
+        next_move = self.a_star(wrld, start, monster) # returns (x,y) coordinate of next move
+        dx = next_move[0] - start[0]
+        dy = next_move[1] - start[1]
         try:
-            if wrld.wall_at(nextMove[0], nextMove[1]):
-                # do stuff with wall
-                # put  - 11 ticks to explode
-                # move diagonally
-
-                # wallNeighbors = []
-                # if wrld.wall_at(start[0] +1, start[1]):
-                #     if wrld.wall_at(start[0], start[1] + 1):
-                #         self.place_bomb()
-                #         self.move(-1, -1)
-                #         #move back
-                #     else:
-                #         self.move(0, 1)
-                #         self.place_bomb()
-                #         self.move(0, -1)
-                # else:
-                #     self.move(1,0)
-                #     self.place_bomb()
-                #     self.move(-1, 0)
-
-                # start = (start[0] + dx, start[1] + dy)
-
-                if (nextMove[0] + 1) >= wrld.width() and wrld.bomb_at(start[0], start[1]):
-                    self.move(-1, -1)
-
-                if not (nextMove[0] + 1) >= wrld.width() and wrld.bomb_at(start[0], start[1]):
-                    self.move(1, -1)
-
+            if wrld.wall_at(start[0], start[1] + 1) and not wrld.next()[0].explosion_at(start[0] + 1, start[1] - 1):
                 self.place_bomb()
-                pass
-
-                print('a')
+                self.move(1, -1)
+            elif wrld.bomb_at(*start):
+                self.move(1, -1)
+            elif monster_move_away[0] != 0 and monster_move_away[1] != 0:
+                print('monster_move_away')
+                print(*monster_move_away)
+                self.place_bomb()
+                self.move(*monster_move_away)
+            elif wrld.wall_at(*next_move) or wrld.next()[0].explosion_at(*start):
+                print('asd')
+                self.move(x_dir, y_dir)
+            elif next_move[0] == bomb[0] or next_move[1] == bomb[1] or wrld.explosion_at(*next_move):
+                print('aaaaa')
+                self.move(0, 0)
             else:
-                # there is no wall
-                if wrld.bomb_at(nextMove[0], nextMove[1]) or wrld.explosion_at(nextMove[0], nextMove[1]):
-                    self.move(0, 0)
-                else:
-                    start = (start[0] + dx, start[1] + dy)
-                    self.move(dx, dy)
-
-            print(start[0], start[1], nextMove[0], nextMove[1])
+                self.move(dx, dy)
         except IndexError:
             pass
+    @staticmethod
+    def check_monster(start, wrld):
+        for x in range(-2, 2):
+            for y in range(-2, 2):
+                if wrld.monsters_at(start[0] + x, start[1] + y):
+                    dx = start[0] - (start[0] + x)
+                    dy = start[1] - (start[1] + y)
+                    if dx < 0:
+                        dx = -1
+                    else:
+                        dx = 1
+                    if dy < 0:
+                        dy = -1
+                    else:
+                        dy = 1
+                    return dx, dy
+        return 0, 0
 
-    def check_monster(self, start, radius):
-        pass
+    @staticmethod
+    def get_direction(start, wrld):
+        x = 1
+        y = 1
+        if start[0] > wrld.width()/2:
+            x = -1
+        if start[1] > wrld.height()/2:
+            y = -1
+        if wrld.wall_at(start[0] + x, start[1] + y):
+            return 0, 1
+        return x, y
+
+    @staticmethod
+    def get_monster(wrld):
+        # Find the exit to use for heuristic A*
+        for x in range(wrld.width()):
+            for y in range(wrld.height()):
+                if wrld.monsters_at(x, y):
+                    return x, y
+        return -1, -1
 
     @staticmethod
     def get_exit(wrld):
@@ -80,7 +88,7 @@ class TestCharacter(CharacterEntity):
             for y in range(wrld.height()):
                 if wrld.exit_at(x, y):
                     return x, y
-        pass
+        return -1, -1
 
     # @staticmethod
     # def make_graph(wrld):
@@ -104,6 +112,15 @@ class TestCharacter(CharacterEntity):
             if 0 <= neighbor[0] < wrld.width() and 0 <= neighbor[1] < wrld.height():
                 result.append(neighbor)
         return result
+
+    @staticmethod
+    def get_bomb(wrld):
+        # Find the exit to use for heuristic A*
+        for x in range(0, wrld.width()):
+            for y in range(0, wrld.height()):
+                if wrld.bomb_at(x, y):
+                    return x, y
+        return -1, -1
 
     @staticmethod
     def get_my_location(wrld):
