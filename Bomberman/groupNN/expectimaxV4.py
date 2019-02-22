@@ -14,6 +14,7 @@ def cost(wrld):
     except StopIteration:
         return 1
 
+    # TODO: Don't hardcode
     #hardcode exit
     exit = [7, 18]#wildly inefficent
     # get current position
@@ -41,10 +42,11 @@ def cost(wrld):
 def moveDist(start, end):
     return max(abs(start[0] - end[0]), abs(start[1] - end[1]))
 
-def exptectiMax(wrld, Depth):
+def expectiMax(wrld, Depth):
     #this can't do 0 depth or non monsters, as error would be thrown
     #may need to do try cach for above here, but it should exit before this becomes a conflict
     #TODO Watch for bug here, iteration error. To fix, see Cost or expVal
+    #TODO: Process each m individually; possibly by distance
     m = next(iter(wrld.monsters.values()))[0]
     c = next(iter(wrld.characters.values()))[0]
 

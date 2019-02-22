@@ -12,7 +12,7 @@ class gridcell():
 
 #getNextStep([x,y], [x,y], world)->[x,y]
 #Given a start tuple [x,y], end tuple [x,y] and the world
-#returns a tuple [x,y] that is the next position to move to using the current algorithm 
+#returns a tuple [x,y] that is the next position to move to using the current algorithm
 #Currently GREEDYBFS
 def getNextStep(start, end, wrld):
     #Call pathing algorithm, returns Gridcell with complete path to be reconstructed
@@ -20,7 +20,7 @@ def getNextStep(start, end, wrld):
 
     prev = pathNode
 
-    #reverse order of the graph by following camefrom obj until reaching the start position. 
+    #reverse order of the graph by following camefrom obj until reaching the start position.
     #use this to find the positon that comes just after the start position
     while pathNode is not None and pathNode.current is not start:
         prev = pathNode.current
@@ -77,12 +77,12 @@ def greedyBFS(start, end, wrld,w):
             for j in range(3):
 
                 j -= 1
-                
+
                 #if the postition is in world bounds
                 if not (x + i >= width or x + i < 0 or y + j >= height or y + j < 0):
                     #if the checked position has not already been checked, and there is not a wall at the location
                     if w ==1:
-                        if [x + i, y + j] not in evaluated and not wrld.wall_at(x + i, y + j) :
+                        if [x + i, y + j] not in evaluated and not wrld.wall_at(x + i, y + j) and not wrld.explosion_at(x + i, y + j):
                             #create a new gridcell, with the previous postition being the gridcell used in this for for loop
                             #to reach the position
                             current = gridcell([x + i, y + j], popped)
