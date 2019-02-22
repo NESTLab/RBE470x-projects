@@ -18,25 +18,20 @@ class TestCharacter(CharacterEntity):
         x_dir, y_dir = self.get_direction(start, wrld)
         monster_move_away = self.check_monster(start, wrld)
         monster = self.get_monster(wrld)
-        next_move = self.a_star(wrld, start, monster) # returns (x,y) coordinate of next move
+        next_move = self.a_star(wrld, start, goal) # returns (x,y) coordinate of next move
         dx = next_move[0] - start[0]
         dy = next_move[1] - start[1]
         try:
-            if wrld.wall_at(start[0], start[1] + 1) and not wrld.next()[0].explosion_at(start[0] + 1, start[1] - 1):
+            if wrld.wall_at(start[0], start[1] + 1) and not wrld.next()[0].explosion_at(start[0] - 1, start[1] - 1):
                 self.place_bomb()
-                self.move(1, -1)
-            elif wrld.bomb_at(*start):
-                self.move(1, -1)
+                self.move(-1, -1)
             elif monster_move_away[0] != 0 and monster_move_away[1] != 0:
                 print('monster_move_away')
-                print(*monster_move_away)
                 self.place_bomb()
                 self.move(*monster_move_away)
             elif wrld.wall_at(*next_move) or wrld.next()[0].explosion_at(*start):
-                print('asd')
                 self.move(x_dir, y_dir)
             elif next_move[0] == bomb[0] or next_move[1] == bomb[1] or wrld.explosion_at(*next_move):
-                print('aaaaa')
                 self.move(0, 0)
             else:
                 self.move(dx, dy)
@@ -44,8 +39,10 @@ class TestCharacter(CharacterEntity):
             pass
     @staticmethod
     def check_monster(start, wrld):
-        for x in range(-2, 2):
-            for y in range(-2, 2):
+        dx = 0
+        dy = 0
+        for x in range(-4, 4):
+            for y in range(-4, 4):
                 if wrld.monsters_at(start[0] + x, start[1] + y):
                     dx = start[0] - (start[0] + x)
                     dy = start[1] - (start[1] + y)
@@ -58,7 +55,7 @@ class TestCharacter(CharacterEntity):
                     else:
                         dy = 1
                     return dx, dy
-        return 0, 0
+        return dx, dy
 
     @staticmethod
     def get_direction(start, wrld):
