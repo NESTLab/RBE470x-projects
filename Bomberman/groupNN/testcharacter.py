@@ -14,7 +14,6 @@ class TestCharacter(CharacterEntity):
         start = self.get_my_location(wrld)
         bomb = self.get_bomb(wrld)
         x_dir, y_dir = self.get_direction(start, wrld)
-        monster = self.get_monster(wrld)
         next_move = self.a_star(wrld, start, goal, 0)  # returns (x,y) coordinate of next move
 
         try:
@@ -93,16 +92,6 @@ class TestCharacter(CharacterEntity):
         if start[1] > wrld.height()/2:
             y = -1
         return x, y
-
-    # TODO: SHOULDN'T THIS RETURN A LIST OF MONSTERS??? IN CASE THERE ARE MORE THAN ONE
-    @staticmethod
-    def get_monster(wrld):
-        # Find monsters in board
-        for x in range(wrld.width()):
-            for y in range(wrld.height()):
-                if wrld.monsters_at(x, y):
-                    return x, y
-        return -1, -1
 
     @staticmethod
     def get_exit(wrld):
