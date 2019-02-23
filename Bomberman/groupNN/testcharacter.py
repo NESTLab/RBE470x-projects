@@ -29,24 +29,32 @@ class TestCharacter(CharacterEntity):
                 print("STATE: MONSTER")
                 self.place_bomb()
                 print("My current position is:")
-                print(start[0], start[1])
-                monster_move_away = self.bestMove_Monster(start,wrld, monstersNear)
+                print(*start)
+                monster_move_away = self.bestMove_Monster(start, wrld, monstersNear)
                 dx = monster_move_away[0] - start[0]
                 dy = monster_move_away[1] - start[1]
                 print("Move: {}, {}".format(dx, dy))
                 self.move(dx, dy)
 
-            elif wrld.wall_at(start[0], start[1] + 1) and not wrld.next()[0].explosion_at(start[0] - 1, start[1] - 1):
-                print("STATE: 1")
-                self.place_bomb()
-                self.move(-1, -1)
+            # elif wrld.wall_at(start[0], start[1] + 1) and not wrld.next()[0].explosion_at(start[0] - 1, start[1] - 1):
+            #     print("STATE: 1")
+            #     self.place_bomb()
+            #     self.move(-1, -1)
 
-            elif wrld.wall_at(*next_move) or wrld.next()[0].explosion_at(*start):
+            elif wrld.wall_at(*next_move):
                 print("STATE: 3")
                 self.move(x_dir, y_dir)
             elif next_move[0] == bomb[0] or next_move[1] == bomb[1] or wrld.explosion_at(*next_move):
                 print("STATE: 4")
-                self.move(0, 0)
+                if not monstersNear and (bomb[0] == start[0] or bomb[1] == start[1]):
+                    self.move(dx, dy)
+                elif not monstersNear:
+                    self.move(0, 0)
+                monster_move_away = self.bestMove_Monster(start, wrld, monstersNear)
+                dx = monster_move_away[0] - start[0]
+                dy = monster_move_away[1] - start[1]
+                print("Move: {}, {}".format(dx, dy))
+                self.move(dx, dy)
             else:
                 print("STATE: 5")
                 self.move(dx, dy)
@@ -61,11 +69,12 @@ class TestCharacter(CharacterEntity):
         dx = 0
         dy = 0
         monstersNear = [] # list of tuples (int x, int y)
-        for x in range(-4, 4):
-            for y in range(-4, 4):
-                if wrld.monsters_at(start[0] + x, start[1] + y):
+        for x in range(-3, 4):
+            for y in range(-3, 4):
+                if wrld.next()[0].monsters_at(start[0] + x, start[1] + y):
                     # monster was found
                     monstersNear.append((start[0] + x, start[1] + y))
+                    print(*start, start[0] + x, start[1] + y)
                     # dx = start[0] - (start[0] + x)
                     # dy = start[1] - (start[1] + y)
                     # if dx < 0:
@@ -77,6 +86,7 @@ class TestCharacter(CharacterEntity):
                     # else:
                     #     dy = 1
                     # return dx, dy
+        print(monstersNear)
         return monstersNear
 
     # PARAM [SensedWorld] wrld: wrld grid, used to get boundries
@@ -93,7 +103,40 @@ class TestCharacter(CharacterEntity):
             # print(wrld.next()[0].explosion_at(*neighbor))
             # if wrld.wall_at(*neighbor) or newWorld.explosion_at(*neighbor) or newWorld.monsters_at(*
             # todo TO CHECK FOR EXPLOSION IN THE BOARD WE DONT NEED TO GET THE NEXT BOARD
-            if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor) or newWorld.monsters_at(*neighbor):
+            if not wrld.wall_at(*neighbor) and not wrld.explosion_at(*neighbor) \
+                    and not newWorld.monsters_at(*neighbor):
+                result.append(neighbor)
+            # # if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor):
+            #     print("Found wall or explosion")
+            # elif newWorld.explosion_at(*neighbor):
+            # # elif wrld.explosion_at(*neighbor):
+            #     print("Im a a explotion at: ")
+            #     print(*neighbor)
+            # else:
+            #     print("Neighbor is not wall or explosion")
+
+
+        if not result:
+            # there is no escape, you are dead
+            print("WE DIEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+            return 0, 0
+        return self.a_star_monsters(wrld, result, monsterList)
+
+    # PARAM [SensedWorld] wrld: wrld grid, used to get boundries
+    # RETURN (int x, int y): best next move coordinates taking in account monsters and bomb range
+    def bestMove_Bomb(self, start, wrld, monster_list):
+        moves = self.get_neighbors(start, wrld) # possible moves within board bounds (no need to check for bounds again)
+        moves.append(start)
+        result = []
+        newWorld = wrld.next()[0]
+
+        # filter out next moves that are walls or have an explosion in the next board configuration
+        for neighbor in moves:
+            # print("Is there a explosion???")
+            # print(wrld.next()[0].explosion_at(*neighbor))
+            # if wrld.wall_at(*neighbor) or newWorld.explosion_at(*neighbor) or newWorld.monsters_at(*
+            # todo TO CHECK FOR EXPLOSION IN THE BOARD WE DONT NEED TO GET THE NEXT BOARD
+            if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor):
             # if wrld.wall_at(*neighbor) or wrld.explosion_at(*neighbor):
                 print("Found wall or explosion")
             elif newWorld.explosion_at(*neighbor):
@@ -107,8 +150,10 @@ class TestCharacter(CharacterEntity):
         if not result:
             # there is no escape, you are dead
             print("WE DIEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
-            return 0,0
-        return self.a_star_monsters(wrld,result,monsterList)
+            return 0, 0
+
+        return self.a_star_monsters(wrld, result, monster_list)
+
 
 
     @staticmethod
@@ -162,7 +207,8 @@ class TestCharacter(CharacterEntity):
         # check that neighbors are inside wrld bounds
         for neighbor in neighbors:
             if 0 <= neighbor[0] < wrld.width() and 0 <= neighbor[1] < wrld.height():
-                result.append(neighbor)
+                if not wrld.wall_at(*neighbor):
+                    result.append(neighbor)
         return result
 
     @staticmethod
@@ -184,9 +230,52 @@ class TestCharacter(CharacterEntity):
 
     # Determining the heuristic value, being Euclidean Distance
     @staticmethod
-    def heuristic(start, goal):
+    def heuristic(start, goal, wrld):
         (x1, y1) = start
         (x2, y2) = goal
+        a = 0
+        b = 0
+
+        if (x2 - x1)**2 + (y2 - y1)**2 < 50:
+            value = (x2 - x1) ** 2 + (y2 - y1) ** 2
+            return value
+
+        if x1 > wrld.width()/2:
+            a = abs(x1 - wrld.width()/2)
+        if y1 > wrld.height()/2:
+            b = abs(x1 - wrld.width()/2)
+        x1 -= a
+        y1 -= b
+
+        # penalty = 10 * a
+
+        # Euclidean distance is the hypotenuse
+        # We add the squared values, and finding the sqrt is
+        # not necessary as it will never effect the outcome
+        value = (x2 - x1)**2 + (y2 - y1)**2
+        return value
+
+
+    # Determining the heuristic value, being Euclidean Distance
+    @staticmethod
+    def heuristic2(start, goal, wrld):
+        (x1, y1) = start
+        (x2, y2) = goal
+        a = 0
+        b = 0
+
+        if (x2 - x1)**2 + (y2 - y1)**2 < 20:
+            value = (x2 - x1) ** 2 + (y2 - y1) ** 2
+            return value
+
+        if x1 > wrld.width()/2:
+            a = abs(x1 - wrld.width()/2)
+        if y1 > wrld.height()/2:
+            b = abs(x1 - wrld.width()/2)
+        x1 += a
+        y1 += b
+
+        # penalty = 10 * a
 
         # Euclidean distance is the hypotenuse
         # We add the squared values, and finding the sqrt is
@@ -203,7 +292,7 @@ class TestCharacter(CharacterEntity):
         neighbors = self.get_neighbors(start, wrld)
         neighbors_values = []
         for neighbor in neighbors:
-            neighbors_values.append((neighbor[0], neighbor[1], self.heuristic(neighbor, goal)))
+            neighbors_values.append((neighbor[0], neighbor[1], self.heuristic(neighbor, goal, wrld)))
         neighbors_values.sort(key=operator.itemgetter(2))
         print(neighbors_values)
 
@@ -216,7 +305,7 @@ class TestCharacter(CharacterEntity):
         neighbors_values = []
         for neighbor in possibleMoves:
             # todo change this to accept multiple monsters
-            neighbors_values.append((neighbor[0], neighbor[1], self.heuristic(neighbor, monsterList[0])))
+            neighbors_values.append((neighbor[0], neighbor[1], self.heuristic2(neighbor, monsterList[0], wrld)))
         # sort by distance to monster. Its in DECREASING order.
         neighbors_values.sort(key=operator.itemgetter(2))
         print("Monster A* values: ")
