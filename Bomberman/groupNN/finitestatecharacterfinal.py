@@ -127,7 +127,7 @@ class FiniteStateCharacter(CharacterEntity):
         #move in direction to get to x,y found in prev step
         self.move(-meX + goTo[0], -meY + goTo[1])
 
-        if not greedy:
+        if goTo is None:
             # TODO: Improve bomb placement and pathfinding combinations
             goTo = greedyBFS.getNextStep([meX, meY], exit, wrld,0)
             if wrld.wall_at(goTo[0],goTo[1]):
