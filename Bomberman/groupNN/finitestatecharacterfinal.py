@@ -30,13 +30,13 @@ class FiniteStateCharacter(CharacterEntity):
         meY = wrld.me(self).y
 
         # True if there is at least 1 monster within 5 steps
-        isThereMonster = self.isThereMonster(self, wrld, meX, meY)
+        isThereMonster = self.isThereMonster(wrld, meX, meY)
 
         # A list of bombs if there are bombs on the board, empty otherwise
-        isThereBomb = self.isThereBomb(self, wrld, meX, meY)
+        isThereBomb = self.isThereBomb(wrld, meX, meY)
 
         # A list of explosions if there is at least 1 explosion within 2 steps, empty otherwise
-        isThereExplosion = self.isThereExplosion(self, wrld, meX, meY)
+        isThereExplosion = self.isThereExplosion(wrld, meX, meY)
 
         if isThereBomb and isThereMonster and isThereExplosion:
             # There at least 1 bomb, 1 monster, and 1 explosion within the danger zone
