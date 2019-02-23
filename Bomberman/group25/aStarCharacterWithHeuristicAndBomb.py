@@ -6,7 +6,6 @@ sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
 from colorama import Fore, Back
-import math
 
 class Node():
     def __init__(self, x, y, hval=0, gval=0, parent=None):
@@ -20,6 +19,14 @@ class Node():
     # def __eq__(self, other):
     #    return self.position == other.position
 
+#####################
+# Class Description #
+#####################
+#####################
+# If there are monsters, continue to attempt to blow up walls (from right to left) until there is a path to the exit
+# OR
+# Blow up one hole then wait for the monster
+
 
 class TestCharacter(CharacterEntity):
     def __init__(self, name, avatar, x, y):
@@ -28,26 +35,9 @@ class TestCharacter(CharacterEntity):
         self.pathIterator = -1
 
     def do(self, wrld):
-        # TODO get the maximum detection range of a monster
-        if self.checkIfNearMonster(self, 4, wrld):
-            selfIsCloserToExitThanMonster = True
-            for key, monsterlist in wrld.monsters.items():
-                for monster in monsterlist:
-                    if len(self.aStarPath(self, wrld)) >= len(self.aStarPath(monster, wrld)):
-                        selfIsCloserToExitThanMonster = False
-                        break
-
-            if not selfIsCloserToExitThanMonster:
-                # pick the spot out of the 8 cardinal directions that is least near to a monster.
-                self.path = self.runAway(wrld)
-                self.pathIterator = 0
-            elif not self.path or self.checkIfNearMonster(self, 5, wrld) or self.pathIterator == len(self.path) - 1:
-                self.path = self.aStarPath(self, wrld)
-                self.pathIterator = 0
-
-        # if no path or within distance 5 of a monster
-        elif not self.path or self.checkIfNearMonster(self, 5, wrld) or self.pathIterator == len(self.path) - 1:
-            self.path = self.aStarPath(self, wrld)
+        # if no path
+        if not self.path or self.checkIfNearMonster(self, 5, wrld):
+            self.path = self.aStarPath(wrld)
             self.pathIterator = 0
         # if within distance 3 of a monster
         self.pathIterator += 1
@@ -63,42 +53,12 @@ class TestCharacter(CharacterEntity):
                     return True
         return False
 
-    # TODO calculate distance function
-    # def distanceBetweenPoints():
-
-    # Implement alpha beta search to try to run away faster
-    def runAway(self, wrld):
-        # put current position into the path
-        path = [Node(self.x, self.y)]
-        lowestNode = None
-
-        # start by setting the lowest sum to infinity
-        highestSum = 0
-        # iterate over the available spots of the eight cardinal directions
-        for node in self.getNeighbors(self, wrld):
-            # put the node farthest from the available locations
-            currSum = 0
-            for key, monsterlist in wrld.monsters.items():
-                for monster in monsterlist:
-                    # check if the monster is within distance 4, we don't care about distance from monster after that
-                    if (monster.x - 4 < node.x < monster.x + 4) \
-                            and (monster.y - 4 < node.y < monster.y + 4):
-                                # TODO account for walls and bombs
-                                xDistance = abs(node.x - monster.x)
-                                yDistance = abs(node.y - monster.y)
-                                currSum += max(xDistance, yDistance)
-            if currSum > highestSum:
-                highestSum = currSum
-                lowestNode = node
-        path.append(lowestNode)
-        return path
-
-    def aStarPath(self, node, wrld):
+    def aStarPath(self, wrld):
         openNodes = []
         closedNodes = []
         # End node is position 7, 18
         endNode = Node(7, 18)
-        startNode = Node(node.x, node.y)
+        startNode = Node(self.x, self.y)
 
         openNodes.append(startNode)
 
@@ -178,15 +138,16 @@ class TestCharacter(CharacterEntity):
                                 listOfNeighbors.append(Node(node.x + dx, node.y + dy, parent=node))
         # All done
         return listOfNeighbors
+
     # absolute distance between two nodes
     def distanceBetweenNodes(self, currNode, endNode, wrld):
         xDistance = abs(endNode.x - currNode.x)
         yDistance = abs(endNode.y - currNode.y)
 
         # if the node is close to any monster, try to avoid it
-        # for i in range(1, 5):
-        #    if self.checkIfNearMonster(currNode, i, wrld):
-        #        return max(xDistance, yDistance) + 500 - i * 100
+        for i in range(1, 5):
+            if self.checkIfNearMonster(currNode, i, wrld):
+                return max(xDistance, yDistance) + 500 - i * 100
 
         # moving diagonally is one move so can combine x and y distance
         return max(xDistance, yDistance)
