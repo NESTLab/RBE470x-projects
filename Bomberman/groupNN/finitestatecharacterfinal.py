@@ -11,6 +11,7 @@ from colorama import Fore, Back
 class FiniteStateCharacter(CharacterEntity):
 
     def do(self, wrld):
+        print("branch")
         # This method calls different algorithms to find the next position to
         # move based on the finite state the character is in.
 
