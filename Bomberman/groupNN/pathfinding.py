@@ -80,14 +80,23 @@ def greedyBFS(start, end, wrld):
 
                 #if the postition is in world bounds
                 if not (x + i >= width or x + i < 0 or y + j >= height or y + j < 0):
+                    notEvalFlag = True
+                    for point in evaluated:
+                        if point[0] == x + i and point[1] == y + j:
+                            notEvalFlag= False
+                    for pointCell in  notEvaluated:
+                        point = pointCell[1].current
+                        if point[0] == x + i and point[1] == y + j:
+                            notEvalFlag= False
                     #if the checked position has not already been checked, and there is not a wall at the location
-                    if [x + i, y + j] not in evaluated and not wrld.wall_at(x + i, y + j) and not wrld.explosion_at(x + i, y + j):
+                    if notEvalFlag and not wrld.wall_at(x + i, y + j) and not wrld.explosion_at(x + i, y + j):
                         #create a new gridcell, with the previous postition being the gridcell used in this for for loop
                         #to reach the position
                         current = gridcell([x + i, y + j], popped)
                         #append to the fronter
                         notEvaluated.append((manhattandist(current, endcell), current))
 
+    a = 0
 
 #manhattandist(gridcell, gridcell)
 #given 2 gridcells, use the current position of each to calculate the abs net manhattan distance
