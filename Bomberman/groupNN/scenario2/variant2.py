@@ -10,7 +10,7 @@ from monsters.stupid_monster import StupidMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
-from greedycharacterS2 import GreedyCharacter
+from finitestatecharacterfinal import FiniteStateCharacter
 
 # Create the game
 random.seed(1) # TODO Change this if you want different random choices
@@ -21,7 +21,7 @@ g.add_monster(StupidMonster("monster", # name
 ))
 
 # TODO Add your character
-g.add_character(GreedyCharacter("me", # name
+g.add_character(FiniteStateCharacter("me", # name
                               "C",  # avatar
                               0, 0  # position
 ))

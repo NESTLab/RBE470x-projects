@@ -1,6 +1,7 @@
 # This is necessary to find the main code
 import sys
 import pathfinding as greedyBFS
+import pathfinding as conn4
 import expectimaxV4 as EM
 
 sys.path.insert(0, '../bomberman')
@@ -133,7 +134,7 @@ class FiniteStateCharacter(CharacterEntity):
 
         if goTo is None:
             # TODO: Improve bomb placement and pathfinding combinations
-            goTo = greedyBFS.getNextStep([meX, meY], exit, wrld,0)
+            goTo = conn4.getNextStep([meX, meY], exit, wrld)
             if wrld.wall_at(goTo[0],goTo[1]):
                 NotSetThisTime = False
                 self.place_bomb()
