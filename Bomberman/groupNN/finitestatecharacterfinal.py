@@ -74,7 +74,7 @@ class FiniteStateCharacter(CharacterEntity):
         try:
             bombs = next(iter(wrld.bombs.values()))
             return bombs
-        except IndexError:
+        except StopIteration:
             return None
 
     def isThereExplosion(self, wrld, meX, meY):
@@ -91,7 +91,7 @@ class FiniteStateCharacter(CharacterEntity):
                     exps.append(exp)
 
             return exps
-        except IndexError:
+        except StopIteration:
             return None
 
 
@@ -105,7 +105,7 @@ class FiniteStateCharacter(CharacterEntity):
                 if self.MoveDist([meX, meY], [monstr.x, monstr.y]) <= 5:
                     return True
             return False
-        except IndexError:
+        except StopIteration:
             return False
 
     def expectimax(self, wrld, exit, meX, meY):
