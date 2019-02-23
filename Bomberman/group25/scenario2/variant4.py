@@ -7,10 +7,13 @@ sys.path.insert(1, '..')
 import random
 from game import Game
 from monsters.selfpreserving_monster import SelfPreservingMonster
+from scen2var3character import Scen2Var3Character
+
 
 # TODO This is your code!
 sys.path.insert(1, '../group25')
 from testcharacter import TestCharacter
+from scen2var4character import Scen2Var4Character
 
 # Create the game
 random.seed(123) # TODO Change this if you want different random choices
@@ -22,9 +25,16 @@ g.add_monster(SelfPreservingMonster("monster", # name
 ))
 
 # TODO Add your character
+"""
 g.add_character(TestCharacter("me", # name
                               "C",  # avatar
                               0, 0  # position
+))
+"""
+g.add_character(Scen2Var4Character("me", # name
+                              "C",  # avatar
+                              0, 0,  # position
+                              3 # depth
 ))
 
 # Run!
