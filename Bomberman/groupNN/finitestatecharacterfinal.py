@@ -12,7 +12,6 @@ from colorama import Fore, Back
 class FiniteStateCharacter(CharacterEntity):
 
     def do(self, wrld):
-        print("branch")
         # This method calls different algorithms to find the next position to
         # move based on the finite state the character is in.
 
@@ -125,7 +124,6 @@ class FiniteStateCharacter(CharacterEntity):
 
 
     def greedy(self, wrld, exit, meX, meY):
-        print("greedy")
         # Returns true if the character can be moved, false if not
 
         # Complete the greedy algorithm
