@@ -1,6 +1,7 @@
 # This is necessary to find the main code
 import sys
-import pathfinding4conn as greedyBFS
+import pathfinding as greedyBFS
+import pathfinding4conn as greedyBFSNoWall
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -34,9 +35,9 @@ class GreedyCharacter(CharacterEntity):
                         exit = [i, j]
 
             #get the [x,y] coords of the next cell to go to
-            goTo = greedyBFS.getNextStep([meX, meY], exit, wrld,1)
+            goTo = greedyBFS.getNextStep([meX, meY], exit, wrld)
             if goTo is None:
-                goTo = greedyBFS.getNextStep([meX, meY], exit, wrld,0)
+                goTo = greedyBFSNoWall.getNextStep([meX, meY], exit, wrld)
                 if wrld.wall_at(goTo[0],goTo[1]):
                     NotSetThisTime = False
                     self.state='b'
