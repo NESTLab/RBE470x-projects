@@ -1,7 +1,7 @@
 # This is necessary to find the main code
 import sys
 import pathfinding as greedyBFS
-import pathfinding as conn4
+import pathfinding4conn as conn4
 import expectimaxV4 as EM
 
 sys.path.insert(0, '../bomberman')
