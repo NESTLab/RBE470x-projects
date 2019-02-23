@@ -40,18 +40,23 @@ class FiniteStateCharacter(CharacterEntity):
 
         if isThereBomb and isThereMonster and isThereExplosion:
             # There at least 1 bomb, 1 monster, and 1 explosion within the danger zone
+            print("all")
             self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereMonster:
             # There is both at least 1 bomb and 1 monster within 2 steps
+            print("bomb & monster")
             self.greedy(wrld, exit, meX, meY)
         elif isThereBomb and isThereExplosion:
             # There is both at least 1 bomb and 1 explosion within 2 steps
+            print("bomb & exp")
             self.greedy(wrld, exit, meX, meY)
         elif isThereExplosion and isThereMonster:
             # There is both at least 1 explosion and 1 monster within 2 steps
+            print("exp & monster")
             self.greedy(wrld, exit, meX, meY)
         elif isThereMonster:
             # There is at least 1 monster within 2 steps
+            print("here")
             self.expectimax(wrld, exit, meX, meY)
         elif isThereBomb:
             # There is at least 1 bomb within 2 steps
@@ -118,6 +123,7 @@ class FiniteStateCharacter(CharacterEntity):
 
 
     def greedy(self, wrld, exit, meX, meY):
+        print("greedy")
         # Returns true if the character can be moved, false if not
 
         # Complete the greedy algorithm
