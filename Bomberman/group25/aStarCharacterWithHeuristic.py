@@ -111,7 +111,7 @@ class TestCharacter(CharacterEntity):
 
             if not selfIsCloserToExitThanMonster:
                 # pick the spot out of the 8 cardinal directions that is least near to a monster.
-                self.path = self.runAway(6, wrld)
+                self.path = self.runAway(8, wrld)
                 self.pathIterator = 0
             elif not self.path or self.checkIfNearMonster(self, 6, wrld) or self.pathIterator == len(self.path) - 1:
                 self.path = self.aStarPath(self, Node(7, 18), wrld, True)
@@ -155,19 +155,31 @@ class TestCharacter(CharacterEntity):
         for node in self.getNeighbors(self, Node(7, 18), wrld):
             # put the node farthest from the available locations
             currSum = 0
-            for key, monsterlist in wrld.monsters.items():
-                for monster in monsterlist:
-                    distance = len(self.aStarPath(node, monster, wrld, False))
-                    # check if the monster is within distance 6, we don't care about distance from monster after that
-                    if distance < maxDistance:
-                        currSum += distance
+            # for key, monsterlist in wrld.monsters.items():
+            #     for monster in monsterlist:
+            for monster in self.monsters:
+                distance = len(self.aStarPath(node, monster, wrld, False))
+                if distance < maxDistance and monster.type == "smart":
+                    if distance < 5:
+                        # try very hard not to get into detection range
+                        currSum -= 5
+                    currSum += distance
+                elif distance < (maxDistance - 4) and monster.type == "stupid":
+                    if distance < 3:
+                        # try kinda hard not to get too close to dumb
+                        currSum -= 3
+                    currSum += distance
+
             if currSum == highestSum:
                 possibleNodes.append(node)
             elif currSum > highestSum:
                 highestSum = currSum
                 possibleNodes = [node]
-        pathToStart = self.aStarPath(self, Node(0, 0), wrld, False)
-        pathToEnd = self.aStarPath(self, Node(7, 18), wrld, False)
+        pathToStart = self.aStarPath(self, Node(0, 0), wrld, True)
+        pathToEnd = self.aStarPath(self, Node(7, 18), wrld, True)
+        if not possibleNodes:
+            # accept death.
+            return [Node(self.x, self.y), Node(self.x, self.y)]
         lowestNode = possibleNodes[0]
         for node in possibleNodes:
             if len(pathToEnd) > 1 and pathToEnd[1].x == node.x and pathToEnd[1].y == node.y:

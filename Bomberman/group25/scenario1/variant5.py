@@ -14,7 +14,7 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 sys.path.insert(1, '../group25')
 from aStarCharacterWithHeuristic import TestCharacter
 
-random.seed(6543252) # TODO Change this if you want different random choices
+random.seed(34623624) # TODO Change this if you want different random choices
 g = Game.fromfile('map.txt')
 # g = tournament.Tournament.fromfile('map.txt')
 
