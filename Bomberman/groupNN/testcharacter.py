@@ -30,40 +30,33 @@ class TestCharacter(CharacterEntity):
         try:
             if run_from_monster:
                 # STATE: MONSTER ( There are a monsters within our range)
-                print("STATE: MONSTER")
                 self.place_bomb()
                 monster_move_away = self.a_star(wrld, start, run_from_monster[0], -1)
                 dx = monster_move_away[0] - start[0]
                 dy = monster_move_away[1] - start[1]
-                print("Move: {}, {}".format(dx, dy))
+                if dy > 1 or dx > 1 or dx < -1 or dy < -1:
+                    dx = 0
+                    dy = 0
                 self.move(dx, dy)
             elif wrld.wall_at(*next_move):
-                print("STATE: 3")
-                print(x_dir, y_dir)
                 self.move(x_dir, y_dir)
             elif next_move[0] == bomb[0] or next_move[1] == bomb[1] or wrld.explosion_at(*next_move):
-                print("STATE: 4")
                 if not run_from_monster and (bomb[0] == start[0] or bomb[1] == start[1]) \
                         and not wrld.explosion_at(start[0] + dx, start[1] + dy):
-                    print("4.1")
                     bomb_move_away = self.a_star(wrld, start, bomb, -1)
                     dx = bomb_move_away[0] - start[0]
                     dy = bomb_move_away[1] - start[1]
-                    print(dx, dy)
+                    if dy > 1 or dx > 1 or dx < -1 or dy < -1:
+                        dx = 0
+                        dy = 0
                     self.move(dx, dy)
                 elif not run_from_monster:
-                    print("4.2")
-                    print(0, 0)
                     self.move(0, 0)
                 monster_move_away = self.a_star(wrld, start, run_from_monster[0], -1)
                 dx = monster_move_away[0] - start[0]
                 dy = monster_move_away[1] - start[1]
-                print('4.3')
-                print("Move: {}, {}".format(dx, dy))
                 self.move(dx, dy)
             else:
-                print("STATE: 5")
-                print(dx, dy)
                 self.move(dx, dy)
                 if wrld.wall_at(start[0], start[1] + 1) or wrld.wall_at(start[0], start[1] - 1):
                     self.place_bomb()
@@ -153,8 +146,8 @@ class TestCharacter(CharacterEntity):
                         wrld.explosion_at(neighbor[0], neighbor[1]):
                     runaway_list.append(neighbor)
             try:
-                print('run list')
-                print(runaway_list)
+                if not runaway_list:
+                    return 0, 0
                 return runaway_list[-1][0], runaway_list[-1][1]
             except IndexError:
                 pass
@@ -170,6 +163,6 @@ class TestCharacter(CharacterEntity):
         for neighbor in neighbors:
             if 0 <= neighbor[0] < wrld.width() and 0 <= neighbor[1] < wrld.height():
                 if not wrld.wall_at(*neighbor) and not wrld.monsters_at(*neighbor) \
-                        and not wrld.bomb_at(*neighbor) and not wrld.next()[0].explosion_at(*neighbor):
+                        and not wrld.next()[0].explosion_at(*neighbor):
                     result.append(neighbor)
         return result
