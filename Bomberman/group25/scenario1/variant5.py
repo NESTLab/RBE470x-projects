@@ -14,7 +14,7 @@ sys.path.insert(1, '../group25')
 from aStarCharacterWithHeuristic import TestCharacter
 
 # Create the game
-random.seed(523) # TODO Change this if you want different random choices
+random.seed(423) # TODO Change this if you want different random choices
 g = Game.fromfile('map.txt')
 g.add_monster(StupidMonster("monster", # name
                             "S",       # avatar
