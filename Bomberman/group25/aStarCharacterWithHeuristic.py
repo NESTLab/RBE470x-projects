@@ -111,7 +111,7 @@ class TestCharacter(CharacterEntity):
 
             if not selfIsCloserToExitThanMonster:
                 # pick the spot out of the 8 cardinal directions that is least near to a monster.
-                self.path = self.runAway(8, wrld)
+                self.path = self.runAway(7, wrld)
                 self.pathIterator = 0
             elif not self.path or self.checkIfNearMonster(self, 6, wrld) or self.pathIterator == len(self.path) - 1:
                 self.path = self.aStarPath(self, Node(7, 18), wrld, True)
@@ -150,7 +150,7 @@ class TestCharacter(CharacterEntity):
         possibleNodes = []
 
         # start by setting the lowest sum to infinity
-        highestSum = 0
+        highestSum = -math.inf
         # iterate over the available spots of the eight cardinal directions
         for node in self.getNeighbors(self, Node(7, 18), wrld):
             # put the node farthest from the available locations
@@ -160,8 +160,10 @@ class TestCharacter(CharacterEntity):
             for monster in self.monsters:
                 distance = len(self.aStarPath(node, monster, wrld, False))
                 if distance < maxDistance and monster.type == "smart":
-                    if distance < 5:
+                    if distance < 4:
                         # try very hard not to get into detection range
+                        currSum -= 10
+                    elif distance < 5:
                         currSum -= 5
                     currSum += distance
                 elif distance < (maxDistance - 4) and monster.type == "stupid":
@@ -291,12 +293,17 @@ class TestCharacter(CharacterEntity):
         # if the node is close to any monster and the endnode is not a monster, try to avoid it
 
         if shouldPathAroundMonsters:
-            for i in range(1, 3):
-                for key, monsterlist in wrld.monsters.items():
-                    for monster in monsterlist:
+            for i in range(1, 5):
+                for monster in self.monsters:
+                    if monster.type == 'stupid' and i < 3:
                         if (monster.x - i <= currNode.x <= monster.x + i) \
                                 and (monster.y - i <= currNode.y <= monster.y + i):
-                            return max(xDistance, yDistance) + 400 - i * 100
+                            return max(xDistance, yDistance) + 600 - i * 100
+
+                    else:
+                        if (monster.x - i <= currNode.x <= monster.x + i) \
+                                and (monster.y - i <= currNode.y <= monster.y + i):
+                            return max(xDistance, yDistance) + 600 - i * 100
 
         # moving diagonally is one move so can combine x and y distance
         return max(xDistance, yDistance)
