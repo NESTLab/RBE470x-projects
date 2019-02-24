@@ -11,6 +11,7 @@ from entity import CharacterEntity, MonsterEntity
 from colorama import Fore, Back
 import math
 
+
 # this version of monster is used to determine the type of monster when it is supposed to be hidden (see readme)
 class Monster():
     def __init__(self, x, y):
@@ -39,12 +40,11 @@ class Monster():
             self.prevY = self.y
 
             # if moved in a manner consistent to self-preserving monster, then it's smart
-            if self.timesIActedSmart == 7:
+            if self.timesIActedSmart > 2:
                 self.type = "smart"
         else:
             self.type = "stupid"
         return
-
 
     # stolen from Self Preserving Monster
     def must_change_direction(self, wrld):
@@ -52,7 +52,7 @@ class Monster():
         (nx, ny) = (self.prevX + self.velocityX, self.prevY + self.velocityY)
         # If next pos is out of bounds, must change direction
         if ((nx < 0) or (nx >= wrld.width()) or
-            (ny < 0) or (ny >= wrld.height())):
+                (ny < 0) or (ny >= wrld.height())):
             return True
         # If these cells are an explosion, a wall, or a monster, go away
         # return (wrld.explosion_at(self.x, self.y) or
@@ -96,7 +96,7 @@ class TestCharacter(CharacterEntity):
                 i += 1
 
             for monster in self.monsters:
-                if monster.type is None:
+                if monster.type is None or (monster.type == 'smart' and monster.timesIActedSmart < 10):
                     monster.checkVelocity(wrld)
 
         # TODO get the maximum detection maxDistance of a monster
@@ -104,20 +104,22 @@ class TestCharacter(CharacterEntity):
             selfIsCloserToExitThanMonster = True
             for key, monsterlist in wrld.monsters.items():
                 for monster in monsterlist:
-                    if len(self.aStarPath(self, Node(7, 18), wrld, False)) >= len(self.aStarPath(monster, Node(7, 18), wrld, False)):
+                    if len(self.aStarPath(self, Node(7, 18), wrld, False)) >= len(
+                            self.aStarPath(monster, Node(7, 18), wrld, False)):
                         selfIsCloserToExitThanMonster = False
                         break
 
             if not selfIsCloserToExitThanMonster:
                 # pick the spot out of the 8 cardinal directions that is least near to a monster.
-                self.path = self.runAway(4, wrld)
+                self.path = self.runAway(6, wrld)
                 self.pathIterator = 0
             elif not self.path or self.checkIfNearMonster(self, 6, wrld) or self.pathIterator == len(self.path) - 1:
                 self.path = self.aStarPath(self, Node(7, 18), wrld, True)
                 self.pathIterator = 0
 
-        # if no path or within distance 5 of a monster
-        elif not self.path or self.checkIfNearMonster(self, 5, wrld) or self.pathIterator == len(self.path) - 1:
+        # if no path or within distance 6 of a monster
+        # elif not self.path or self.checkIfNearMonster(self, 6, wrld) or self.pathIterator == len(self.path) - 1:
+        else:
             self.path = self.aStarPath(self, Node(7, 18), wrld, True)
             self.pathIterator = 0
         # if within distance 3 of a monster
@@ -129,11 +131,13 @@ class TestCharacter(CharacterEntity):
         for monster in self.monsters:
             # if SelfPreservingMonster (smart) monster is within <maxDistance> steps, return true
             distance = self.aStarPath(node, monster, wrld, False)
-            if monster.type is not None and monster.type == "stupid" and len(distance) - 1 < 2:
+
+            if monster.type is not None and monster.type == "smart" and len(distance) - 1 < maxDistance:
                 return True
 
-            elif monster.type is not None and monster.type == "smart" and len(distance) - 1 < maxDistance:
+            elif len(distance) - 1 < 2:
                 return True
+
         return False
 
     # TODO calculate distance function
@@ -153,17 +157,23 @@ class TestCharacter(CharacterEntity):
             currSum = 0
             for key, monsterlist in wrld.monsters.items():
                 for monster in monsterlist:
-                    # check if the monster is within distance 4, we don't care about distance from monster after that
-                    if self.checkIfNearMonster(self, maxDistance, wrld):
-                        currSum += len(self.aStarPath(self, monster, wrld, False))
+                    distance = len(self.aStarPath(node, monster, wrld, False))
+                    # check if the monster is within distance 6, we don't care about distance from monster after that
+                    if distance < maxDistance:
+                        currSum += distance
             if currSum == highestSum:
                 possibleNodes.append(node)
             elif currSum > highestSum:
                 highestSum = currSum
                 possibleNodes = [node]
         pathToStart = self.aStarPath(self, Node(0, 0), wrld, False)
+        pathToEnd = self.aStarPath(self, Node(7, 18), wrld, False)
         lowestNode = possibleNodes[0]
         for node in possibleNodes:
+            if len(pathToEnd) > 1 and pathToEnd[1].x == node.x and pathToEnd[1].y == node.y:
+                path.append(node)
+                break
+
             if len(pathToStart) > 1 and pathToStart[1].x == node.x and pathToStart[1].y == node.y:
                 path.append(node)
                 break
@@ -232,13 +242,13 @@ class TestCharacter(CharacterEntity):
                         openNodes.append(neighbor)
         print("this is the end")
 
-            # for node in self.getNeighbors(currNode, wrld):
-            #     currCost = self.distanceBetweenNodes(node, startNode) + self.distanceBetweenNodes(node, endNode)
-            #     #if the cost isn't here or
-            #     if currCost not in costs or currCost < costs[node]:
-            #         costs[node] = currCost
-            #         heapVal = currCost
-            #         path[node] = currNode
+        # for node in self.getNeighbors(currNode, wrld):
+        #     currCost = self.distanceBetweenNodes(node, startNode) + self.distanceBetweenNodes(node, endNode)
+        #     #if the cost isn't here or
+        #     if currCost not in costs or currCost < costs[node]:
+        #         costs[node] = currCost
+        #         heapVal = currCost
+        #         path[node] = currNode
 
     # code taken from selfpreserving_monster.py
     def getNeighbors(self, node, endNode, wrld):
@@ -255,11 +265,12 @@ class TestCharacter(CharacterEntity):
                             listOfNeighbors.append(Node(node.x + dx, node.y + dy, parent=node))
                         # Is this cell safe?
                         elif (wrld.exit_at(node.x + dx, node.y + dy) or
-                                wrld.empty_at(node.x + dx, node.y + dy)):
+                              wrld.empty_at(node.x + dx, node.y + dy)):
                             if not (dx == 0 and dy == 0):
                                 listOfNeighbors.append(Node(node.x + dx, node.y + dy, parent=node))
         # All done
         return listOfNeighbors
+
     # absolute distance between two nodes
     def distanceBetweenNodes(self, currNode, endNode, wrld, shouldPathAroundMonsters):
         xDistance = abs(endNode.x - currNode.x)
@@ -267,10 +278,13 @@ class TestCharacter(CharacterEntity):
 
         # if the node is close to any monster and the endnode is not a monster, try to avoid it
 
-        # if shouldPathAroundMonsters:
-        #    for i in range(1, 2):
-        #        if self.checkIfNearMonster(currNode, i, wrld):
-        #            return max(xDistance, yDistance) + 200 - i * 100
+        if shouldPathAroundMonsters:
+            for i in range(1, 3):
+                for key, monsterlist in wrld.monsters.items():
+                    for monster in monsterlist:
+                        if (monster.x - i <= currNode.x <= monster.x + i) \
+                                and (monster.y - i <= currNode.y <= monster.y + i):
+                            return max(xDistance, yDistance) + 400 - i * 100
 
         # moving diagonally is one move so can combine x and y distance
         return max(xDistance, yDistance)
