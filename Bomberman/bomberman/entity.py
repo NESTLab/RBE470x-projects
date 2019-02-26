@@ -220,7 +220,10 @@ class MonsterEntity(AIEntity, MovableEntity):
     @classmethod
     def from_monster(cls, monster):
         """Clone this monster"""
-        return MonsterEntity(monster.name, monster.avatar, monster.x, monster.y)
+        new = MonsterEntity(monster.name, monster.avatar, monster.x, monster.y)
+        new.dx = monster.dx
+        new.dy = monster.dy
+        return new
 
     ###################
     # Private methods #
