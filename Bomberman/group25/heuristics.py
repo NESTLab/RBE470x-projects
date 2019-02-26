@@ -17,32 +17,59 @@ def nodevalue(self, world, player):
     # check surroundings for monsters
     # will also add code to check for bombs
     for m in world.monsters:
-        if y-2 >= 0:
-            if m.y != y-2:
-                value += 5
-            else:
-                if x-2 >= 0:
-                    if m.x != x-2:
-                        value += 5
-                    else:
-                        value -= 2 * m.x
-                if x+2 < world.height():
-                    if m.x != x+2:
-                        value += 5
-                    else:
-                        value -= 2 * m.x
-        if y+2 < world.width():
-            if m.y != y+2:
-                value += 5
-            else:
-                if x-2 >= 0:
-                    if m.x != x-2:
-                        value += 5
-                    else:
-                        value -= 2 * m.x
-                if x+2 < world.height():
-                    if m.x != x+2:
-                        value += 5
-                    else:
-                        value -= 2 * m.x
+        for b in world.bombs:
+            if y-2 >= 0:
+                if m.y != y-2:
+                    value += 5
+                else:
+                    if x-2 >= 0:
+                        if m.x != x-2:
+                            value += 5
+                        else:
+                            value -= 2 * m.x
+                    if x+2 < world.height():
+                        if m.x != x+2:
+                            value += 5
+                        else:
+                            value -= 2 * m.x
+                if b.y != y-2:
+                    value += 5
+                else:
+                    if x-2 >= 0:
+                        if b.x != x-2:
+                            value += 5
+                        else:
+                            value -= 2 * b.x
+                    if x+2 < world.height():
+                        if b.x != x+2:
+                            value += 5
+                        else:
+                            value -= 2 * b.x
+            if y+2 < world.width():
+                if m.y != y+2:
+                    value += 5
+                else:
+                    if x-2 >= 0:
+                        if m.x != x-2:
+                            value += 5
+                        else:
+                            value -= 2 * m.x
+                    if x+2 < world.height():
+                        if m.x != x+2:
+                            value += 5
+                        else:
+                            value -= 2 * m.x
+                if b.y != y+2:
+                    value += 5
+                else:
+                    if x-2 >= 0:
+                        if b.x != x-2:
+                            value += 5
+                        else:
+                            value -= 2 * b.x
+                    if x+2 < world.height():
+                        if b.x != x+2:
+                            value += 5
+                        else:
+                            value -= 2 * b.x
     return value
