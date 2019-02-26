@@ -66,14 +66,10 @@ class SensedWorld(World):
         new = SensedWorld.from_world(self)
         new.time = new.time - 1
         new.update_explosions()
-        ev = new.update_bombs()
-        ev = ev + new.update_monsters()
-        ev = ev + new.update_characters()
-        new.manage_events_and_scores(ev)
-        new.aientity_do(self.monsters)
-        new.aientity_do(self.characters)
-        new.events = ev
-        return (new,ev)
+        new.events = new.update_bombs() + new.update_monsters() + new.update_characters()
+        new.update_scores()
+        new.manage_events()
+        return (new, new.events)
 
     ###################
     # Private methods #

@@ -372,9 +372,9 @@ class World:
         # Return events
         return ev
 
-    def manage_events_and_scores(self, events):
+    def update_scores(self):
         """Updates scores and manages events"""
-        for e in events:
+        for e in self.events:
             if e.tpe == Event.BOMB_HIT_WALL:
                 self.scores[e.character.name] = self.scores[e.character.name] + 10
             elif e.tpe == Event.BOMB_HIT_MONSTER:
@@ -389,7 +389,3 @@ class World:
         for k,clist in self.characters.items():
             for c in clist:
                 self.scores[c.name] = self.scores[c.name] + 1
-
-    def aientity_do(self, entities):
-        """Call AI to get actions for next step"""
-        raise NotImplementedError("Method not implemented")

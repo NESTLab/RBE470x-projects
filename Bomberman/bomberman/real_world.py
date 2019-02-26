@@ -30,14 +30,12 @@ class RealWorld(World):
         """Returns a new world state, along with the events that occurred"""
         self.time = self.time - 1
         self.update_explosions()
-        ev = self.update_bombs()
-        ev = ev + self.update_monsters()
-        ev = ev + self.update_characters()
-        self.manage_events_and_scores(ev)
+        self.events = self.update_bombs() + self.update_monsters() + self.update_characters()
+        self.update_scores()
         self.aientity_do(self.monsters)
         self.aientity_do(self.characters)
-        self.events = ev
-        return (self,ev)
+        self.manage_events()
+        return (self, self.events)
 
     def aientity_do(self, entities):
         """Call AI to get actions for next step"""
@@ -45,3 +43,14 @@ class RealWorld(World):
             for e in elist:
                 # Call AI
                 e.do(SensedWorld.from_world(self))
+
+    def manage_events(self):
+        for e in self.events:
+            if e.tpe == Event.BOMB_HIT_CHARACTER:
+                e.other.done(SensedWorld.from_world(self))
+            elif e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                self.remove_character(e.character)
+                e.character.done(SensedWorld.from_world(self))
+            elif e.tpe == Event.CHARACTER_FOUND_EXIT:
+                e.character.done(SensedWorld.from_world(self))
+        
