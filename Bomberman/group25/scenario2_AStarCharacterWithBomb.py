@@ -1,19 +1,14 @@
 # This is necessary to find the main code
 import sys
-import heapq
-
-from monsters.selfpreserving_monster import SelfPreservingMonster
-from monsters.stupid_monster import StupidMonster
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
-from entity import CharacterEntity, MonsterEntity
-from colorama import Fore, Back
+from entity import CharacterEntity
 import math
 
 
 # this version of monster is used to determine the type of monster when it is supposed to be hidden (see readme)
-class Monster():
+class Monster:
     def __init__(self, x, y):
         self.prevX = x
         self.prevY = y
@@ -24,7 +19,23 @@ class Monster():
 
         self.timesIActedSmart = 0
         self.type = None
+        self.path = []
 
+    def getPath(self, wrld):
+        self.checkVelocity(wrld)
+        path = [Node(self.x, self.y)]
+        isOutOfBounds = False
+        i = 1
+        while not isOutOfBounds:
+            (nx, ny) = (self.prevX + self.velocityX*i, self.prevY + self.velocityY*i)
+            # If next pos is out of bounds, must change direction
+            if ((nx < 0) or (nx >= wrld.width()) or
+                    (ny < 0) or (ny >= wrld.height())):
+                isOutOfBounds = True
+            else:
+                path.append(Node(self.x + self.velocityX*i, self.y + self.velocityY*i))
+                i += 1
+        return path
 
     def checkVelocity(self, wrld):
         currVelocityX = self.x - self.prevX
@@ -43,7 +54,7 @@ class Monster():
             # if moved in a manner consistent to self-preserving monster, then it's smart
             if self.timesIActedSmart > 2:
                 self.type = "smart"
-        else:
+        elif self.timesIActedSmart < 5:
             self.type = "stupid"
         return
 
@@ -75,31 +86,49 @@ class Node():
 
 
 class TestCharacter(CharacterEntity):
-    def __init__(self, name, avatar, x, y):
+    def __init__(self, name, avatar, x, y, shouldPanic, distanceStupid, distanceSmart):
         super().__init__(name, avatar, x, y)
         self.monsters = []
         # TODO keep track of all bombs, unnecessary rn because we have our own
         self.path = []
         self.bombTimer = 0
+        self.explosionTimer = 0
         self.placeBombAtEnd = False
         self.pathIterator = -1
         self.distanceFromExit = 0
+        self.shoudPanic = shouldPanic
+        self.distanceStupid = distanceStupid
+        self.distanceSmart = distanceSmart
+        self.panicCounter = 0
 
     def do(self, wrld):
+        ispanicking = False
         # recalculate the AStar path and distance from exit every time
         self.distanceFromExit = self.distanceBetweenNodes(Node(self.x, self.y), Node(7,18), False)
-        self.calculateCharacterPath(Node(7, 18), wrld)
+        self.calculateCharacterPath(Node(7, 18), wrld, True)
         self.pathIterator = 0
+
+        if self.shoudPanic and self.panicCounter > 3 and len(wrld.bombs.items()) == 0:
+            self.placeBombAtEnd = True
+            self.panicCounter = 0
+
+        if self.explosionTimer > 0:
+            self.explosionTimer -= 1
 
         if self.bombTimer > 0:
             self.bombTimer -= 1
+            if self.bombTimer == 0:
+                self.explosionTimer = wrld.expl_duration
 
-        for k, b in wrld.bombs.items():
-            if b.owner == self:
-                self.runAway(7, wrld)
-                break
+        for bomb in wrld.bombs.items():
+            if self.explosionTimer < 8:
+                self.runAway(6, wrld)
 
-        if not self.monsters:
+        if len(self.path) == 1:
+            self.runAway(6, wrld)
+
+        if not self.monsters or len(self.monsters) != len(wrld.monsters.items()):
+            self.monsters = []
             for key, monsterlist in wrld.monsters.items():
                 for monster in monsterlist:
                     self.monsters.append(Monster(monster.x, monster.y))
@@ -111,19 +140,20 @@ class TestCharacter(CharacterEntity):
                     self.monsters[i].y = monster.y
                 i += 1
             for monster in self.monsters:
-                if monster.type is None or (monster.type == 'smart' and monster.timesIActedSmart < 10):
-                    monster.checkVelocity(wrld)
+                monster.checkVelocity(wrld)
 
         if self.placeBombAtEnd:
             self.place_bomb()
             self.bombTimer = wrld.bomb_time
-            self.runAway(7, wrld)
+            self.runAway(6, wrld)
             self.placeBombAtEnd = False
 
+        if self.checkIfNearMonster(self, wrld):
+            self.panicCounter += 1
+            ispanicking = True
 
-        if self.checkIfNearMonster(self, 5, wrld) or self.bombTimer > 0:
             # if my path ends at the exit
-            selfIsCloserToExitThanMonster = False
+            selfIsCloserToExitThanMonster = True
             myPathToExit = self.calculateAStarPath(self, Node(7, 18), wrld, False)
 
             # if there isn't currently a path to the exit
@@ -133,21 +163,23 @@ class TestCharacter(CharacterEntity):
             else:
                 for key, monsterlist in wrld.monsters.items():
                     for monster in monsterlist:
-                        if len(myPathToExit[1]) >= len(self.calculateAStarPath(monster, Node(7, 18), wrld, False)):
+                        if len(myPathToExit[1]) >= len(self.calculateAStarPath(monster, Node(7, 18), wrld, False)[1]):
                             selfIsCloserToExitThanMonster = False
                             break
 
             if not selfIsCloserToExitThanMonster:
                 # pick the spot out of the 8 cardinal directions that is least near to a monster.
-                self.runAway(7, wrld)
-                self.pathIterator = 0
+                self.runAway(6, wrld)
+            else:
+                self.calculateCharacterPath(Node(7, 18), wrld, False)
 
-
+        if not ispanicking and self.panicCounter > 0:
+            self.panicCounter -= 1
         self.pathIterator += 1
         self.move(self.path[self.pathIterator].x - self.x, self.path[self.pathIterator].y - self.y)
         return
 
-    def checkIfNearMonster(self, node, maxDistance, wrld):
+    def checkIfNearMonster(self, node, wrld):
         for monster in self.monsters:
             # if SelfPreservingMonster (smart) monster is within <maxDistance> steps, return true
             pathBetweenSelfAndMonster = self.calculateAStarPath(node, monster, wrld, False)
@@ -155,10 +187,10 @@ class TestCharacter(CharacterEntity):
             # if there is path between myself and the monster
             if pathBetweenSelfAndMonster[0]:
                 distance = len(pathBetweenSelfAndMonster[1])
-                if monster.type is not None and monster.type == "smart" and distance - 1 < maxDistance:
+                if monster.type is not None and monster.type == "smart" and distance - 1 < self.distanceSmart:
                     return True
 
-                elif distance - 1 < 4:
+                elif distance - 1 < self.distanceStupid:
                     return True
 
         return False
@@ -195,13 +227,14 @@ class TestCharacter(CharacterEntity):
                     # avoid the tiles in the x and y direction
                     bombRange = wrld.expl_range
                     for x in range(-bombRange, bombRange):
-                        if node.x == x and node.y == bomb.y:
+                        if node.x == bomb.x + x and node.y == bomb.y:
                             shouldContinue = True
+                            break
 
                     for y in range(-bombRange, bombRange):
-                        if node.x == bomb.x and node.y == y:
+                        if node.x == bomb.x and node.y == bomb.y + y:
                             shouldContinue = True
-
+                            break
 
             if shouldContinue:
                 continue
@@ -209,31 +242,35 @@ class TestCharacter(CharacterEntity):
             # for monster in monsterlist:
             for monster in self.monsters:
                 pathBetweenSelfAndMonster = self.calculateAStarPath(node, monster, wrld, False)
-
+                myDistance = len(self.calculateAStarPath(self, monster, wrld, False)[1])
                 # if there is a path between myself and the monster
                 if pathBetweenSelfAndMonster[0]:
                     distance = len(pathBetweenSelfAndMonster[1])
-                    if distance < maxDistance and monster.type == "smart":
-                        if distance < 6:
+                    if myDistance < self.distanceSmart and monster.type == "smart":
+                        if distance < (self.distanceSmart - 1):
                             # try very hard not to get into detection range
-                            currSum -= 10
-                        elif distance < 5:
                             currSum -= 5
+                        elif distance < (self.distanceSmart - 2):
+                            currSum -= 10
+
+                        # monsterPath = monster.getPath(wrld)
+                        # for monsterNode in monsterPath:
+                        #     if monsterNode.x == node.x and monsterNode.y == node.y:
+                        #         currSum -= 3
+                        #     break
+
                         currSum += distance
-                    elif distance < (maxDistance - 2):
-                        if distance < 4:
-                            # try kinda hard not to get too close to dumb
-                            currSum -= 3
+                    elif myDistance < self.distanceStupid:
                         currSum += distance
 
-            if currSum == highestSum:
+            if highestSum + 2 <= currSum <= highestSum - 2:
                 possibleNodes.append(node)
             elif currSum > highestSum:
                 highestSum = currSum
                 possibleNodes = [node]
 
         pathToStart = (self.calculateAStarPath(self, Node(0, 0), wrld, True))[1]
-        self.calculateCharacterPath(Node(7, 18), wrld)
+        self.calculateCharacterPath(Node(7, 18), wrld, True)
         if not possibleNodes:
             # accept death.
             self.path = [Node(self.x, self.y), Node(self.x, self.y)]
@@ -258,9 +295,9 @@ class TestCharacter(CharacterEntity):
         self.path = path
 
     # return the character's path to the end
-    def calculateCharacterPath(self, endNode, wrld):
+    def calculateCharacterPath(self, endNode, wrld, shouldPathAroundMonsters):
         startNode = Node(self.x, self.y)
-        path = self.calculateAStarPath(startNode, endNode, wrld, True)
+        path = self.calculateAStarPath(startNode, endNode, wrld, shouldPathAroundMonsters)
 
         if path[0]:
             self.path = path[1]
@@ -270,15 +307,15 @@ class TestCharacter(CharacterEntity):
             minNode = startNode
             minNode.hval = math.inf
             for node in path[1]:
-                node.hval = self.distanceBetweenNodes(node, endNode, False)
+                node.hval = self.absoluteDistanceBetweenNodes(node, endNode)
                 if node.hval < minNode.hval:
                     minNode = node
 
-            if self.distanceBetweenNodes(minNode, endNode, False) == self.distanceFromExit and self.bombTimer == 0:
+            if self.absoluteDistanceBetweenNodes(minNode, endNode) == self.absoluteDistanceBetweenNodes(self, endNode) and self.bombTimer == 0:
                 self.placeBombAtEnd = True
 
             else:
-                self.calculateCharacterPath(minNode, wrld)
+                self.calculateCharacterPath(minNode, wrld, True)
 
 
     # take into account walls; if there is a wall in the way, move to it and bomb the heck out of it
@@ -362,7 +399,15 @@ class TestCharacter(CharacterEntity):
         # All done
         return listOfNeighbors
 
-    # absolute distance between two nodes
+    # absolute distance between nodes
+    def absoluteDistanceBetweenNodes(self, currNode, endNode):
+        xDistance = abs(endNode.x - currNode.x)
+        yDistance = abs(endNode.y - currNode.y)
+
+        return xDistance + yDistance
+
+
+    # distance between two nodes
     def distanceBetweenNodes(self, currNode, endNode, shouldPathAroundMonsters):
         xDistance = abs(endNode.x - currNode.x)
         yDistance = abs(endNode.y - currNode.y)
@@ -370,17 +415,17 @@ class TestCharacter(CharacterEntity):
         # if the node is close to any monster and the endnode is not a monster, try to avoid it
 
         if shouldPathAroundMonsters:
-            for i in range(0, 5):
+            for i in range(0, 4):
                 for monster in self.monsters:
                     if monster.type == 'stupid' and i < 3:
                         if (monster.x - i <= currNode.x <= monster.x + i) \
                                 and (monster.y - i <= currNode.y <= monster.y + i):
-                            return max(xDistance, yDistance) + 600 - i * 100
+                            return max(xDistance, yDistance) + 300 - i * 100
 
                     else:
                         if (monster.x - i <= currNode.x <= monster.x + i) \
                                 and (monster.y - i <= currNode.y <= monster.y + i):
-                            return max(xDistance, yDistance) + 600 - i * 100
+                            return max(xDistance, yDistance) + 300 - i * 100
 
         # moving diagonally is one move so can combine x and y distance
         return max(xDistance, yDistance)

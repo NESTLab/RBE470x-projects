@@ -135,7 +135,7 @@ class TestCharacter(CharacterEntity):
             if monster.type is not None and monster.type == "smart" and len(distance) - 1 < maxDistance:
                 return True
 
-            elif len(distance) - 1 < 2:
+            elif len(distance) - 1 < 4:
                 return True
 
         return False
@@ -158,15 +158,17 @@ class TestCharacter(CharacterEntity):
             # for key, monsterlist in wrld.monsters.items():
             #     for monster in monsterlist:
             for monster in self.monsters:
+                myDistance = len(self.aStarPath(self, monster, wrld, False))
+
                 distance = len(self.aStarPath(node, monster, wrld, False))
-                if distance < maxDistance and monster.type == "smart":
+                if myDistance < maxDistance and monster.type == "smart":
                     if distance < 4:
                         # try very hard not to get into detection range
                         currSum -= 10
                     elif distance < 5:
                         currSum -= 5
                     currSum += distance
-                elif distance < (maxDistance - 4) and monster.type == "stupid":
+                elif myDistance < (maxDistance - 3) and monster.type == "stupid":
                     if distance < 3:
                         # try kinda hard not to get too close to dumb
                         currSum -= 3

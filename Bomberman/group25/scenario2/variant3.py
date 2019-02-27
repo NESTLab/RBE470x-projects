@@ -10,7 +10,7 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../group25')
-from testcharacter import TestCharacter
+from scenario2_AStarCharacterWithBomb import TestCharacter
 from scen2var3character import Scen2Var3Character
 
 # Create the game
@@ -23,10 +23,11 @@ g.add_monster(SelfPreservingMonster("monster", # name
 ))
 
 # TODO Add your character
-g.add_character(Scen2Var3Character("me", # name
+g.add_character(TestCharacter("me", # name
                               "C",  # avatar
                               0, 0,  # position
-                              3 # depth
+                              False,
+                              3, 6
 ))
 
 # Run!
