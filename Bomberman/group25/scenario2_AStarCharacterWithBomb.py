@@ -118,10 +118,10 @@ class TestCharacter(CharacterEntity):
         if self.bombTimer > 0:
             self.bombTimer -= 1
             if self.bombTimer == 0:
-                self.explosionTimer = wrld.expl_duration
+                self.explosionTimer = wrld.expl_duration + 1
 
         for bomb in wrld.bombs.items():
-            if self.explosionTimer < 8:
+            if self.explosionTimer < 6:
                 self.runAway(6, wrld)
 
         if len(self.path) == 1:
@@ -252,18 +252,12 @@ class TestCharacter(CharacterEntity):
                             currSum -= 5
                         elif distance < (self.distanceSmart - 2):
                             currSum -= 10
-
-                        # monsterPath = monster.getPath(wrld)
-                        # for monsterNode in monsterPath:
-                        #     if monsterNode.x == node.x and monsterNode.y == node.y:
-                        #         currSum -= 3
-                        #     break
-
-                        currSum += distance
-                    elif myDistance < self.distanceStupid:
                         currSum += distance
 
-            if highestSum + 2 <= currSum <= highestSum - 2:
+                    elif myDistance < self.distanceStupid + 1:
+                        currSum += distance
+
+            if currSum == highestSum:
                 possibleNodes.append(node)
             elif currSum > highestSum:
                 highestSum = currSum
@@ -277,6 +271,14 @@ class TestCharacter(CharacterEntity):
             return
 
         firstNode = possibleNodes[0]
+
+        # if len(path) <= 2:
+        #     for node in possibleNodes:
+        #         # if node is in the path to the start
+        #         if len(pathToStart) > 1 and pathToStart[1].x == node.x and pathToStart[1].y == node.y:
+        #             path.append(node)
+        #             break
+
         # append possible nodes
         for node in possibleNodes:
             # if node is in the path to the end
@@ -284,10 +286,6 @@ class TestCharacter(CharacterEntity):
                 path.append(node)
                 break
 
-            # if node is in the path to the start
-            if len(pathToStart) > 1 and pathToStart[1].x == node.x and pathToStart[1].y == node.y:
-                path.append(node)
-                break
 
         # if no node was added before, just add the first node
         if len(path) == 1:
@@ -311,11 +309,13 @@ class TestCharacter(CharacterEntity):
                 if node.hval < minNode.hval:
                     minNode = node
 
-            if self.absoluteDistanceBetweenNodes(minNode, endNode) == self.absoluteDistanceBetweenNodes(self, endNode) and self.bombTimer == 0:
+            if self.absoluteDistanceBetweenNodes(minNode, endNode) == self.absoluteDistanceBetweenNodes(self, endNode) \
+                    and self.bombTimer == 0 and self.explosionTimer == 0 and len(wrld.explosions.items()) == 0:
                 self.placeBombAtEnd = True
 
             else:
                 self.calculateCharacterPath(minNode, wrld, True)
+
 
 
     # take into account walls; if there is a wall in the way, move to it and bomb the heck out of it
