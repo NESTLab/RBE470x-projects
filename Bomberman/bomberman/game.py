@@ -106,11 +106,11 @@ class Game:
         self.draw()
         step()
         while not self.done():
-            self.display_gui()
             (self.world, self.events) = self.world.next()
             self.display_gui()
             self.draw()
             step()
+            self.world.next_decisions()
         colorama.deinit()
 
     ###################

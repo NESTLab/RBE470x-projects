@@ -32,10 +32,12 @@ class RealWorld(World):
         self.update_explosions()
         self.events = self.update_bombs() + self.update_monsters() + self.update_characters()
         self.update_scores()
-        self.aientity_do(self.monsters)
-        self.aientity_do(self.characters)
         self.manage_events()
         return (self, self.events)
+
+    def next_decisions(self):
+        self.aientity_do(self.monsters)
+        self.aientity_do(self.characters)
 
     def aientity_do(self, entities):
         """Call AI to get actions for next step"""
