@@ -7,13 +7,13 @@ import math
 class Game:
     """Game class"""
 
-    def __init__(self, width, height, max_time, bomb_time, expl_duration, expl_range):
+    def __init__(self, width, height, max_time, bomb_time, expl_duration, expl_range, sprite_dir="../../bomberman/sprites/"):
         self.world = RealWorld.from_params(width, height, max_time, bomb_time, expl_duration, expl_range)
-        self.sprite_dir = "../../bomberman/sprites/"
+        self.sprite_dir = sprite_dir
         self.load_gui(width, height)
 
     @classmethod
-    def fromfile(cls, fname):
+    def fromfile(cls, fname, sprite_dir="../../bomberman/sprites/"):
         with open(fname, 'r') as fd:
             # First lines are parameters
             max_time = int(fd.readline().split()[1])
@@ -32,7 +32,7 @@ class Game:
                     raise RuntimeError("Row", height, "is not", width, "characters long")
                 row = fd.readline()
             # Create empty world
-            gm = cls(width, height, max_time, bomb_time, expl_duration, expl_range)
+            gm = cls(width, height, max_time, bomb_time, expl_duration, expl_range, sprite_dir)
             # Now parse the data in the world
             fd.seek(startpos)
             for y in range(0, height):
@@ -70,7 +70,6 @@ class Game:
         self.explosion_sprite = pygame.transform.scale(self.explosion_sprite, rect)
 
     def display_gui(self):
-        pygame.event.clear()
         for x in range(self.world.width()):
             for y in range(self.world.height()):
                 top = self.block_height * y
@@ -91,20 +90,28 @@ class Game:
                     self.screen.blit(self.bomb_sprite, rect)
         pygame.display.flip()
 
-    def go(self):
+    def go(self, wait=0):
+        """ Main game loop. """
+
+        if wait is 0:
+            def step():
+                pygame.event.clear()
+                input("Press Enter to continue or CTRL-C to stop...")
+        else:
+            def step():
+                pygame.time.wait(abs(wait))
+
         colorama.init(autoreset=True)
         self.display_gui()
         self.draw()
+        step()
         while not self.done():
-            self.display_gui()
-            self.step()
+            (self.world, self.events) = self.world.next()
             self.display_gui()
             self.draw()
+            step()
+            self.world.next_decisions()
         colorama.deinit()
-
-    def step(self):
-        (self.world, self.events) = self.world.next()
-        input("Press Enter to continue...")
 
     ###################
     # Private methods #
@@ -114,6 +121,10 @@ class Game:
         self.world.printit()
 
     def done(self):
+        # User Exit
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
         # Time's up
         if self.world.time <= 0:
             return True

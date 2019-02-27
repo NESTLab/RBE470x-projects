@@ -220,11 +220,17 @@ class MonsterEntity(AIEntity, MovableEntity):
     @classmethod
     def from_monster(cls, monster):
         """Clone this monster"""
-        return MonsterEntity(monster.name, monster.avatar, monster.x, monster.y)
+        new = MonsterEntity(monster.name, monster.avatar, monster.x, monster.y)
+        new.dx = monster.dx
+        new.dy = monster.dy
+        return new
 
     ###################
     # Private methods #
     ###################
+
+    def __hash__(self):
+        return hash((self.name, self.x, self.y))
 
     def __eq__(self, other):
         return (super(MovableEntity, self).__eq__(other) and
@@ -255,6 +261,9 @@ class CharacterEntity(AIEntity, MovableEntity):
     def set_cell_color(self, x, y, color):
         """Sets the cell color at (x,y)"""
         self.tiles[(x,y)] = color
+
+    def done(self, wrld):
+        pass
 
     ###################
     # Private methods #
