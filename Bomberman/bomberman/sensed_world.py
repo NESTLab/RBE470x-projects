@@ -17,21 +17,24 @@ class SensedWorld(World):
         # Copy grid
         new.grid          = [[wrld.wall_at(x,y) for y in range(wrld.height())] for x in range(wrld.width())]
         # Copy monsters
+        mmapping = {}
         for k, omonsters in wrld.monsters.items():
             # Make a new list of monsters at k
             nmonsters = []
             # Create a new generic monster for each monster
             # This way, every monster instance can be manipulated individually
             for m in omonsters:
-                nmonsters.append(MonsterEntity.from_monster(m))
+                nm = MonsterEntity.from_monster(m)
+                nmonsters.append(nm)
+                mmapping[m] = nm
             # Set list of monsters at k
             new.monsters[k] = nmonsters
         # Copy characters, scores, and build a mapping between old and new
-        mapping = {}
+        cmapping = {}
         for k, ocharacters in wrld.characters.items():
             # Make a new list of characters at k
             ncharacters = []
-            # Create a new generic character for each monster
+            # Create a new generic character for each character
             # This way, every character instance can be manipulated individually
             # Plus, you can't peek into other characters' variables
             for oc in ocharacters:
@@ -39,17 +42,30 @@ class SensedWorld(World):
                 nc = CharacterEntity.from_character(oc)
                 ncharacters.append(nc)
                 # Add to mapping
-                mapping[oc] = nc
+                cmapping[oc] = nc
             new.characters[k] = ncharacters
         # Copy bombs
         for k, ob in wrld.bombs.items():
-            c = mapping.get(ob.owner, ob.owner)
+            c = cmapping.get(ob.owner, ob.owner)
             new.bombs[k] = BombEntity(ob.x, ob.y, ob.timer, c)
         # Copy explosions
         for k, oe in wrld.explosions.items():
-            c = mapping.get(oe.owner)
+            c = cmapping.get(oe.owner)
             if c:
                 new.explosions[k] = ExplosionEntity(oe.x, oe.y, oe.timer, c)
+        # Copy events
+        for e in wrld.events:
+            # Create a new event
+            # Tricky: if the character related to the event has died, duplicate the original character
+            newev = Event(e.tpe, cmapping.get(e.character, CharacterEntity.from_character(e.character)))
+            # Manage other attribute
+            if e.tpe == Event.BOMB_HIT_MONSTER:
+                newev.other = MonsterEntity.from_monster(e.other)
+            elif e.tpe == Event.BOMB_HIT_CHARACTER:
+                newev.other = CharacterEntity.from_character(e.other)
+            elif e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                newev.other = mmapping.get(e.other, MonsterEntity.from_monster(e.other))
+            new.events.append(newev)
         # Copy scores
         for name,score in wrld.scores.items():
             new.scores[name] = score
@@ -66,14 +82,10 @@ class SensedWorld(World):
         new = SensedWorld.from_world(self)
         new.time = new.time - 1
         new.update_explosions()
-        ev = new.update_bombs()
-        ev = ev + new.update_monsters()
-        ev = ev + new.update_characters()
-        new.manage_events_and_scores(ev)
-        new.aientity_do(self.monsters)
-        new.aientity_do(self.characters)
-        new.events = ev
-        return (new,ev)
+        new.events = new.update_bombs() + new.update_monsters() + new.update_characters()
+        new.update_scores()
+        new.manage_events()
+        return (new, new.events)
 
     ###################
     # Private methods #
@@ -85,3 +97,8 @@ class SensedWorld(World):
             for e in elist:
                 # Call AI
                 e.do(None)
+
+    def manage_events(self):
+        for e in self.events:
+            if e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                self.remove_character(e.character)
