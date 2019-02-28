@@ -1,4 +1,4 @@
-def nodevalue(self, world, player):
+def nodevalue(world, player):
     value = 0
     actions = world.events
 

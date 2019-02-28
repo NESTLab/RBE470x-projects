@@ -46,7 +46,7 @@ class Monster:
             self.prevX = self.x
             self.prevY = self.y
 
-        elif self.velocityX == currVelocityX and self.velocityY == currVelocityY:
+        elif self.velocityX == currVelocityX and self.velocityY == currVelocityY and self.type != "stupid":
             self.timesIActedSmart += 1
             self.prevX = self.x
             self.prevY = self.y
@@ -54,7 +54,7 @@ class Monster:
             # if moved in a manner consistent to self-preserving monster, then it's smart
             if self.timesIActedSmart > 2:
                 self.type = "smart"
-        elif self.timesIActedSmart < 5:
+        elif self.timesIActedSmart < 8:
             self.type = "stupid"
         return
 
@@ -96,10 +96,11 @@ class TestCharacter(CharacterEntity):
         self.placeBombAtEnd = False
         self.pathIterator = -1
         self.distanceFromExit = 0
-        self.shoudPanic = shouldPanic
+        self.shouldPanic = shouldPanic
         self.distanceStupid = distanceStupid
         self.distanceSmart = distanceSmart
         self.panicCounter = 0
+        self.numberOfBombsPlaced = -1
 
     def do(self, wrld):
         ispanicking = False
@@ -108,24 +109,20 @@ class TestCharacter(CharacterEntity):
         self.calculateCharacterPath(Node(7, 18), wrld, True)
         self.pathIterator = 0
 
-        if self.shoudPanic and self.panicCounter > 3 and len(wrld.bombs.items()) == 0:
-            self.placeBombAtEnd = True
-            self.panicCounter = 0
-
         if self.explosionTimer > 0:
             self.explosionTimer -= 1
 
         if self.bombTimer > 0:
             self.bombTimer -= 1
             if self.bombTimer == 0:
+                self.numberOfBombsPlaced += 1
                 self.explosionTimer = wrld.expl_duration + 1
 
         for bomb in wrld.bombs.items():
-            if self.explosionTimer < 6:
-                self.runAway(6, wrld)
+            self.runAway(wrld)
 
         if len(self.path) == 1:
-            self.runAway(6, wrld)
+            self.runAway(wrld)
 
         if not self.monsters or len(self.monsters) != len(wrld.monsters.items()):
             self.monsters = []
@@ -142,11 +139,6 @@ class TestCharacter(CharacterEntity):
             for monster in self.monsters:
                 monster.checkVelocity(wrld)
 
-        if self.placeBombAtEnd:
-            self.place_bomb()
-            self.bombTimer = wrld.bomb_time
-            self.runAway(6, wrld)
-            self.placeBombAtEnd = False
 
         if self.checkIfNearMonster(self, wrld):
             self.panicCounter += 1
@@ -166,12 +158,22 @@ class TestCharacter(CharacterEntity):
                         if len(myPathToExit[1]) >= len(self.calculateAStarPath(monster, Node(7, 18), wrld, False)[1]):
                             selfIsCloserToExitThanMonster = False
                             break
+            if self.shouldPanic and self.bombTimer == 0 and self.x == 0:
+                self.placeBombAtEnd = True
+                self.panicCounter = 0
 
-            if not selfIsCloserToExitThanMonster:
+            elif not selfIsCloserToExitThanMonster:
                 # pick the spot out of the 8 cardinal directions that is least near to a monster.
-                self.runAway(6, wrld)
+                self.runAway(wrld)
+
             else:
                 self.calculateCharacterPath(Node(7, 18), wrld, False)
+
+        if self.placeBombAtEnd:
+            self.place_bomb()
+            self.bombTimer = wrld.bomb_time
+            self.runAway(wrld)
+            self.placeBombAtEnd = False
 
         if not ispanicking and self.panicCounter > 0:
             self.panicCounter -= 1
@@ -198,20 +200,22 @@ class TestCharacter(CharacterEntity):
     # TODO calculate distance function
     # def distanceBetweenPoints():
 
-    # Implement alpha beta search to try to run away faster
-    def runAway(self, maxDistance, wrld):
+    # TODO Implement alpha beta search to try to run away faster
+    def runAway(self, wrld):
         # put current position into the path
         path = [Node(self.x, self.y)]
         possibleNodes = []
+        shouldRun = False
 
         # start by setting the lowest sum to infinity
         highestSum = -math.inf
 
+        # get the set of neighbors, including ourself
         neighbors = self.getNeighbors(self, Node(7, 18), wrld)
         neighbors.append(Node(self.x, self.y))
+
         # iterate over the available spots of the eight cardinal directions
         for node in neighbors:
-            # put the node farthest from the available locations
             currSum = 0
 
             # if there's an explosion, don't add
@@ -221,10 +225,9 @@ class TestCharacter(CharacterEntity):
             shouldContinue = False
 
             # TODO account for other players bombs
-            # only bomb is ours:
+            # do not include the nodes that would be in bomb's path of explosion
             for k, bomb in wrld.bombs.items():
                 if self.bombTimer <= 2:
-                    # avoid the tiles in the x and y direction
                     bombRange = wrld.expl_range
                     for x in range(-bombRange, bombRange):
                         if node.x == bomb.x + x and node.y == bomb.y:
@@ -235,61 +238,82 @@ class TestCharacter(CharacterEntity):
                         if node.x == bomb.x and node.y == bomb.y + y:
                             shouldContinue = True
                             break
-
             if shouldContinue:
                 continue
 
+            node.hval = math.inf
             # for monster in monsterlist:
             for monster in self.monsters:
                 pathBetweenSelfAndMonster = self.calculateAStarPath(node, monster, wrld, False)
                 myDistance = len(self.calculateAStarPath(self, monster, wrld, False)[1])
+
+
                 # if there is a path between myself and the monster
                 if pathBetweenSelfAndMonster[0]:
                     distance = len(pathBetweenSelfAndMonster[1])
+                    # distance = self.distanceBetweenNodes(node, monster, False)
                     if myDistance < self.distanceSmart and monster.type == "smart":
                         if distance < (self.distanceSmart - 1):
                             # try very hard not to get into detection range
                             currSum -= 5
+
                         elif distance < (self.distanceSmart - 2):
                             currSum -= 10
                         currSum += distance
+                        node.hval = self.absoluteDistanceBetweenNodes(node, monster)
+                        if len(wrld.bombs.items()) > 0:
+                            shouldRun = True
 
                     elif myDistance < self.distanceStupid + 1:
                         currSum += distance
+                        shouldRun = True
+
 
             if currSum == highestSum:
                 possibleNodes.append(node)
+
             elif currSum > highestSum:
                 highestSum = currSum
                 possibleNodes = [node]
 
-        pathToStart = (self.calculateAStarPath(self, Node(0, 0), wrld, True))[1]
+        pathToStart = (self.calculateAStarPath(self, Node(0, 4*self.numberOfBombsPlaced), wrld, True))[1]
         self.calculateCharacterPath(Node(7, 18), wrld, True)
         if not possibleNodes:
             # accept death.
             self.path = [Node(self.x, self.y), Node(self.x, self.y)]
             return
 
-        firstNode = possibleNodes[0]
+        bestNode = None
+        highestSum = -math.inf
 
-        # if len(path) <= 2:
-        #     for node in possibleNodes:
-        #         # if node is in the path to the start
-        #         if len(pathToStart) > 1 and pathToStart[1].x == node.x and pathToStart[1].y == node.y:
-        #             path.append(node)
-        #             break
+        if shouldRun:
+            for node in possibleNodes:
+                if node.hval > highestSum:
+                    bestNode = node
+                    highestSum = node.hval
 
-        # append possible nodes
-        for node in possibleNodes:
-            # if node is in the path to the end
-            if len(self.path) > 1 and self.path[1].x == node.x and self.path[1].y == node.y:
-                path.append(node)
-                break
+        if bestNode is None and len(wrld.bombs.items()) == 0:
+            # append possible nodes
+            for node in possibleNodes:
+                # if node is in the path to the end and the end isn't some bomb
+                if len(wrld.bombs.items()) > 0 and len(self.path) > 1 and self.path[1].x == node.x and self.path[1].y == node.y:
+                    bestNode = node
+                    break
+
+        if bestNode is None:
+            for node in possibleNodes:
+                # if node is in the path to the start
+                if len(pathToStart) > 1 and pathToStart[1].x == node.x and pathToStart[1].y == node.y:
+                    bestNode = node
+                    break
+
 
 
         # if no node was added before, just add the first node
-        if len(path) == 1:
-            path.append(firstNode)
+        if bestNode is not None:
+            path.append(bestNode)
+        else:
+            path.append(possibleNodes[0])
         self.path = path
 
     # return the character's path to the end
@@ -310,7 +334,7 @@ class TestCharacter(CharacterEntity):
                     minNode = node
 
             if self.absoluteDistanceBetweenNodes(minNode, endNode) == self.absoluteDistanceBetweenNodes(self, endNode) \
-                    and self.bombTimer == 0 and self.explosionTimer == 0 and len(wrld.explosions.items()) == 0:
+                and self.bombTimer == 0 and len(wrld.explosions.items()) == 0:
                 self.placeBombAtEnd = True
 
             else:
@@ -390,10 +414,9 @@ class TestCharacter(CharacterEntity):
                         # add node if it's the end node, useful if calculating distance to monster
                         if endNode.x == node.x + dx and endNode.y == node.y + dy:
                             listOfNeighbors.append(Node(node.x + dx, node.y + dy, parent=node))
-                        # Is this cell an exit, empty or a monster?
-                        elif (wrld.exit_at(node.x + dx, node.y + dy) or
-                              wrld.empty_at(node.x + dx, node.y + dy) or
-                              wrld.monsters_at(node.x + dx, node.y + dy)):
+                        # Is this cell not a wall or an explosion?
+                        elif not (wrld.wall_at(node.x + dx, node.y + dy) or
+                                  wrld.explosion_at(node.x + dx, node.y + dy)):
                             if not (dx == 0 and dy == 0):
                                 listOfNeighbors.append(Node(node.x + dx, node.y + dy, parent=node))
         # All done
