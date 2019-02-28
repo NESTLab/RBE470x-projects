@@ -12,6 +12,7 @@ MONSTER = 1  # in danger from monster
 BOMB = 2  # in danger from bomb
 BLOCKED = 3  # path to exit is blocked (not in danger from monster)
 CRAZY = 4  # in danger from monster and bombs
+STAY = 5
 
 
 
@@ -20,7 +21,7 @@ class TestCharacter(CharacterEntity):
         super().__init__(name, avatar, x, y)
         self.exit_position = None
         self.start = (self.x, self.y)
-        self.came_from = {self.start: None}
+        self.came_from = {self.start: (None, 0)}
         self.state = NORMAL
         self.prev_state = None
         self.stillness_counter = 0
@@ -47,7 +48,7 @@ class TestCharacter(CharacterEntity):
 
         self.prev_state = self.state
         if(monster is not None):
-            if self.get_distance_to_exit((self.x, self.y), (monster[0], monster[1])) < 4:
+            if self.get_chebyshev((self.x, self.y), (monster[0], monster[1])) < 3:
                 self.state = MONSTER
             else:
                 self.state = NORMAL
@@ -55,7 +56,8 @@ class TestCharacter(CharacterEntity):
         frontier = PQueue()
         frontier.put((self.x, self.y), 0)
         cost_so_far = {(self.x, self.y): 0}
-        print(self.state)
+        print("state: ", self.state)
+        print("prev_state: ", self.prev_state)
 
         if self.state == (NORMAL) or self.state == BLOCKED:
             if self.x == self.start[0] and self.y == self.start[1] or self.prev_state is not NORMAL:
@@ -66,7 +68,7 @@ class TestCharacter(CharacterEntity):
         elif self.state == BOMB:
             self.a_star(frontier, cost_so_far, wrld, None)
 
-        next_move = self.find_next_move(self.came_from, self.exit_position)
+        next_move = self.find_next_move(self.came_from, self.exit_position, wrld)
 
         if (self.lastx == self.x and self.lasty == self.y):
             self.stillness_counter += 1
@@ -79,6 +81,8 @@ class TestCharacter(CharacterEntity):
         if (self.state is BLOCKED and self.stillness_counter == 2):
             # drop a bomb
             self.place_bomb()
+            curr_state = self.state
+            self.prev_state = curr_state
             self.state = BOMB
             print("I'm dropping a bomb")
         else:
@@ -96,15 +100,15 @@ class TestCharacter(CharacterEntity):
                 expected = 0
                 if self.state == MONSTER:
                     expected = self.exp_value(wrld, self.exit_position, next[0], next[1], monster[0], monster[1], 0)
-                if self.state == BOMB:
-                    #print("expected bomb values injected")
-                    expected = self.bomb(wrld, next[0], next[1])
-                new_cost = cost_so_far[(self.x, self.y)] + 1 - expected
+                # if self.state == BOMB:
+                #     #print("expected bomb values injected")
+                #     expected = self.bomb(wrld, next[0], next[1])
+                new_cost = cost_so_far[(current[0], current[1])] + 1 - expected
                 if next not in cost_so_far or new_cost < cost_so_far[next]:
                     cost_so_far[next] = new_cost
                     priority = new_cost + (20 - self.get_distance_to_exit(next, self.exit_position))
                     frontier.put((next[0], next[1]), priority)
-                    self.came_from[next] = current
+                    self.came_from[next] = (current, priority)
 
     def exp_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
         if (char_x, char_y) == exit_position:
@@ -128,17 +132,69 @@ class TestCharacter(CharacterEntity):
             value = max(value, self.exp_value(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1))
         return value
 
-    def find_next_move(self, came_from, exit_position):
+    def find_next_move(self, came_from, exit_position, wrld):
         next_move = exit_position
 
         if(exit_position in came_from.keys()):
-            while came_from[next_move] is not (self.x, self.y):
-                if came_from[next_move] == (self.x, self.y):
+            while came_from[next_move][0] is not (self.x, self.y):
+                if came_from[next_move][0] == (self.x, self.y):
                     break
-                next_move = came_from[next_move]
+                next_move = came_from[next_move][0]
         elif(self.state is NORMAL or self.state is BLOCKED):
             self.state = BLOCKED
+            next_move = self.find_blocked_move(wrld, exit_position)
 
+        if(self.state is BOMB):
+            next_move = self.find_bomb_move(wrld)
+        if(self.state is STAY):
+            next_move = (self.x, self.y)
+            explosions = []
+            for x in range(0, wrld.width()):
+                for y in range(0, wrld.height()):
+                    explo = wrld.explosion_at(x, y)
+                    if (explo is not None):
+                        explosions.append(explo)
+            if len(explosions) == 0:
+                self.state = NORMAL
+                self.prev_state = STAY
+
+        print("next move: ", next_move)
+        return next_move
+
+    def find_blocked_move(self, wrld, exit_position):
+        possible_moves = self.get_possible_moves(self.x, self.y, wrld)
+        move_values = []
+        for move in possible_moves:
+            move_values.append(self.get_chebyshev((move[0], move[1]), exit_position))
+        min = None
+        min_val = 1000000
+        for i in range(0, len(move_values)):
+            if move_values[i] < min_val:
+                min_val = move_values[i]
+                min = i
+
+        return possible_moves[i]
+
+    def find_bomb_move(self, wrld):
+        print("finding bomb move")
+        next_move = None
+
+        possible_moves = self.get_possible_moves(self.x, self.y, wrld)
+        move_scores = []
+        for move in possible_moves:
+            move_scores.append(self.bomb(wrld, move[0], move[1]))
+            print("move: ", move)
+            print("score: ", self.bomb(wrld, move[0], move[1]))
+        max = 0
+        max_val = -1000
+        for i in range(0, len(move_scores)):
+            if move_scores[i] > max_val:
+                max_val = move_scores[i]
+                max = i
+
+        next_move = possible_moves[max]
+        print(possible_moves)
+        print(move_scores)
 
         return next_move
 
@@ -154,23 +210,21 @@ class TestCharacter(CharacterEntity):
                     bombs.append(bomb)
         # check if on axis and assign value for expected
         if (len(bombs) == 0):
-            self.state = NORMAL
+            self.state = STAY
+            self.prev_state = BOMB
             return 0
         else:
             for bomb in bombs:
                 dist = self.get_chebyshev((bomb.x, bomb.y), (char_x, char_y))
                 if (dist < 4):
-                    if (abs(bomb.x - char_x) == abs(bomb.y - char_y)):
-                        # on the diagonal axis
-                        value -= (100000 - dist)
-                    elif(abs(bomb.x - char_x) == 0):
+                    if(abs(bomb.x - char_x) == 0):
                         # on the same y axis
-                        value -= 100000 - dist
+                        value -= 5 - dist
                     elif(abs(bomb.y - char_y) == 0):
                         # on the same x axis
-                        value -= 100000 - dist
+                        value -= 5 - dist
                     else:
-                        return 0
+                        return 100 - self.get_chebyshev((bomb.x, bomb.y), (char_x, char_y))
 
         return value
 
