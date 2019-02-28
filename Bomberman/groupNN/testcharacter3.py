@@ -54,8 +54,8 @@ class TestCharacter(CharacterEntity):
         print(self.state)
 
         if self.state == NORMAL:
-            if self.x == self.start[0] and self.y == self.start[1] or self.prev_state is not NORMAL:
-                self.a_star(frontier, cost_so_far, wrld, None)
+            # if self.x == self.start[0] and self.y == self.start[1] or self.prev_state is not NORMAL:
+            self.a_star(frontier, cost_so_far, wrld, None)
         elif self.state == MONSTER:
             self.a_star(frontier, cost_so_far, wrld, monster)
 
@@ -82,24 +82,25 @@ class TestCharacter(CharacterEntity):
 
     def exp_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
         if (char_x, char_y) == exit_position:
-            return (0.9 ** depth) * 100000
+            return (1.1 ** depth) * 100000
         value = 0
         monster_moves = self.get_possible_moves(monster_x, monster_y, wrld)
         for move in monster_moves:
             prob = 1 / len(monster_moves)
-            v = (0.9 ** depth) * self.max_value(wrld, exit_position, char_x, char_y, move[0], move[1], depth)
+            v = self.max_value(wrld, exit_position, char_x, char_y, move[0], move[1], depth)
             value = value + prob * v
         return value
 
     def max_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
         if (char_x, char_y) == (monster_x, monster_y):
-            return (0.9 ** depth) * -10000
+            return (1.1 ** depth) * -10000
         elif depth > 0:
-            return -1 * self.get_distance_between((char_x, char_y), (monster_x, monster_y))
+            monst_distance = (20 - self.get_distance_between((char_x, char_y), (monster_x, monster_y)))
+            return (1.1 ** depth) * -1 * monst_distance * monst_distance
         value = -1000000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
-            v = (0.9 ** depth) * self.exp_value(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1)
+            v = self.exp_value(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1)
             value = max(value, v)
         return value
 
@@ -132,6 +133,7 @@ class TestCharacter(CharacterEntity):
     def get_distance_between(self, position, position2):
         return math.sqrt((position[1] - position2[1]) * (position[1] - position2[1]) +
                          (position[0] - position2[0]) * (position[0] - position2[0]))
+        # return max(abs(position[0] - position2[0]), abs(position[1] - position2[1]))
 
 
 class PQueue:
