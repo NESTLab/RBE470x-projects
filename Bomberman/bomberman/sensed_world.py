@@ -17,21 +17,24 @@ class SensedWorld(World):
         # Copy grid
         new.grid          = [[wrld.wall_at(x,y) for y in range(wrld.height())] for x in range(wrld.width())]
         # Copy monsters
+        mmapping = {}
         for k, omonsters in wrld.monsters.items():
             # Make a new list of monsters at k
             nmonsters = []
             # Create a new generic monster for each monster
             # This way, every monster instance can be manipulated individually
             for m in omonsters:
-                nmonsters.append(MonsterEntity.from_monster(m))
+                nm = MonsterEntity.from_monster(m)
+                nmonsters.append(nm)
+                mmapping[m] = nm
             # Set list of monsters at k
             new.monsters[k] = nmonsters
         # Copy characters, scores, and build a mapping between old and new
-        mapping = {}
+        cmapping = {}
         for k, ocharacters in wrld.characters.items():
             # Make a new list of characters at k
             ncharacters = []
-            # Create a new generic character for each monster
+            # Create a new generic character for each character
             # This way, every character instance can be manipulated individually
             # Plus, you can't peek into other characters' variables
             for oc in ocharacters:
@@ -39,17 +42,30 @@ class SensedWorld(World):
                 nc = CharacterEntity.from_character(oc)
                 ncharacters.append(nc)
                 # Add to mapping
-                mapping[oc] = nc
+                cmapping[oc] = nc
             new.characters[k] = ncharacters
         # Copy bombs
         for k, ob in wrld.bombs.items():
-            c = mapping.get(ob.owner, ob.owner)
+            c = cmapping.get(ob.owner, ob.owner)
             new.bombs[k] = BombEntity(ob.x, ob.y, ob.timer, c)
         # Copy explosions
         for k, oe in wrld.explosions.items():
-            c = mapping.get(oe.owner)
+            c = cmapping.get(oe.owner)
             if c:
                 new.explosions[k] = ExplosionEntity(oe.x, oe.y, oe.timer, c)
+        # Copy events
+        for e in wrld.events:
+            # Create a new event
+            # Tricky: if the character related to the event has died, duplicate the original character
+            newev = Event(e.tpe, cmapping.get(e.character, CharacterEntity.from_character(e.character)))
+            # Manage other attribute
+            if e.tpe == Event.BOMB_HIT_MONSTER:
+                newev.other = MonsterEntity.from_monster(e.other)
+            elif e.tpe == Event.BOMB_HIT_CHARACTER:
+                newev.other = CharacterEntity.from_character(e.other)
+            elif e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                newev.other = mmapping.get(e.other, MonsterEntity.from_monster(e.other))
+            new.events.append(newev)
         # Copy scores
         for name,score in wrld.scores.items():
             new.scores[name] = score
@@ -66,75 +82,23 @@ class SensedWorld(World):
         new = SensedWorld.from_world(self)
         new.time = new.time - 1
         new.update_explosions()
-        ev = new.update_bombs()
-        ev = ev + new.update_monsters()
-        ev = ev + new.update_characters()
-        new.manage_events_and_scores(ev)
-        new.events = ev
-        return (new,ev)
+        new.events = new.update_bombs() + new.update_monsters() + new.update_characters()
+        new.update_scores()
+        new.manage_events()
+        return (new, new.events)
 
     ###################
     # Private methods #
     ###################
 
-    def update_monsters(self):
-        """Update monster state"""
-        # Event list
-        ev = []
-        # Update all the monsters
-        nmonsters = {}
-        for i, mlist in self.monsters.items():
-            for m in mlist:
+    def aientity_do(self, entities):
+        """Call AI to get actions for next step"""
+        for i, elist in entities.items():
+            for e in elist:
                 # Call AI
-                m.do(None)
-                # Update position and check for events
-                ev2 = self.update_monster_move(m, False)
-                ev = ev + ev2
-                # Monster gets inserted in next step's list unless hit
-                if not (ev2 and ev2[0].tpe == Event.BOMB_HIT_MONSTER):
-                    # Update new index
-                    ni = self.index(m.x, m.y)
-                    np = nmonsters.get(ni, [])
-                    np.append(m)
-                    nmonsters[ni] = np
-        # Save new index
-        self.monsters = nmonsters
-        # Return events
-        return ev
+                e.do(None)
 
-    def update_characters(self):
-        """Update character state"""
-        # Event list
-        ev = []
-        # Update all the characters
-        ncharacters = {}
-        for i, clist in self.characters.items():
-            for c in clist:
-                # Call AI
-                c.do(None)
-                # Attempt to place bomb
-                if c.maybe_place_bomb:
-                    c.maybe_place_bomb = False
-                    can_bomb = True
-                    # Make sure this character has not already placed another bomb
-                    for k,b in self.bombs.items():
-                        if b.owner == c:
-                            can_bomb = False
-                            break
-                    if can_bomb:
-                        self.add_bomb(c.x, c.y, c)
-                # Update position and check for events
-                ev2 = self.update_character_move(c, False)
-                ev = ev + ev2
-                # Character gets inserted in next step's list unless hit or
-                # escaped
-                if not (ev2 and ev2[0].tpe in [Event.BOMB_HIT_CHARACTER, Event.CHARACTER_FOUND_EXIT]):
-                    # Update new index
-                    ni = self.index(c.x, c.y)
-                    np = ncharacters.get(ni, [])
-                    np.append(c)
-                    ncharacters[ni] = np
-        # Save new index
-        self.characters = ncharacters
-        # Return events
-        return ev
+    def manage_events(self):
+        for e in self.events:
+            if e.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                self.remove_character(e.character)
