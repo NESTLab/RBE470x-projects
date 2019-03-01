@@ -10,20 +10,20 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
-from testcharacter3 import TestCharacter
+from minMax import MinMax
 
 # Create the game
-random.seed(2) # TODO Change this if you want different random choices
-# can't pass seeds: 3,
+random.seed(9)
+# failed 3 5 7 9
 g = Game.fromfile('map.txt')
-g.add_monster(SelfPreservingMonster("selfpreserving", # name
-                                    "S",              # avatar
-                                    3, 9,             # position
-                                    1                 # detection range
+g.add_monster(SelfPreservingMonster("aggressive", # name
+                                    "A",          # avatar
+                                    3, 13,        # position
+                                    2             # detection range
 ))
 
 # TODO Add your character
-g.add_character(TestCharacter("me", # name
+g.add_character(MinMax("me", # name
                               "C",  # avatar
                               0, 0  # position
 ))

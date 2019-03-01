@@ -32,6 +32,10 @@ class TestCharacter(CharacterEntity):
                 if self.exit_position is not None:
                     break
 
+        if self.chebyshev_dist((self.x, self.y), self.exit_position) == 1:
+            self.move(self.exit_position[0], self.exit_position[1])
+            return
+
         monster = None
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
@@ -51,7 +55,6 @@ class TestCharacter(CharacterEntity):
         frontier = PQueue()
         frontier.put((self.x, self.y), 0)
         cost_so_far = {(self.x, self.y): 0}
-        print(self.state)
 
         if self.state == NORMAL:
             # if self.x == self.start[0] and self.y == self.start[1] or self.prev_state is not NORMAL:
@@ -61,6 +64,17 @@ class TestCharacter(CharacterEntity):
 
         next_move = self.find_next_move(self.came_from, self.exit_position)
         self.move(next_move[0] - self.x, next_move[1] - self.y)
+
+    def avoid_monster(self, wrld, monster):
+        next_move = None
+        possible_moves = self.get_possible_moves(self.x, self.y, wrld)
+        value = -10000000
+        for move in possible_moves:
+            expected = self.exp_value(wrld, self.exit_position, move[0], move[1], monster[0], monster[1], 0)
+            if expected >= value:
+                value = expected
+                next_move = move
+        return next_move
 
     def a_star(self, frontier, cost_so_far, wrld, monster):
         while not frontier.empty():
@@ -133,7 +147,9 @@ class TestCharacter(CharacterEntity):
     def get_distance_between(self, position, position2):
         return math.sqrt((position[1] - position2[1]) * (position[1] - position2[1]) +
                          (position[0] - position2[0]) * (position[0] - position2[0]))
-        # return max(abs(position[0] - position2[0]), abs(position[1] - position2[1]))
+
+    def chebyshev_dist(self, position, position2):
+        return max(abs(position[0] - position2[0]), abs(position[1] - position2[1]))
 
 
 class PQueue:
