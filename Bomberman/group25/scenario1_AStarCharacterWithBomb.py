@@ -219,7 +219,7 @@ class TestCharacter(CharacterEntity):
                     bestNode = node
                     highestSum = node.hval
 
-        if bestNode is None and len(wrld.bombs.items()) == 0:
+        if bestNode is None:
             # append possible nodes
             for node in possibleNodes:
                 # if node is in the path to the end
