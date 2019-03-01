@@ -31,6 +31,10 @@ class TestCharacter(CharacterEntity):
                 if self.exit_position is not None:
                     break
 
+        if self.chebyshev_dist((self.x, self.y), self.exit_position) == 1:
+            self.move(self.exit_position[0], self.exit_position[1])
+            return
+
         monster = None
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
@@ -48,7 +52,6 @@ class TestCharacter(CharacterEntity):
         frontier = PQueue()
         frontier.put((self.x, self.y), 0)
         cost_so_far = {(self.x, self.y): 0}
-        print(self.state)
 
         if self.state == NORMAL:
             if self.x == self.start[0] and self.y == self.start[1] or self.prev_state is not NORMAL:
@@ -128,6 +131,9 @@ class TestCharacter(CharacterEntity):
     def get_distance_to_exit(self, position, exit_position):
         return math.sqrt((position[1] - exit_position[1]) * (position[1] - exit_position[1]) +
                         (position[0] - exit_position[0]) * (position[0] - exit_position[0]))
+
+    def chebyshev_dist(self, position, position2):
+        return max(abs(position[0] - position2[0]), abs(position[1] - position2[1]))
 
 
 class PQueue:
