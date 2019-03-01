@@ -96,8 +96,8 @@ class MinMax(CharacterEntity):
             return ((0.9 ** depth) * -10000), char
         elif char == self.exit_position:
             return ((0.9 ** depth) * 100000), char
-        # elif monst_distance < 2:
-        #     return ((0.9 ** depth) * -3000), char
+        elif monst_distance < 2:
+            return ((0.9 ** depth) * -3000), char
         elif depth > self.max_depth:
             return (self.heuristic(char[0], char[1], depth, monst_distance)), char
 
@@ -119,8 +119,8 @@ class MinMax(CharacterEntity):
             return ((0.9 ** depth) * -10000), char
         elif char == self.exit_position:
             return ((0.9 ** depth) * 100000), char
-        # elif monst_distance < 2:
-        #     return ((0.9 ** depth) * -3000), char
+        elif monst_distance < 2:
+            return ((0.9 ** depth) * -3000), char
         elif depth > self.max_depth:
             return (self.heuristic(char[0], char[1], depth, monst_distance)), char
 
@@ -138,8 +138,8 @@ class MinMax(CharacterEntity):
 
     def heuristic(self, char_x, char_y, depth, monst_distance):
         exit_dist = self.get_distance_between((char_x, char_y), self.exit_position)
-        if monst_distance < 3:
-            monst_distance = -5
+        # if monst_distance < 3:
+        #     monst_distance = -10
         # return (0.9 ** depth) * ((monst_distance / 2) + (40 / exit_dist))
         return (0.9 ** depth) * (monst_distance + (75 / (1 + exit_dist)))
 

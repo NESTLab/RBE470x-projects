@@ -13,8 +13,8 @@ sys.path.insert(1, '../groupNN')
 from minMax import MinMax
 
 # Create the game
-random.seed(9)
-# failed 3 5 7 9
+random.seed(3)
+# failed 2 3 5 7 9
 g = Game.fromfile('map.txt')
 g.add_monster(SelfPreservingMonster("aggressive", # name
                                     "A",          # avatar
