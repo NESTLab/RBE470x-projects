@@ -20,7 +20,7 @@ class TestCharacter(CharacterEntity):
         self.came_from = {self.start: None}
         self.state = NORMAL
         self.prev_state = None
-        self.monster_dist = 0
+        self.nearest_monster = 0
         self.last_mon = None
         self.bomb = None
         self.explosions = []
@@ -37,7 +37,7 @@ class TestCharacter(CharacterEntity):
                 if self.exit_position is not None:
                     break
 
-        monster = None
+        monsters = []
         self.explosions = []
         self.bomb = None
         # explosion = None
@@ -45,7 +45,7 @@ class TestCharacter(CharacterEntity):
         for x in range(0, wrld.width()):
             for y in range(0, wrld.height()):
                 if wrld.monsters_at(x, y):
-                    monster = (x, y)
+                    monsters.append((x, y))
                 explosion = wrld.explosion_at(x, y)
                 if explosion is not None:
                     self.explosions.append(explosion)
@@ -54,16 +54,19 @@ class TestCharacter(CharacterEntity):
                     self.bomb = bomb
 
         self.prev_state = self.state
-        if monster is not None:
-            self.monster_dist = self.get_distance_between((self.x, self.y), (monster[0], monster[1]))
-        else:
-            self.monster_dist = 100
-        if self.in_corner(wrld) and self.monster_dist > 3 and self.bomb is None and len(self.explosions) == 0:
+        self.nearest_monster = 100
+        if len(monsters):
+            for monster in monsters:
+                dist = self.get_distance_between((self.x, self.y), (monster[0], monster[1]))
+                if dist < self.nearest_monster:
+                    self.nearest_monster = dist
+
+        if self.in_corner(wrld) and self.nearest_monster > 3 and self.bomb is None and len(self.explosions) == 0:
             self.state = BOMB
             self.place_bomb()
         elif len(self.explosions) > 0 or self.bomb is not None:
             self.state = BOMB
-        elif self.monster_dist < 6:
+        elif self.nearest_monster < 6:
             self.state = MONSTER
         else:
             self.state = NORMAL
@@ -78,37 +81,36 @@ class TestCharacter(CharacterEntity):
             self.a_star(frontier, cost_so_far, wrld)
             next_move = self.find_next_move(self.came_from, self.exit_position)
         elif self.state == MONSTER:
-            next_move = self.avoid_monster(wrld, monster)
+            next_move = self.avoid_monster(wrld, monsters)
             # self.a_star(frontier, cost_so_far, wrld, monster)
         elif self.state == BOMB:
-            next_move = self.avoid_bomb(wrld, monster)
+            next_move = self.avoid_bomb(wrld, monsters)
 
         self.move(next_move[0] - self.x, next_move[1] - self.y)
-        self.last_mon = monster
 
-    def avoid_monster(self, wrld, monster):
+    def avoid_monster(self, wrld, monsters):
         next_move = None
-        if monster is None:
-            monster = (0, 0)
-        if self.monster_dist < 6:
+        if len(monsters) < 0:
+            monsters.append((0, 0))
+        if self.nearest_monster < 6:
             self.max_depth = 2
         possible_moves = self.get_possible_moves(self.x, self.y, wrld)
         value = -10000000
         for move in possible_moves:
-            expected = self.exp_value(wrld, self.exit_position, move[0], move[1], monster[0], monster[1], 0)
+            expected = self.exp_value(wrld, self.exit_position, move[0], move[1], monsters, 0)
             if expected >= value:
                 value = expected
                 next_move = move
         return next_move
 
-    def avoid_bomb(self, wrld, monster):
+    def avoid_bomb(self, wrld, monsters):
         next_move = None
-        if monster is None:
-            monster = (0, 0)
+        if len(monsters) < 0:
+            monsters.append((0, 0))
         possible_moves = self.get_possible_moves(self.x, self.y, wrld)
         value = -10000000
         for move in possible_moves:
-            expected = self.exp_value_bomb(wrld, self.exit_position, move[0], move[1], monster[0], monster[1], 0)
+            expected = self.exp_value_bomb(wrld, self.exit_position, move[0], move[1], monsters, 0)
             if expected >= value:
                 value = expected
                 next_move = move
@@ -129,69 +131,129 @@ class TestCharacter(CharacterEntity):
                     frontier.put((next[0], next[1]), priority)
                     self.came_from[next] = current
 
-    def exp_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
-        monst_distance = self.get_distance_between((char_x, char_y), (monster_x, monster_y))
-        if (char_x, char_y) == exit_position:
+    def exp_value(self, wrld, exit_position, char_x, char_y, monsters, depth):
+        char = (char_x, char_y)
+        if char == exit_position:
             return (0.9 ** depth) * 100000
-        if (char_x, char_y) == (monster_x, monster_y):
-            return (0.9 ** depth) * -10000
-        elif monst_distance < 3:
-            return (0.9 ** depth) * -5000
+        monst_value = 0
+        for monster in monsters:
+            dist = self.get_distance_between(char, monster)
+            if dist == 0:
+                return (0.9 ** depth) * -10000
+            if dist < 3:
+                monst_value += (0.9 ** depth) * -5000
+        if monst_value != 0:
+            return monst_value
+
         value = 0
-        monster_moves = self.get_possible_moves(monster_x, monster_y, wrld)
-        for move in monster_moves:
-            prob = 1 / len(monster_moves)
-            v = self.max_value(wrld, exit_position, char_x, char_y, move[0], move[1], depth)
-            value = value + prob * v
+        if len(monsters) == 2:
+            moves_array = []
+            for monster in monsters:
+                moves_array.append(self.get_possible_moves(monster[0], monster[1], wrld))
+            for move1 in moves_array[0]:
+                for move2 in moves_array[1]:
+                    prob = 1 / (len(moves_array[0]) + len(moves_array[1]))
+                    new_monsters = [move1, move2]
+                    v = self.max_value(wrld, exit_position, char_x, char_y, new_monsters, depth)
+                    value = value + prob * v
+            return value
+        else:
+            monster = monsters[0]
+            monster_moves = self.get_possible_moves(monster[0], monster[1], wrld)
+            for move in monster_moves:
+                prob = 1 / len(monster_moves)
+                new_monsters = [move]
+                v = self.max_value(wrld, exit_position, char_x, char_y, new_monsters, depth)
+                value = value + prob * v
         return value
 
-    def max_value(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
-        monst_distance = self.get_distance_between((char_x, char_y), (monster_x, monster_y))
-        if (char_x, char_y) == (monster_x, monster_y):
-            return (0.9 ** depth) * -10000
-        elif monst_distance < 3:
-            return (0.9 ** depth) * -5000
+    def max_value(self, wrld, exit_position, char_x, char_y, monsters, depth):
+        char = (char_x, char_y)
+        monst_value = 0
+        monst_distances = []
+        for monster in monsters:
+            dist = self.get_distance_between(char, monster)
+            monst_distances.append(dist)
+            if dist == 0:
+                return (0.9 ** depth) * -10000
+            if dist < 3:
+                monst_value += (0.9 ** depth) * -5000
+        if monst_value != 0:
+            return monst_value
         elif depth > 1:
-            exit_dist = self.get_distance_between((char_x, char_y), exit_position)
-            w = 20 - monst_distance
-            if w == 0:
-                w -= 1
-            return (0.9 ** depth) * ((20 / w) + (55 / (1 + exit_dist)))  # ((monst_distance) + (1 / exit_dist))
-        value = -1000000000
+            exit_dist = self.get_distance_between(char, exit_position)
+            m_weight = 0
+            for m_dist in monst_distances:
+                w = 20 - m_dist
+                if w == 0:
+                    w -= 1
+                m_weight += (20 / w)
+            return (0.9 ** depth) * (m_weight + (55 / (1 + exit_dist)))
+
+        value = -100000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
-            v = self.exp_value(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1)
+            v = self.exp_value(wrld, exit_position, move[0], move[1], monsters, depth + 1)
             value = max(value, v)
         return value
 
-    def exp_value_bomb(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
-        terminal = self.terminal_state(char_x, char_y, monster_x, monster_y, depth)
+    def exp_value_bomb(self, wrld, exit_position, char_x, char_y, monsters, depth):
+        terminal = self.terminal_state(char_x, char_y, monsters, depth)
         if terminal is not None:
             return terminal
+        close_monsters = []
+        for monster in monsters:
+            dist = self.get_distance_between((char_x, char_y), monster)
+            if dist < 6:
+                close_monsters.append(monster)
+
         value = 0
-        monster_moves = self.get_possible_moves(monster_x, monster_y, wrld)
-        for move in monster_moves:
-            prob = 1 / len(monster_moves)
-            v = self.max_value_bomb(wrld, exit_position, char_x, char_y, move[0], move[1], depth)
-            value = value + prob * v
+        if len(close_monsters) == 2:
+            moves_array = []
+            for monster in close_monsters:
+                moves_array.append(self.get_possible_moves(monster[0], monster[1], wrld))
+            for move1 in moves_array[0]:
+                for move2 in moves_array[1]:
+                    prob = 1 / (len(moves_array[0]) + len(moves_array[1]))
+                    new_monsters = [move1, move2]
+                    v = self.max_value_bomb(wrld, exit_position, char_x, char_y, new_monsters, depth)
+                    value = value + prob * v
+            return value
+        elif len(close_monsters) == 1:
+            monster = close_monsters[0]
+            monster_moves = self.get_possible_moves(monster[0], monster[1], wrld)
+            for move in monster_moves:
+                prob = 1 / len(monster_moves)
+                new_monsters = [move]
+                v = self.max_value(wrld, exit_position, char_x, char_y, new_monsters, depth)
+                value = value + prob * v
         return value
 
-    def max_value_bomb(self, wrld, exit_position, char_x, char_y, monster_x, monster_y, depth):
-        terminal = self.terminal_state(char_x, char_y, monster_x, monster_y, depth)
+    def max_value_bomb(self, wrld, exit_position, char_x, char_y, monsters, depth):
+        terminal = self.terminal_state(char_x, char_y, monsters, depth)
         if terminal is not None:
             return terminal
         value = -1000000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
-            v = self.exp_value_bomb(wrld, exit_position, move[0], move[1], monster_x, monster_y, depth + 1)
+            v = self.exp_value_bomb(wrld, exit_position, move[0], move[1], monsters, depth + 1)
             value = max(value, v)
         return value
 
-    def terminal_state(self, char_x, char_y, monster_x, monster_y, depth):
-        monst_distance = self.get_distance_between((char_x, char_y), (monster_x, monster_y))
+    def terminal_state(self, char_x, char_y, monsters, depth):
         bad = (0.9 ** depth) * -100
-        if (char_x, char_y) == (monster_x, monster_y):
-            return bad
+        char = (char_x, char_y)
+        monst_value = 0
+        monst_distances = []
+        for monster in monsters:
+            dist = self.get_distance_between(char, monster)
+            monst_distances.append(dist)
+            if dist == 0:
+                return bad
+            if dist < 3:
+                monst_value += (0.9 ** depth) * -5000
+        if monst_value != 0:
+            return monst_value
         if self.bomb is not None and self.bomb.timer - depth <= 1:
             if char_x == self.bomb.x or char_y == self.bomb.y:
                 return bad
@@ -202,17 +264,15 @@ class TestCharacter(CharacterEntity):
                     return bad
         if (char_x, char_y) == self.exit_position:
             return (0.9 ** depth) * 100000
-        if monst_distance < 3:
-            return bad
         if depth > self.max_depth:
-            exit_dist = self.get_distance_between((char_x, char_y), self.exit_position)
-            w = 40 - (2 * monst_distance)
-            if w == 0:
-                w -= 1
-            bomb_dist = 0
-            # if self.bomb is not None:
-            #     bomb_dist = self.get_distance_between((char_x, char_y), (self.bomb.x, self.bomb.y)) / 3
-            return (0.9 ** depth) * ((100 / w) + (15 / (1 + exit_dist)) + bomb_dist)
+            exit_dist = self.get_distance_between(char, self.exit_position)
+            m_weight = 0
+            for m_dist in monst_distances:
+                w = 40 - (2 * m_dist)
+                if w == 0:
+                    w -= 1
+                m_weight += (100 / w)
+            return (0.9 ** depth) * (m_weight + (15 / (1 + exit_dist)))
         return None
 
     def find_next_move(self, came_from, exit_position):
