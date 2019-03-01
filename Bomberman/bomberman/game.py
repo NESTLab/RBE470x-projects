@@ -96,22 +96,23 @@ class Game:
         if wait is 0:
             def step():
                 pygame.event.clear()
-                input("Press Enter to continue or CTRL-C to stop...")
+                # input("Press Enter to continue or CTRL-C to stop...")
         else:
             def step():
                 pygame.time.wait(abs(wait))
 
         colorama.init(autoreset=True)
         self.display_gui()
-        self.draw()
+        # self.draw()
         step()
         while not self.done():
             (self.world, self.events) = self.world.next()
             self.display_gui()
-            self.draw()
+            # self.draw()
             step()
             self.world.next_decisions()
         colorama.deinit()
+        return self.world.scores
 
     ###################
     # Private methods #

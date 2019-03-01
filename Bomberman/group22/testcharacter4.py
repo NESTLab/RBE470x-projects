@@ -24,8 +24,10 @@ class TestCharacter(CharacterEntity):
         self.last_mon = None
         self.bomb = None
         self.explosions = []
+        self.max_depth = 1
 
     def do(self, wrld):
+        self.max_depth = 1
         if self.exit_position is None:
             for x in range(0, wrld.width()):
                 for y in range(0, wrld.height()):
@@ -56,7 +58,7 @@ class TestCharacter(CharacterEntity):
             self.monster_dist = self.get_distance_between((self.x, self.y), (monster[0], monster[1]))
         else:
             self.monster_dist = 100
-        if self.in_corner(wrld) and 9 > self.monster_dist > 3 and self.bomb is None and len(self.explosions) == 0:
+        if self.in_corner(wrld) and self.monster_dist > 3 and self.bomb is None and len(self.explosions) == 0:
             self.state = BOMB
             self.place_bomb()
         elif len(self.explosions) > 0 or self.bomb is not None:
@@ -88,6 +90,8 @@ class TestCharacter(CharacterEntity):
         next_move = None
         if monster is None:
             monster = (0, 0)
+        if self.monster_dist < 6:
+            self.max_depth = 2
         possible_moves = self.get_possible_moves(self.x, self.y, wrld)
         value = -10000000
         for move in possible_moves:
@@ -149,10 +153,10 @@ class TestCharacter(CharacterEntity):
             return (0.9 ** depth) * -5000
         elif depth > 1:
             exit_dist = self.get_distance_between((char_x, char_y), exit_position)
-            w = 15 - monst_distance
+            w = 20 - monst_distance
             if w == 0:
                 w -= 1
-            return (0.9 ** depth) * ((15 / w) + (75 / (1 + exit_dist)))  # ((monst_distance) + (1 / exit_dist))
+            return (0.9 ** depth) * ((20 / w) + (55 / (1 + exit_dist)))  # ((monst_distance) + (1 / exit_dist))
         value = -1000000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
@@ -200,15 +204,15 @@ class TestCharacter(CharacterEntity):
             return (0.9 ** depth) * 100000
         if monst_distance < 3:
             return bad
-        if depth > 1:
+        if depth > self.max_depth:
             exit_dist = self.get_distance_between((char_x, char_y), self.exit_position)
-            w = 20 - monst_distance
+            w = 40 - (2 * monst_distance)
             if w == 0:
                 w -= 1
             bomb_dist = 0
             # if self.bomb is not None:
             #     bomb_dist = self.get_distance_between((char_x, char_y), (self.bomb.x, self.bomb.y)) / 3
-            return (0.9 ** depth) * ((20 / w) + (15 / (1 + exit_dist)) + bomb_dist)
+            return (0.9 ** depth) * ((100 / w) + (15 / (1 + exit_dist)) + bomb_dist)
         return None
 
     def find_next_move(self, came_from, exit_position):
@@ -275,11 +279,12 @@ class TestCharacter(CharacterEntity):
     def in_corner(self, wrld):
         x = self.x
         y = self.y
-        for dx in [-1, 0, 1]:
+        array = [-3, -2, -1, 0, 1, 2, 3]
+        for dx in array:
             # Avoid out-of-bound indexing
             if (x + dx >= 0) and (x + dx < wrld.width()):
                 # Loop through delta y
-                for dy in [-1, 0, 1]:
+                for dy in array:
                     # Make sure the monster is moving
                     if (dx == 0) or (dy == 0):
                         # Avoid out-of-bound indexing
