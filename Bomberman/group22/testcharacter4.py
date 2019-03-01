@@ -149,7 +149,10 @@ class TestCharacter(CharacterEntity):
             return (0.9 ** depth) * -5000
         elif depth > 1:
             exit_dist = self.get_distance_between((char_x, char_y), exit_position)
-            return (0.9 ** depth) * ((monst_distance) + (75 / (1 + exit_dist)))  # ((monst_distance) + (1 / exit_dist))
+            w = 15 - monst_distance
+            if w == 0:
+                w -= 1
+            return (0.9 ** depth) * ((15 / w) + (75 / (1 + exit_dist)))  # ((monst_distance) + (1 / exit_dist))
         value = -1000000000
         character_moves = self.get_possible_moves(char_x, char_y, wrld)
         for move in character_moves:
@@ -199,10 +202,13 @@ class TestCharacter(CharacterEntity):
             return bad
         if depth > 1:
             exit_dist = self.get_distance_between((char_x, char_y), self.exit_position)
+            w = 20 - monst_distance
+            if w == 0:
+                w -= 1
             bomb_dist = 0
-            if self.bomb is not None:
-                bomb_dist = self.get_distance_between((char_x, char_y), (self.bomb.x, self.bomb.y)) / 3
-            return (0.9 ** depth) * (monst_distance + (100 / (1 + exit_dist)) + bomb_dist)
+            # if self.bomb is not None:
+            #     bomb_dist = self.get_distance_between((char_x, char_y), (self.bomb.x, self.bomb.y)) / 3
+            return (0.9 ** depth) * ((20 / w) + (15 / (1 + exit_dist)) + bomb_dist)
         return None
 
     def find_next_move(self, came_from, exit_position):

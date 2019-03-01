@@ -14,9 +14,9 @@ sys.path.insert(1, '../groupNN')
 from testcharacter4 import TestCharacter
 
 # Create the game
-random.seed(9)
-# failed 4 7 8
-# passed 1 2 3 5 6
+random.seed(10)
+# failed 5 9 10
+# passed 1 2 3 4 6 7 8
 g = Game.fromfile('map.txt')
 g.add_monster(SelfPreservingMonster("aggressive", # name
                                     "A",          # avatar
