@@ -24,6 +24,7 @@ class TestCharacter(CharacterEntity):
         self.distanceSmart = distanceSmart
         self.panicCounter = 0
         self.numberOfBombsPlaced = -1
+        self.bombPosition = None
 
     def do(self, wrld):
         ispanicking = False
@@ -32,14 +33,16 @@ class TestCharacter(CharacterEntity):
         self.calculateCharacterPath(customEntities.Node(7, 18), wrld, True)
         self.pathIterator = 0
 
-        if self.explosionTimer > 0:
+        if self.bombTimer == 0 and self.explosionTimer > 0:
             self.explosionTimer -= 1
+            if self.explosionTimer == 0:
+                self.bombPosition = None
 
         if self.bombTimer > 0:
             self.bombTimer -= 1
             if self.bombTimer == 0:
                 self.numberOfBombsPlaced += 1
-                self.explosionTimer = wrld.expl_duration + 1
+                self.explosionTimer = wrld.expl_duration + 2
 
         for bomb in wrld.bombs.items():
             if self.bombTimer <= 2:
@@ -94,6 +97,7 @@ class TestCharacter(CharacterEntity):
                 self.calculateCharacterPath(customEntities.Node(7, 18), wrld, False)
 
         if self.placeBombAtEnd:
+            self.bombPosition = customEntities.Node(self.x, self.y)
             self.place_bomb()
             self.bombTimer = wrld.bomb_time
             self.runAway(wrld)
@@ -150,18 +154,17 @@ class TestCharacter(CharacterEntity):
 
             # TODO account for other players bombs
             # do not include the nodes that would be in bomb's path of explosion
-            for k, bomb in wrld.bombs.items():
-                if self.bombTimer <= 2:
-                    bombRange = wrld.expl_range
-                    for x in range(-bombRange, bombRange):
-                        if node.x == bomb.x + x and node.y == bomb.y:
-                            shouldContinue = True
-                            break
+            if self.bombTimer <= 2 and self.bombPosition is not None:
+                bombRange = wrld.expl_range
+                for x in range(-bombRange - 1, bombRange + 1):
+                    if node.x == self.bombPosition.x + x and node.y == self.bombPosition.y:
+                        shouldContinue = True
+                        break
 
-                    for y in range(-bombRange, bombRange):
-                        if node.x == bomb.x and node.y == bomb.y + y:
-                            shouldContinue = True
-                            break
+                for y in range(-bombRange - 1, bombRange + 1):
+                    if node.x == self.bombPosition.x and node.y == self.bombPosition.y + y:
+                        shouldContinue = True
+                        break
             if shouldContinue:
                 continue
 

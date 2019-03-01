@@ -10,7 +10,7 @@ from monsters.stupid_monster import StupidMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../group25')
-from aStarCharacterWithHeuristic import TestCharacter
+from scenario1_AStarCharacterWithBomb import TestCharacter
 
 # Create the game
 random.seed(1123) # TODO Change this if you want different random choices
@@ -23,7 +23,9 @@ g.add_monster(StupidMonster("stupid", # name
 # TODO Add your character
 g.add_character(TestCharacter("me", # name
                               "C",  # avatar
-                              0, 0  # position
+                              0, 0,  # position
+                              True,
+                              5, 7
 ))
 
 # Run!
