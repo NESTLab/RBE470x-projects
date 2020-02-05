@@ -1,5 +1,7 @@
 import math
 import agent
+import board
+import random
 
 ###########################
 # Alpha-Beta Search Agent #
@@ -26,6 +28,16 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+
+        # Read board
+        
+        # Interpret using heurisitcs
+        # Create graph and load in heuristics
+
+        # Call alpha beta on graph
+
+        # Make decision
+        return random.choice(brd.free_cols());
 
     # Get the successors of the given board.
     #
