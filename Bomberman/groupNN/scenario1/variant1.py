@@ -9,7 +9,7 @@ from game import Game
 # TODO This is your code!
 sys.path.insert(1, '../groupNN')
 from testcharacter import TestCharacter
-
+# from interactivecharacter import InteractiveCharacter
 
 # Create the game
 g = Game.fromfile('map.txt')
