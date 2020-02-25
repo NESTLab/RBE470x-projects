@@ -23,9 +23,6 @@ class InteractiveCharacter(CharacterEntity):
             if 'b' == c:
                 bomb = True
             
-        dx = max(-1, min(dx, 1))
-        dy = max(-1, min(dy, 1))
-
         self.move(dx, dy)
         if bomb:
             self.place_bomb()
