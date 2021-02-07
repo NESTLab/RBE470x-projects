@@ -1,5 +1,8 @@
 import math
 import agent
+import random
+import alpha_beta_node
+
 
 ###########################
 # Alpha-Beta Search Agent #
@@ -26,6 +29,14 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        parent_node = alpha_beta_node.AlphaBetaNode(brd, None, None)
+        successors = self.get_successors(brd)
+        for successor in successors:
+            new_node = alpha_beta_node.AlphaBetaNode(successor[0], successor[1], random.random())
+            parent_node.children.append(new_node)
+        for child in parent_node.children:
+            child.children = self.make_children(child, 1)
+        return 0
 
     # Get the successors of the given board.
     #
@@ -49,7 +60,7 @@ class AlphaBetaAgent(agent.Agent):
             # (This internally changes nb.player, check the method definition!)
             nb.add_token(col)
             # Add board to list of successors
-            succ.append((nb,col))
+            succ.append((nb, col))
         return succ
 
     # Get the evaluation of the given board.
@@ -59,3 +70,16 @@ class AlphaBetaAgent(agent.Agent):
     # 0-1; 1 meaning AI will win and 0 meaning the other player will win
     def get_evaluation(self, brd):
         return None
+
+    def make_children(self, node, level):
+        children = []
+        if level <= self.max_depth:
+            successors = self.get_successors(node.board)
+            for successor in successors:
+                new_node = alpha_beta_node.AlphaBetaNode(successor[0], successor[1], random.random())
+                children.append(new_node)
+            for new_child in children:
+                new_child.children = self.make_children(new_child, level + 1)
+        else:
+            return children
+        return children
