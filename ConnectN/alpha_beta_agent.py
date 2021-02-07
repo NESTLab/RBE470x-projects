@@ -52,5 +52,10 @@ class AlphaBetaAgent(agent.Agent):
             succ.append((nb,col))
         return succ
 
+    # Get the evaluation of the given board.
+    #
+    # PARAM [board.Board] brd: the board state
+    # RETURN [int] eval: The likely hood of either player winning.
+    # 0-1; 1 meaning AI will win and 0 meaning the other player will win
     def get_evaluation(self, brd):
         return None
