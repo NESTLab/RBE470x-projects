@@ -51,3 +51,6 @@ class AlphaBetaAgent(agent.Agent):
             # Add board to list of successors
             succ.append((nb,col))
         return succ
+
+    def get_evaluation(self, brd):
+        return None
