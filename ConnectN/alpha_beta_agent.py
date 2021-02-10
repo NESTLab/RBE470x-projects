@@ -30,13 +30,8 @@ class AlphaBetaAgent(agent.Agent):
         """Search for the best move (choice of column for the token)"""
         # Your code here
         parent_node = alpha_beta_node.AlphaBetaNode(brd, None, None)
-        successors = self.get_successors(brd)
-        for successor in successors:
-            new_node = alpha_beta_node.AlphaBetaNode(successor[0], successor[1], random.random())
-            parent_node.children.append(new_node)
-        for child in parent_node.children:
-            child.children = self.make_children(child, 1)
-        return 0
+        parent_node.children = self.make_children(parent_node, 0)
+        return self.find_max_node(parent_node).col
 
     # Get the successors of the given board.
     #
@@ -73,7 +68,7 @@ class AlphaBetaAgent(agent.Agent):
 
     def make_children(self, node, level):
         children = []
-        if level <= self.max_depth:
+        if level < self.max_depth:
             successors = self.get_successors(node.board)
             for successor in successors:
                 new_node = alpha_beta_node.AlphaBetaNode(successor[0], successor[1], random.random())
@@ -83,3 +78,11 @@ class AlphaBetaAgent(agent.Agent):
         else:
             return children
         return children
+
+    # Get the max node from the tree.
+    #
+    # PARAM [alpha_beta_node.AlphaBetaNode] parent_node: the root node of the tree
+    # RETURN [alpha_beta_node.AlphaBetaNode] max_node: The node with the max value
+    # found using alpha-beta-pruning
+    def find_max_node(self, parent_node):
+        return parent_node.children[0]
