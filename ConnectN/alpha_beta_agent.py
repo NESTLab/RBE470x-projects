@@ -64,15 +64,21 @@ class AlphaBetaAgent(agent.Agent):
     # RETURN [int] eval: The likely hood of either player winning.
     # 0-1; 1 meaning AI will win and 0 meaning the other player will win
     def get_evaluation(self, brd):
-        return None
+        return random.random()
 
     def make_children(self, node, level):
         children = []
         if level < self.max_depth:
             successors = self.get_successors(node.board)
             for successor in successors:
-                new_node = alpha_beta_node.AlphaBetaNode(successor[0], successor[1], random.random())
-                children.append(new_node)
+                brd = successor[0]
+                col = successor[1]
+                if level == self.max_depth-1:
+                    new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.get_evaluation(successor[0]))
+                    children.append(new_node)
+                else:
+                    new_node = alpha_beta_node.AlphaBetaNode(brd, col, None)
+                    children.append(new_node)
             for new_child in children:
                 new_child.children = self.make_children(new_child, level + 1)
         else:
