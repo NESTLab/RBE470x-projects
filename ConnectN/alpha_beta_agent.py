@@ -29,9 +29,88 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
-        parent_node = alpha_beta_node.AlphaBetaNode(brd, None, None)
-        parent_node.children = self.make_children(parent_node, 0)
-        return self.find_max_node(parent_node).col
+        move_col = self.alpha_beta_search(brd)
+        return move_col
+
+    # The first level of an Alpha-Beta search that kicks off the rest.
+    # Separated because the moves need to be tracked at the first level
+    #
+    # PARAM [board.Board] brd: the board state
+    # RETURN [int]: the column of the move evaluated to be best
+    def alpha_beta_search(self, brd):
+        # Array of possible moves
+        possible_moves = []
+        successors = self.get_successors(brd)
+        # For each possible move
+        for successor in successors:
+            brd = successor[0]
+            col = successor[1]
+            # create new node, evaluation created by alpha-beta searching all possible children to max_depth
+            new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.min_value(brd, self.max_depth, 0, 1))
+            # check if the move wins and if so return immediately
+            if new_node.evaluation == 1:
+                return new_node.col
+            # Add to the array
+            possible_moves.append(new_node)
+        # Assign Starting Vals to find the best move
+        highest_move_val = 0
+        move_col = 1
+        # Find the column associated with the best move
+        for move in possible_moves:
+            if move.evaluation >= highest_move_val:
+                move_col = move.col
+                highest_move_val = move.evaluation
+        return move_col
+
+    # find the maximum assured score from a given board
+    #
+    # PARAM [board.Board] brd: the board state
+    # PARAM [int] depth: levels of depth to explore
+    # PARAM [float] min_bound:
+    # PARAM [float] max_bound:
+    # RETURN [float] maximum assured score
+    def max_value(self, brd, depth, min_bound, max_bound):
+        value = 0.0
+        # If node is terminal, than we have lost
+        if brd.get_outcome() != 0:
+            return value
+        # If depth = 0, than we need to use the heuristic
+        if depth == 0:
+            return self.get_evaluation(brd)
+        # Now we evaluate each possible next move
+        successors = self.get_successors(brd)
+        for successor in successors:
+            brd = successor[0]
+            value = max(value, self.min_value(brd, depth - 1, min_bound, max_bound))
+            min_bound = max(value, min_bound)
+            if min_bound >= max_bound:
+                return value
+        return value
+
+    # find the minimum assured score from a given board
+    #
+    # PARAM [board.Board] brd: the board state
+    # PARAM [int] depth: levels of depth to explore
+    # PARAM [float] min_bound:
+    # PARAM [float] max_bound:
+    # RETURN [float] minimum assured score
+    def min_value(self, brd, depth, min_bound, max_bound):
+        value = 1.0
+        # If node is terminal, than we have lost
+        if brd.get_outcome() != 0:
+            return value
+        # If depth = 0, than we need to use the heuristic
+        if depth == 0:
+            return self.get_evaluation(brd)
+        # Now we evaluate each possible next move
+        successors = self.get_successors(brd)
+        for successor in successors:
+            brd = successor[0]
+            value = min(value, self.max_value(brd, depth - 1, min_bound, max_bound))
+            min_bound = min(value, max_bound)
+            if max_bound <= min_bound:
+                return value
+        return value
 
     # Get the successors of the given board.
     #
@@ -61,34 +140,7 @@ class AlphaBetaAgent(agent.Agent):
     # Get the evaluation of the given board.
     #
     # PARAM [board.Board] brd: the board state
-    # RETURN [int] eval: The likely hood of either player winning.
+    # RETURN [float] eval: The likely hood of either player winning.
     # 0-1; 1 meaning AI will win and 0 meaning the other player will win
     def get_evaluation(self, brd):
         return random.random()
-
-    def make_children(self, node, level):
-        children = []
-        if level < self.max_depth:
-            successors = self.get_successors(node.board)
-            for successor in successors:
-                brd = successor[0]
-                col = successor[1]
-                if level == self.max_depth-1:
-                    new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.get_evaluation(successor[0]))
-                    children.append(new_node)
-                else:
-                    new_node = alpha_beta_node.AlphaBetaNode(brd, col, None)
-                    children.append(new_node)
-            for new_child in children:
-                new_child.children = self.make_children(new_child, level + 1)
-        else:
-            return children
-        return children
-
-    # Get the max node from the tree.
-    #
-    # PARAM [alpha_beta_node.AlphaBetaNode] parent_node: the root node of the tree
-    # RETURN [alpha_beta_node.AlphaBetaNode] max_node: The node with the max value
-    # found using alpha-beta-pruning
-    def find_max_node(self, parent_node):
-        return parent_node.children[0]
