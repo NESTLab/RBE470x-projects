@@ -4,52 +4,27 @@ import agent
 import alpha_beta_agent as aba
 
 # Set random seed for reproducibility
-random.seed(1)
+# random.seed(1)
 
-#
-# Random vs. Random
-#
-# g = game.Game(7, # width
-#               6, # height
-#               4, # tokens in a row to win
-#               agent.RandomAgent("random1"),       # player 1
-#               agent.RandomAgent("random2"))       # player 2
-
-#
-# Human vs. Random
-#
-# g = game.Game(7, # width
-#               6, # height
-#               4, # tokens in a row to win
-#               agent.InteractiveAgent("human"),    # player 1
-#               agent.RandomAgent("random"))        # player 2
-
-#
-# Random vs. AlphaBeta
-#
-g = game.Game(7, # width
-              6, # height
-              4, # tokens in a row to win
-              agent.RandomAgent("random"),        # player 1
-              aba.AlphaBetaAgent("alphabeta", 4)) # player 2
-
-#
-# Human vs. AlphaBeta
-#
-# g = game.Game(7, # width
-#               6, # height
-#               4, # tokens in a row to win
-#               agent.InteractiveAgent("human"),    # player 1
-#               aba.AlphaBetaAgent("alphabeta", 4)) # player 2
-
-#
-# Human vs. Human
-#
-# g = game.Game(7, # width
-#               6, # height
-#               4, # tokens in a row to win
-#               agent.InteractiveAgent("human1"),   # player 1
-#               agent.InteractiveAgent("human2"))   # player 2
+games = []
+for i in range(10):
+    width = random.randint(4, 10)
+    height = random.randint(4, 10)
+    token = random.randint(4, 6)
+    randomPlayer = random.randint(1, 2)
+    if randomPlayer == 1:
+        games.append(game.Game(width, height, token, agent.RandomAgent("random"), aba.AlphaBetaAgent("alphabeta", 4)))
+    else:
+        games.append(game.Game(width, height, token, aba.AlphaBetaAgent("alphabeta", 4), agent.RandomAgent("random")))
 
 # Execute the game
-outcome = g.go()
+wins = 0
+ties = 0
+for game in games:
+    outcome = game.go()
+    if outcome == 2:
+        wins += 1
+    elif outcome == 0:
+        ties += 1
+print("We won " + str(wins) + " out of " + str(len(games)) + " games")
+print("We tied " + str(ties) + " times")
