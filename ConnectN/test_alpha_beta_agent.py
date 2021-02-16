@@ -374,7 +374,24 @@ class TestAlphaBetaAgent(unittest.TestCase):
         found = agent.count_vertical(b, 1, to_win)
         expect = [[0, 0, 0, 0], [0, 0, 0, 0]]
         self.assertEqual(found, expect)
+    
+    # protect the function definition
+    def test_col_midpoint_scalar(self):
+        def f(col, last_col):
+            return (-1 * col * col) + (last_col * col)
         
+        agent = aba.AlphaBetaAgent("TEST_AI", 1, 3)
+
+
+        col = 0
+        last_col = 20
+        for _ in range(5):
+            found = agent.col_midpoint_scalar(col, last_col)
+            expect = f(col, last_col)
+            self.assertEqual(found, expect)
+            col = col+1
+            last_col = last_col/2
+
         
 
 if __name__ == '__main__':

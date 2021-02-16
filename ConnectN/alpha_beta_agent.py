@@ -77,8 +77,8 @@ class AlphaBetaAgent(agent.Agent):
             next_brd = child[0]
             next_move = child[1]
             found_val = self.minimax(next_brd, self.max_depth, True)
-            print(next_brd.print_it())
-            print("evaluation: ", found_val)
+            # PRIORITIZE THE MIDDLE OF THE BOARD
+            found_val = found_val + self.col_midpoint_scalar(next_move, brd.w-1)
             if found_val > val:
                 val = found_val
                 move = next_move
@@ -261,6 +261,15 @@ class AlphaBetaAgent(agent.Agent):
     #
     def quad_scalar(self, x):
         return x*x*x/self.to_win
+    
+    # equation to prioritize the middle of the board
+    # 
+    # PARAM  [int] col: the column of the next move
+    # PARAM  [int] last_col: the last column available to move to
+    # RETURN [float]: scalar value prioritizing the middle of the board
+    #
+    def col_midpoint_scalar(self, col, last_col):
+        return (-1 * col * col) + (last_col * col)
         
     # run once at the first move of the agent, finding which piece to place
     # [PARAM] brd: board from game
