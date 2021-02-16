@@ -35,7 +35,7 @@ class AlphaBetaAgent(agent.Agent):
 
         # find opponent token
         if self.player == 0:
-            self.player = self.findPlayer(brd)
+            self.player = self.find_player(brd)
 
 
         return self.find_best_column(brd)
@@ -92,11 +92,7 @@ class AlphaBetaAgent(agent.Agent):
     def minimax(self, brd, depth, max_node):
         # is the game over?
         if depth == 0 or len(brd.free_cols()) == 0 or brd.get_outcome() != 0:
-            
             res = self.evaluate(brd)
-            # print(brd.print_it())
-            # print("above evaluation: ", res)
-            # print("depth ", depth, " free_cols ", len(brd.free_cols()), " outcome ", brd.get_outcome())
             return res
         # max
         if max_node:
@@ -113,16 +109,26 @@ class AlphaBetaAgent(agent.Agent):
         return v
 
     def evaluate(self, brd):
-        return self.num_in_a_row(brd) * self.win_weight(brd)
+        # TODO
+        # COUNT NUMBER OF TRAPS (7 SHAPE)
+
+        # if self.player == 2:
+            # Be Deffensive = weight the other player MORE than yourse
+        
+
+
+        return self.num_in_a_row(brd) + self.win_bonus(brd)
     
-    def win_weight(self, brd):
-        if self.player == brd.get_outcome():
+    def win_bonus(self, brd):
+        outcome = brd.get_outcome()
+        if self.player == outcome:
             return 200
-        elif brd.get_outcome() != 0:
+        elif outcome != 0:
             return -200
         else:
-            return 1
+            return 0
 
+    # UNFINISHED
     def num_in_a_row(self, brd):
         # each points[i] is number of occurances with i+1 in a row
         points = []
@@ -149,7 +155,8 @@ class AlphaBetaAgent(agent.Agent):
                     points[seen-1] = points[seen-1] + 1
                     seen = 0
         
-        # TODO *********** horizontal
+        # TODO ***********
+        # diagnal
 
         # count points
         result = 0
@@ -165,7 +172,7 @@ class AlphaBetaAgent(agent.Agent):
     # [PARAM] brd: board from game
     # [int]: which player the AI is playing as
     #
-    def findPlayer(self, brd):
+    def find_player(self, brd):
         for row in brd.board:
             for col in row:
                 if col != 0:
