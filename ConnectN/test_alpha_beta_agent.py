@@ -89,6 +89,11 @@ class TestAlphaBetaAgent(unittest.TestCase):
     # find which player the AI is by counting pieces on the board
     def test_find_player(self):
         self.assertEqual(False, True)
+    
+    # score a board by counting number of tokens in a row
+    # UNFINISHED
+    def test_num_in_a_row(self):
+        self.assertEqual(False, True)
 
 
 if __name__ == '__main__':
