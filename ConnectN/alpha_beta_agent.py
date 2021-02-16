@@ -78,6 +78,12 @@ class AlphaBetaAgent(agent.Agent):
             next_move = child[1]
             found_val = self.minimax(next_brd, self.max_depth, True)
             # PRIORITIZE THE MIDDLE OF THE BOARD
+            #
+            #   NOTE: This may not belong here...
+            #   It may be better to:
+            #       - count 1-in-a-row and multiply them by this scalar
+            #
+            #
             found_val = found_val + self.col_midpoint_scalar(next_move, brd.w-1)
             if found_val > val:
                 val = found_val
