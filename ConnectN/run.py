@@ -10,7 +10,7 @@ games = []
 for i in range(10):
     width = random.randint(4, 10)
     height = random.randint(4, 10)
-    token = random.randint(4, 6)
+    token = random.randint(4, 5)
     randomPlayer = random.randint(1, 2)
     if randomPlayer == 1:
         games.append(game.Game(width, height, token, agent.RandomAgent("random"), aba.AlphaBetaAgent("alphabeta", 4)))
@@ -21,8 +21,13 @@ for i in range(10):
 wins = 0
 ties = 0
 for game in games:
+    player = 0
+    if game.players[0].name == "alphabeta":
+        player = 1
+    else:
+        player = 2
     outcome = game.go()
-    if outcome == 2:
+    if outcome == player:
         wins += 1
     elif outcome == 0:
         ties += 1

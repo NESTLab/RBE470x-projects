@@ -101,7 +101,7 @@ class Board(object):
     # RETURN [list of int]: the columns with at least one free slot
     def free_cols(self):
         """Returns a list of the columns with at least one free slot"""
-        return [x for x in range(self.w) if self.board[-1][x] == 0 ]
+        return [x for x in range(self.w) if self.board[-1][x] == 0]
 
     # Prints the current board state.
     def print_it(self):
