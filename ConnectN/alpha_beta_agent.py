@@ -77,6 +77,8 @@ class AlphaBetaAgent(agent.Agent):
             next_brd = child[0]
             next_move = child[1]
             found_val = self.minimax(next_brd, self.max_depth, True)
+            print(next_brd.print_it())
+            print("evaluation: ", found_val)
             if found_val > val:
                 val = found_val
                 move = next_move
@@ -92,7 +94,10 @@ class AlphaBetaAgent(agent.Agent):
     def minimax(self, brd, depth, max_node):
         # is the game over?
         if depth == 0 or len(brd.free_cols()) == 0 or brd.get_outcome() != 0:
-            res = self.evaluate(brd)
+            e = self.evaluate(brd)
+            # brd.print_it()
+            # print(e)
+            res = e
             return res
         # max
         if max_node:
@@ -131,46 +136,122 @@ class AlphaBetaAgent(agent.Agent):
     # UNFINISHED
     def num_in_a_row(self, brd):
         # each points[i] is number of occurances with i+1 in a row
-        pos_points = []
-        for _ in range(self.to_win):
-            pos_points.append(0)
-        h = brd.h
-        w = brd.w
-        # horizontal
-        good_seen = 0
-        for row in brd.board:
-            for col in row:
-                if col == self.player:
-                    good_seen = good_seen + 1
-                else:
-                    good_seen = 0
-        # vertical
-        good_seen = 0
-        for col in range(w):
-            for row in range(h):
-                if brd.board[row][col] == self.player:
-                    good_seen = good_seen + 1
-                elif good_seen > 0 and good_seen-1 < len(pos_points):
-                    pos_points[good_seen-1] = pos_points[good_seen-1] + 1
-                    good_seen = 0
+        my_points = [0 for _ in range(self.to_win)]
+        op_points = [0 for _ in range(self.to_win)]
         
+        # horizontal
+        found = self.count_horizontal(brd, self.player, self.to_win)
+        for p_idx, _ in enumerate(found[0]):
+            my_points[p_idx] = my_points[p_idx] + found[0][p_idx]
+            op_points[p_idx] = op_points[p_idx] + found[1][p_idx]
+
+        found = self.count_vertical(brd, self, self.to_win)
+        for p_idx, _ in enumerate(found[0]):
+            my_points[p_idx] = my_points[p_idx] + found[0][p_idx]
+            op_points[p_idx] = op_points[p_idx] + found[1][p_idx]
         # TODO ***********
         # diagnal
 
         # count points
         result = 0
-        for v in pos_points:
-            result = result * self.quad_scalar(v)
+        for i, v in enumerate(my_points):
+            result = result + (v * self.quad_scalar(i+1))
+            result = result - (op_points[i] * self.quad_scalar(i+1))
         return result
     
+    # find the number of n horizontal pieces for player1 and player2
+    #
+    # PARAM [board.Board] brd: game board
+    # PARAM [int] piece: number to find in a row within the board
+    # PARAM [int] to_win: number of pieces in a row to win the game
+    # RETURN [list of [list of int]]: value at each index is number of n=(index+1) in a row
+    #                                first array is my pieces, second array is opponent's pieces
+    def count_horizontal(self, brd, piece, to_win):
+        # create array only as large as num_to_win
+        # rational: we don't care about counting 4 in a rows
+        # if it only takes 2 in a row to win
+        #
+        # NOTE: tokens in a row > num_to_win will cound as num_to_win
+        #
+        my_res = [0 for _ in range(to_win)]
+        op_res = [0 for _ in range(to_win)]
+        empty = True
+        for row in brd.board:
+            me = 0
+            op = 0
+            for token in row:
+                if token == piece:
+                    empty = False
+                    me = me + 1
+                    self.add_to_points_list(op_res, op)
+                    op = 0
+                elif token != 0:
+                    empty = False
+                    op = op + 1
+                    self.add_to_points_list(my_res, me)
+                    me = 0
+                else:
+                    self.add_to_points_list(op_res, op)
+                    self.add_to_points_list(my_res, me)
+                    op = 0
+                    me = 0
+            if empty:
+                break
+            else:
+                empty = True
+                self.add_to_points_list(op_res, op)
+                self.add_to_points_list(my_res, me)
+        
+        return [my_res, op_res]
+    
+    # find the number of n vertical pieces for player1 and player2
+    #
+    # PARAM [board.Board] brd: game board
+    # PARAM [int] piece: number to find in a row within the board
+    # PARAM [int] to_win: number of pieces in a row to win the game
+    # RETURN [list of [list of int]]: value at each index is number of n=(index+1) in a row
+    #       
+    def count_vertical(self, brd, piece, to_win):
+        my_res = [0 for _ in range(to_win)]
+        op_res = [0 for _ in range(to_win)]
+        col_idx = 0
+        while col_idx < brd.w:
+            me = 0
+            op = 0
+            for row_idx in range(brd.h):
+                token = brd.board[row_idx][col_idx]
+                if token == piece:
+                    me = me + 1
+                    self.add_to_points_list(op_res, op)
+                    op = 0
+                elif token != 0:
+                    op = op + 1
+                    self.add_to_points_list(my_res, me)
+                    me = 0
+                else:
+                    self.add_to_points_list(op_res, op)
+                    self.add_to_points_list(my_res, me)
+                    me = 0
+                    op = 0
+                    break
+
+            self.add_to_points_list(op_res, op)
+            self.add_to_points_list(my_res, me)
+            col_idx = col_idx + 1
+
+        return [my_res, op_res]
 
     # helper function to num_in_a_row which adds 1 to the value at the index of point-1
+    # NOTE: This will neglect point values of 1
     #
     # PARAM  [list of int] lst: number of n in a row at index = n-1
     # PARAM  [int] point: longest re-occurance of peices found in a arow
     #
     def add_to_points_list(self, lst, point):
-        if point > 0 and point-1 < len(lst):
+        if point > 1 and len(lst) != 0:
+            if point >= len(lst):
+                point = len(lst)
+            
             lst[point-1] = lst[point-1] + 1
 
     # equation used to value larger n_in_a_row occurances exponentially greater
