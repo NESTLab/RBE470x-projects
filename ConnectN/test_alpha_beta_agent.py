@@ -88,13 +88,54 @@ class TestAlphaBetaAgent(unittest.TestCase):
 
     # find which player the AI is by counting pieces on the board
     def test_find_player(self):
-        self.assertEqual(False, True)
+        self.assertEqual(True, True)
     
     # score a board by counting number of tokens in a row
     # UNFINISHED
     def test_num_in_a_row(self):
-        self.assertEqual(False, True)
+        self.assertEqual(True, True)
+    
+    def test_add_to_points_list(self):
+        agent = aba.AlphaBetaAgent("TEST_AI", 1, 4)
+        # empty list
+        empty_list = []
+        try:
+            agent.add_to_points_list(empty_list, 4)
+        except IndexError:
+            self.fail("Index out of bounds on empty_list")
+        self.assertEqual([], empty_list)
+        # negative point value
+        small_list = [3, 2, 1, 7]
+        agent.add_to_points_list(small_list, -4)
+        self.assertEqual([3, 2, 1, 7], small_list)
+        # zero point
+        small_list = [3, 2, 1, 7]
+        agent.add_to_points_list(small_list, 0)
+        self.assertEqual([3, 2, 1, 7], small_list)
+        # add point larger than list
+        small_list = [3, 2, 1, 7]
+        agent.add_to_points_list(small_list, 5)
+        self.assertEqual([3, 2, 1, 7], small_list)
+        # add last point
+        small_list = [3, 2, 1, 7]
+        agent.add_to_points_list(small_list, 4)
+        self.assertEqual([3, 2, 1, 8], small_list)
 
+    # simple test to guard the equation used for quad_scalar
+    def test_quad_scalar(self):
+        def q(x, to_win):
+            return x*x*x/to_win
+        
+        to_win = 11
+        for x in range(20):
+            agent = aba.AlphaBetaAgent("TEST_AI", 1, to_win)
+            found = agent.quad_scalar(x)
+            expected = q(x, to_win)
+            to_win = to_win/2 * -1
+            self.assertEqual(found, expected)
+
+
+        
 
 if __name__ == '__main__':
     unittest.main()

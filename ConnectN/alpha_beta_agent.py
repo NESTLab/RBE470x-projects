@@ -131,43 +131,56 @@ class AlphaBetaAgent(agent.Agent):
     # UNFINISHED
     def num_in_a_row(self, brd):
         # each points[i] is number of occurances with i+1 in a row
-        points = []
+        pos_points = []
         for _ in range(self.to_win):
-            points.append(0)
+            pos_points.append(0)
         h = brd.h
         w = brd.w
         # horizontal
-        seen = 0
+        good_seen = 0
         for row in brd.board:
             for col in row:
                 if col == self.player:
-                    seen = seen + 1
-                elif seen > 0 and seen-1 < len(points):
-                    points[seen-1] = points[seen-1] + 1
-                    seen = 0
+                    good_seen = good_seen + 1
+                else:
+                    good_seen = 0
         # vertical
-        seen = 0
+        good_seen = 0
         for col in range(w):
             for row in range(h):
                 if brd.board[row][col] == self.player:
-                    seen = seen + 1
-                elif seen > 0 and seen-1 < len(points):
-                    points[seen-1] = points[seen-1] + 1
-                    seen = 0
+                    good_seen = good_seen + 1
+                elif good_seen > 0 and good_seen-1 < len(pos_points):
+                    pos_points[good_seen-1] = pos_points[good_seen-1] + 1
+                    good_seen = 0
         
         # TODO ***********
         # diagnal
 
         # count points
         result = 0
-        for v in points:
-            result = result + self.quad_scalar(v)
+        for v in pos_points:
+            result = result * self.quad_scalar(v)
         return result
+    
 
+    # helper function to num_in_a_row which adds 1 to the value at the index of point-1
+    #
+    # PARAM  [list of int] lst: number of n in a row at index = n-1
+    # PARAM  [int] point: longest re-occurance of peices found in a arow
+    #
+    def add_to_points_list(self, lst, point):
+        if point > 0 and point-1 < len(lst):
+            lst[point-1] = lst[point-1] + 1
+
+    # equation used to value larger n_in_a_row occurances exponentially greater
+    #
+    # PARAM  [int] x: n_in_a_row
+    # RETURN [float]: scalar value used to weigh number of occurances of n_in_a_row
+    #
     def quad_scalar(self, x):
         return x*x*x/self.to_win
         
-    
     # run once at the first move of the agent, finding which piece to place
     # [PARAM] brd: board from game
     # [int]: which player the AI is playing as
