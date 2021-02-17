@@ -86,7 +86,7 @@ class AlphaBetaAgent(agent.Agent):
     #
     # PARAM  [board.Board] brd: the board state
     # PARAM  [int] depth: the max depth of recursive calls
-    # PARAM  [bool] max_node: determins if max or min node
+    # PARAM  [bool] max_node: determines if max or min node
     # RETURN [float]: value of given decision tree
     #
     def minimax(self, brd, depth, max_node):
@@ -106,6 +106,40 @@ class AlphaBetaAgent(agent.Agent):
         for child in self.get_successors(brd):
             res = self.minimax(child[0], depth-1, True)
             v = min(v, res)
+        return v
+
+    # minimax algorithm with alpha beta pruning (to be called by go)?
+    #
+    # PARAM  [board.Board] brd: the board state
+    # PARAM  [int] depth: the max depth of recursive calls
+    # PARAM  [bool] max_node: determines if max or min node
+    # PARAM  [int] alpha: serves as alpha flag for pruning
+    # PARAM  [int] beta: serves as beta flag for pruning
+    # RETURN [float]: value of given decision tree
+    #
+    def alphabeta(self, brd, depth, max_node, alpha, beta):
+        # is the game over?
+        if depth == 0 or len(brd.free_cols()) == 0 or brd.get_outcome() != 0:
+            res = self.evaluate(brd)
+            return res
+        # max
+        if max_node:
+            v = float('-inf')
+            for child in self.get_successors(brd):
+                res = self.minimax(child[0], depth-1, False, alpha, beta)
+                v = max(v, res)
+                if v >= beta:
+                    return v
+                alpha = max(alpha, v)
+            return v
+        # min
+        v = float('inf')
+        for child in self.get_successors(brd):
+            res = self.minimax(child[0], depth-1, True, alpha, beta)
+            v = min(v, res)
+            if v <= alpha:
+                return v
+            beta = min(beta, v)
         return v
 
     def evaluate(self, brd):
