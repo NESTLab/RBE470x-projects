@@ -7,6 +7,10 @@ import agent
 
 # OPTOMIZED means we tuned the values to be the best we could
 
+# TUNED VALUES
+# ====================================
+MID_SCALAR = 2
+
 class AlphaBetaAgent(agent.Agent):
     """Agent that uses alpha-beta search"""
 
@@ -351,7 +355,7 @@ class AlphaBetaAgent(agent.Agent):
     # RETURN [float]: scalar value prioritizing the middle of the board
     #
     def col_midpoint_scalar(self, col, last_col):
-        return 25 * ((-1 * col * col) + (last_col * col))
+        return MID_SCALAR * ((-1 * col * col) + (last_col * col))
         
     # run once at the first move of the agent, finding which piece to place
     # [PARAM] brd: board from game
