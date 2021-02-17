@@ -343,7 +343,7 @@ class AlphaBetaAgent(agent.Agent):
     def quad_scalar(self, x):
         return x*x*x/self.to_win
     
-    # OPTOMIZED
+    # OPTIMIZED
     # equation to prioritize the middle of the board
     # 
     # PARAM  [int] col: the column of the next move
