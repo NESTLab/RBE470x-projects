@@ -1,7 +1,7 @@
 ##TODO
 
 - create a new minmax function that adds alpha beta pruning (don't delete the old one) TYLER
-- count number of n-in-a-row diagnals (found in num_in_a_row) TYLER
+- [DONE] count number of n-in-a-row diagnals (found in num_in_a_row) TYLER
 - modify training.py to print out a COMPLETE analysis JEREMY
 
 

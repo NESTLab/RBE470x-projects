@@ -2,6 +2,7 @@ import random
 import game
 import agent
 import alpha_beta_agent as aba
+import old_alpha_beta_agent as oaba
 
 ######################
 # Play a single game #
@@ -27,8 +28,12 @@ def play_game(w, h, n, l, p1, p2):
         print("tie")
     elif o == 1:
         print(p1.name, "won!")
+        if (p1.name == "AI" or p2.name == "AI") and p1.name != "AI":
+            g.board.print_it()
     else:
         print(p2.name, "won!")
+        if (p1.name == "AI" or p2.name == "AI") and p2.name != "AI":
+            g.board.print_it()
     return o
 
 ###########################################################
@@ -110,15 +115,23 @@ tokens_to_win = 4
 time_limit = 15
 
 
-# Run!
-play_tournament(7,      # board width
-                6,      # board height
-                tokens_to_win,      # tokens in a row to win
-                time_limit,     # time limit in seconds
-                
-    [aba.AlphaBetaAgent("AI", depth, tokens_to_win),
-    agent.RandomAgent("random1"),
-    agent.RandomAgent("random2"),
-    agent.RandomAgent("random3"),
-    agent.RandomAgent("random4")
-]) # player list
+for i in range(1):
+    random.seed(i)
+    # Run!
+    play_tournament(7,      # board width
+                    6,      # board height
+                    tokens_to_win,      # tokens in a row to win
+                    time_limit,     # time limit in seconds
+                    
+        [aba.AlphaBetaAgent("ai_100", depth, tokens_to_win, 100),
+        aba.AlphaBetaAgent("ai_25", depth, tokens_to_win, 25),
+        aba.AlphaBetaAgent("ai_15", depth, tokens_to_win, 15),
+        aba.AlphaBetaAgent("ai_5", depth, tokens_to_win, 5),
+        aba.AlphaBetaAgent("ai_200", depth, tokens_to_win, 200),
+        aba.AlphaBetaAgent("ai_300", depth, tokens_to_win, 300),
+        # agent.RandomAgent("random1"),
+        # agent.RandomAgent("random2"),
+        # agent.RandomAgent("random3"),
+        # agent.RandomAgent("random4"),
+    ]) # player list
+

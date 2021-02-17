@@ -7,7 +7,7 @@ import agent
 
 # OPTOMIZED means we tuned the values to be the best we could
 
-class AlphaBetaAgent(agent.Agent):
+class OldAlphaBetaAgent(agent.Agent):
     """Agent that uses alpha-beta search"""
 
     # Class constructor.
@@ -139,11 +139,7 @@ class AlphaBetaAgent(agent.Agent):
         else:
             return 0
 
-    # score the number of n_in_a_row with parabolic scalar
-    # 
-    # PARAM  [board.Board] brd: the game board
-    # RETURN [float] score of board peices (self - opponent)
-    #  
+    # UNFINISHED
     def num_in_a_row(self, brd):
         # each points[i] is number of occurances with i+1 in a row
         my_points = [0 for _ in range(self.to_win)]
@@ -152,10 +148,9 @@ class AlphaBetaAgent(agent.Agent):
         # horizontal
         h_found = self.count_horizontal(brd, self.player, self.to_win)
         # vertical
-        v_found = self.count_vertical(brd, self.player, self.to_win)
+        v_found = self.count_vertical(brd, self, self.to_win)
         # diagnal
-        x_found = self.count_diagnal(brd, self.player, self.to_win)
-
+        x_found = self.count_diagnal(brd, self, self.to_win)
         for p_idx, _ in enumerate(h_found[0]):
             my_points[p_idx] = my_points[p_idx] + h_found[0][p_idx] + v_found[0][p_idx] + x_found[0][p_idx] 
             op_points[p_idx] = op_points[p_idx] + h_found[1][p_idx] + v_found[1][p_idx] + x_found[1][p_idx]
@@ -351,7 +346,7 @@ class AlphaBetaAgent(agent.Agent):
     # RETURN [float]: scalar value prioritizing the middle of the board
     #
     def col_midpoint_scalar(self, col, last_col):
-        return 25 * ((-1 * col * col) + (last_col * col))
+        return 8 * ((-1 * col * col) + (last_col * col))
         
     # run once at the first move of the agent, finding which piece to place
     # [PARAM] brd: board from game
