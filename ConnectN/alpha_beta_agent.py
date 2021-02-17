@@ -335,7 +335,6 @@ class AlphaBetaAgent(agent.Agent):
             
             lst[point-1] = lst[point-1] + 1
 
-    # OPTOMIZED
     # equation used to value larger n_in_a_row occurances exponentially greater
     #
     # PARAM  [int] x: n_in_a_row
@@ -344,6 +343,7 @@ class AlphaBetaAgent(agent.Agent):
     def quad_scalar(self, x):
         return x*x*x/self.to_win
     
+    # OPTOMIZED
     # equation to prioritize the middle of the board
     # 
     # PARAM  [int] col: the column of the next move
