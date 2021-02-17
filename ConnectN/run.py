@@ -7,16 +7,20 @@ import alpha_beta_agent as aba
 # random.seed(1)
 
 games = []
-for i in range(10):
-    width = random.randint(4, 10)
-    height = random.randint(4, 10)
-    token = random.randint(4, 5)
-    randomPlayer = random.randint(1, 2)
-    if randomPlayer == 1:
-        games.append(game.Game(width, height, token, agent.RandomAgent("random"), aba.AlphaBetaAgent("alphabeta", 4)))
-    else:
-        games.append(game.Game(width, height, token, aba.AlphaBetaAgent("alphabeta", 4), agent.RandomAgent("random")))
+# for i in range(10):
+#     width = random.randint(5, 10)
+#     height = random.randint(5, 10)
+#     token = random.randint(4, 5)
+#     randomPlayer = random.randint(1, 2)
+#     if randomPlayer == 1:
+#         games.append(game.Game(width, height, token, agent.RandomAgent("random"), aba.AlphaBetaAgent("alphabeta", 5)))
+#     else:
+#         games.append(game.Game(width, height, token, aba.AlphaBetaAgent("alphabeta", 5), agent.RandomAgent("random")))
 
+games.append(game.Game(7, 6, 4, aba.AlphaBetaAgent("alphabeta", 4), agent.RandomAgent("random")))
+games.append(game.Game(7, 6, 5, aba.AlphaBetaAgent("alphabeta", 4), agent.RandomAgent("random")))
+games.append(game.Game(10, 8, 4, aba.AlphaBetaAgent("alphabeta", 4), agent.RandomAgent("random")))
+games.append(game.Game(10, 8, 5, aba.AlphaBetaAgent("alphabeta", 4), agent.RandomAgent("random")))
 # Execute the game
 wins = 0
 ties = 0

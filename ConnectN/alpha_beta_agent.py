@@ -162,20 +162,6 @@ class AlphaBetaAgent(agent.Agent):
                         brd, ai_player) * 10)
         return eval_score
 
-    # def get_tokens(self, brd, player, num_of_tokens, x, y, dx, dy):
-    #     count = 0
-    #     for i in range(num_of_tokens):
-    #         if brd.board[x][y + i] != player:
-    #             return 0
-    #     return 1
-    # def find_tokens(self, brd, player, num_of_tokens):
-    #     score = 0
-    #     for x in range(brd.w):
-    #         for y in range(brd.h):
-    #             score += self.get_vertical_tokens(brd, player, num_of_tokens, x, y)
-    #             score += self.get_diagonal_tokens(brd, player, num_of_tokens, x, y)
-    #             score += self.get_horizontal_tokens(brd, player, num_of_tokens, x, y)
-
     def get_one_token(self, brd, player):
         score = 0
         for x in range(brd.w - 1):
