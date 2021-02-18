@@ -732,7 +732,104 @@ class TestAlphaBetaAgent(unittest.TestCase):
         found = agent.count_diagnal(b, 2, to_win)
         expect = [[0, 2, 0], [0, 5, 0]]
         self.assertEqual(found, expect)
-    
+
+    # compares alphabeta with minmax to ensure that they always return the same choice
+    def test_alphabeta(self):
+        n_to_win = 3
+        agent = aba.AlphaBetaAgent("TEST_AI", 1, n_to_win)
+        agent.player = 1
+        b = board.Board(
+            [[2, 2, 2, 2],
+             [1, 2, 1, 1],
+             [2, 1, 2, 2],
+             [0, 0, 0, 2]],
+            4,
+            4,
+            n_to_win)
+        mmRes = agent.minimax(b, 1, n_to_win)
+        abRes = agent.alphabeta(b, 1, n_to_win, float('-inf'), float('inf'))
+        self.assertEqual(mmRes, abRes)
+
+        n_to_win = 3
+        agent = aba.AlphaBetaAgent("TEST_AI", 2, n_to_win)
+        agent.player = 1
+        b = board.Board(
+            [[2, 2, 2, 2],
+             [1, 2, 1, 1],
+             [2, 1, 2, 2],
+             [0, 0, 0, 2]],
+            4,
+            4,
+            n_to_win)
+        mmRes = agent.minimax(b, 2, n_to_win)
+        abRes = agent.alphabeta(b, 2, n_to_win, float('-inf'), float('inf'))
+        self.assertEqual(mmRes, abRes)
+
+        n_to_win = 3
+        agent = aba.AlphaBetaAgent("TEST_AI", 3, n_to_win)
+        agent.player = 1
+        b = board.Board(
+            [[2, 2, 2, 2],
+             [1, 2, 1, 1],
+             [2, 1, 2, 2],
+             [0, 0, 0, 2]],
+            4,
+            4,
+            n_to_win)
+        mmRes = agent.minimax(b, 3, n_to_win)
+        abRes = agent.alphabeta(b, 3, n_to_win, float('-inf'), float('inf'))
+        self.assertEqual(mmRes, abRes)
+
+        n_to_win = 4
+        agent = aba.AlphaBetaAgent("TEST_AI", 1, n_to_win)
+        agent.player = 1
+        b = board.Board(
+            [[0, 0, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 0]],
+            4,
+            4,
+            n_to_win)
+        mmRes = agent.minimax(b, 1, n_to_win)
+        abRes = agent.alphabeta(b, 1, n_to_win, float('-inf'), float('inf'))
+        self.assertEqual(mmRes, abRes)
+
+        n_to_win = 4
+        agent = aba.AlphaBetaAgent("TEST_AI", 2, n_to_win)
+        agent.player = 1
+        b = board.Board(
+            [[0, 0, 1, 0],
+             [0, 0, 1, 0],
+             [0, 0, 1, 0],
+             [0, 0, 0, 0]],
+            4,
+            4,
+            n_to_win)
+        mmRes = agent.minimax(b, 2, n_to_win)
+        abRes = agent.alphabeta(b, 2, n_to_win, float('-inf'), float('inf'))
+        self.assertEqual(mmRes, abRes)
+
+        n_to_win = 4
+        agent = aba.AlphaBetaAgent("TEST_AI", 3, n_to_win)
+        agent.player = 1
+        b = board.Board(
+            [[0, 0, 1, 0],
+             [0, 0, 1, 0],
+             [0, 0, 1, 0],
+             [0, 0, 0, 0]],
+            4,
+            4,
+            n_to_win)
+        mmRes = agent.minimax(b, 3, n_to_win)
+        abRes = agent.alphabeta(b, 3, n_to_win, float('-inf'), float('inf'))
+        self.assertEqual(mmRes, abRes)
+
+
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

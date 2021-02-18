@@ -141,7 +141,7 @@ class AlphaBetaAgent(agent.Agent):
         if max_node:
             v = float('-inf')
             for child in self.get_successors(brd):
-                res = self.minimax(child[0], depth-1, False, alpha, beta)
+                res = self.alphabeta(child[0], depth-1, False, alpha, beta)
                 v = max(v, res)
                 if v >= beta:
                     return v
@@ -150,7 +150,7 @@ class AlphaBetaAgent(agent.Agent):
         # min
         v = float('inf')
         for child in self.get_successors(brd):
-            res = self.minimax(child[0], depth-1, True, alpha, beta)
+            res = self.alphabeta(child[0], depth-1, True, alpha, beta)
             v = min(v, res)
             if v <= alpha:
                 return v
