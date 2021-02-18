@@ -7,11 +7,7 @@ import agent
 
 # OPTOMIZED means we tuned the values to be the best we could
 
-# TUNED VALUES
-# ====================================
-MID_SCALAR = 2
-
-class AlphaBetaAgent(agent.Agent):
+class OldAlphaBetaAgent(agent.Agent):
     """Agent that uses alpha-beta search"""
 
     # Class constructor.
@@ -98,7 +94,7 @@ class AlphaBetaAgent(agent.Agent):
     #
     # PARAM  [board.Board] brd: the board state
     # PARAM  [int] depth: the max depth of recursive calls
-    # PARAM  [bool] max_node: determines if max or min node
+    # PARAM  [bool] max_node: determins if max or min node
     # RETURN [float]: value of given decision tree
     #
     def minimax(self, brd, depth, max_node):
@@ -123,40 +119,6 @@ class AlphaBetaAgent(agent.Agent):
             v = min(v, res)
         return v
 
-    # minimax algorithm with alpha beta pruning (to be called by go)?
-    #
-    # PARAM  [board.Board] brd: the board state
-    # PARAM  [int] depth: the max depth of recursive calls
-    # PARAM  [bool] max_node: determines if max or min node
-    # PARAM  [int] alpha: serves as alpha flag for pruning
-    # PARAM  [int] beta: serves as beta flag for pruning
-    # RETURN [float]: value of given decision tree
-    #
-    def alphabeta(self, brd, depth, max_node, alpha, beta):
-        # is the game over?
-        if depth == 0 or len(brd.free_cols()) == 0 or brd.get_outcome() != 0:
-            res = self.evaluate(brd)
-            return res
-        # max
-        if max_node:
-            v = float('-inf')
-            for child in self.get_successors(brd):
-                res = self.minimax(child[0], depth-1, False, alpha, beta)
-                v = max(v, res)
-                if v >= beta:
-                    return v
-                alpha = max(alpha, v)
-            return v
-        # min
-        v = float('inf')
-        for child in self.get_successors(brd):
-            res = self.minimax(child[0], depth-1, True, alpha, beta)
-            v = min(v, res)
-            if v <= alpha:
-                return v
-            beta = min(beta, v)
-        return v
-
     def evaluate(self, brd):
         # TODO
         # COUNT NUMBER OF TRAPS (7 SHAPE)
@@ -177,11 +139,7 @@ class AlphaBetaAgent(agent.Agent):
         else:
             return 0
 
-    # score the number of n_in_a_row with parabolic scalar
-    # 
-    # PARAM  [board.Board] brd: the game board
-    # RETURN [float] score of board peices (self - opponent)
-    #  
+    # UNFINISHED
     def num_in_a_row(self, brd):
         # each points[i] is number of occurances with i+1 in a row
         my_points = [0 for _ in range(self.to_win)]
@@ -190,10 +148,9 @@ class AlphaBetaAgent(agent.Agent):
         # horizontal
         h_found = self.count_horizontal(brd, self.player, self.to_win)
         # vertical
-        v_found = self.count_vertical(brd, self.player, self.to_win)
+        v_found = self.count_vertical(brd, self, self.to_win)
         # diagnal
-        x_found = self.count_diagnal(brd, self.player, self.to_win)
-
+        x_found = self.count_diagnal(brd, self, self.to_win)
         for p_idx, _ in enumerate(h_found[0]):
             my_points[p_idx] = my_points[p_idx] + h_found[0][p_idx] + v_found[0][p_idx] + x_found[0][p_idx] 
             op_points[p_idx] = op_points[p_idx] + h_found[1][p_idx] + v_found[1][p_idx] + x_found[1][p_idx]
@@ -373,6 +330,7 @@ class AlphaBetaAgent(agent.Agent):
             
             lst[point-1] = lst[point-1] + 1
 
+    # OPTOMIZED
     # equation used to value larger n_in_a_row occurances exponentially greater
     #
     # PARAM  [int] x: n_in_a_row
@@ -381,7 +339,6 @@ class AlphaBetaAgent(agent.Agent):
     def quad_scalar(self, x):
         return x*x*x/self.to_win
     
-    # OPTIMIZED
     # equation to prioritize the middle of the board
     # 
     # PARAM  [int] col: the column of the next move
@@ -389,7 +346,7 @@ class AlphaBetaAgent(agent.Agent):
     # RETURN [float]: scalar value prioritizing the middle of the board
     #
     def col_midpoint_scalar(self, col, last_col):
-        return MID_SCALAR * ((-1 * col * col) + (last_col * col))
+        return 8 * ((-1 * col * col) + (last_col * col))
         
     # run once at the first move of the agent, finding which piece to place
     # [PARAM] brd: board from game
