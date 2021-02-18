@@ -1,6 +1,6 @@
 import math
 import agent
-import game
+import time
 import alpha_beta_node
 
 
@@ -29,7 +29,10 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        tik = time.perf_counter()
         move_col = self.alpha_beta_search(brd)
+        tok = time.perf_counter()
+        print(f"Made move in {tok - tik:0.4f} seconds")
         return move_col
 
     # The first level of an Alpha-Beta search that kicks off the rest.
@@ -161,6 +164,7 @@ class AlphaBetaAgent(agent.Agent):
                                                                                                          ai_player) * 50 - self.get_two_token(
                         brd, ai_player) * 10)
         return eval_score
+
 
     def get_one_token(self, brd, player):
         score = 0
