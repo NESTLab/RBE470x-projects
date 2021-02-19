@@ -15,10 +15,13 @@ class AlphaBetaAgent(agent.Agent):
     #
     # PARAM [string] name:      the name of this player
     # PARAM [int]    max_depth: the maximum search depth
-    def __init__(self, name, max_depth):
+    def __init__(self, name):
         super().__init__(name)
         # Max search depth
-        self.max_depth = max_depth
+        self.max_depth = 0
+        self.moves = 0
+        self.eval = 0
+        self.ai_player = 0
 
     # Pick a column.
     #
@@ -29,11 +32,28 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        self.ai_player = (self.player % 2 + 1)
+        self.moves += 1
+        if self.moves <= 5 and brd.w >= 9:
+            self.max_depth = 3
+        else:
+            self.max_depth = 4
         tik = time.perf_counter()
         move_col = self.alpha_beta_search(brd)
         tok = time.perf_counter()
         print(f"Made move in {tok - tik:0.4f} seconds")
+        print("We called the eval " + str(self.eval) + " times")
         return move_col
+
+    def reorganize_successors(self, successors, brd):
+        new_successors = []
+        last_successors = []
+        for successor in successors:
+            if (brd.w * (1 / 3) - 1) <= successor[1] <= (brd.w * (2 / 3)):
+                new_successors.append(successor)
+            else:
+                last_successors.append(successor)
+        return new_successors + last_successors
 
     # The first level of an Alpha-Beta search that kicks off the rest.
     # Separated because the moves need to be tracked at the first level
@@ -44,15 +64,20 @@ class AlphaBetaAgent(agent.Agent):
         # Array of possible moves
         possible_moves = []
         successors = self.get_successors(brd)
+        successors = self.reorganize_successors(successors, brd)
+        alpha = -math.inf
+        beta = math.inf
         # For each possible move
         for successor in successors:
             brd = successor[0]
             col = successor[1]
             # create new node, evaluation created by alpha-beta searching all possible children to max_depth
-            new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.min_value(brd, self.max_depth, -math.inf, math.inf))
+            new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.min_value(brd, self.max_depth, alpha, beta))
             # check if the move wins and if so return immediately
             if new_node.evaluation == math.inf:
                 return new_node.col
+            elif new_node.evaluation > alpha:
+                alpha = new_node.evaluation
             # Add to the array
             possible_moves.append(new_node)
         # Assign Starting Vals to find the best move
@@ -73,15 +98,18 @@ class AlphaBetaAgent(agent.Agent):
     # PARAM [float] max_bound:
     # RETURN [float] maximum assured score
     def max_value(self, brd, depth, min_bound, max_bound):
-        value = 0.0
+        value = -math.inf
         # If node is terminal, than we have lost
-        if brd.get_outcome() != 0:
-            return value
+        if brd.get_outcome() == self.ai_player:
+            return -math.inf
+        elif brd.get_outcome() == self.player:
+            return math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
             return self.get_evaluation(brd)
         # Now we evaluate each possible next move
         successors = self.get_successors(brd)
+        successors = self.reorganize_successors(successors, brd)
         for successor in successors:
             brd = successor[0]
             value = max(value, self.min_value(brd, depth - 1, min_bound, max_bound))
@@ -98,15 +126,18 @@ class AlphaBetaAgent(agent.Agent):
     # PARAM [float] max_bound:
     # RETURN [float] minimum assured score
     def min_value(self, brd, depth, min_bound, max_bound):
-        value = 1.0
+        value = math.inf
         # If node is terminal, than we have lost
-        if brd.get_outcome() != 0:
-            return value
+        if brd.get_outcome() == self.ai_player:
+            return -math.inf
+        elif brd.get_outcome() == self.player:
+            return math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
             return self.get_evaluation(brd)
         # Now we evaluate each possible next move
         successors = self.get_successors(brd)
+        successors = self.reorganize_successors(successors, brd)
         for successor in successors:
             brd = successor[0]
             value = min(value, self.max_value(brd, depth - 1, min_bound, max_bound))
@@ -146,23 +177,19 @@ class AlphaBetaAgent(agent.Agent):
     # RETURN [float] eval: The likely hood of either player winning.
     # 0-1; 1 meaning AI will win and 0 meaning the other player will win
     def get_evaluation(self, brd):
+        self.eval += 1
         eval_score = 0
         ai_player = self.player % 2 + 1
-        if brd.get_outcome() == self.player:
-            return math.inf
-        elif brd.get_outcome == ai_player:
-            return -math.inf
-        else:
-            if brd.n == 4:
-                eval_score = (self.get_three_token_connect4(brd, self.player) * 50 + self.get_two_token(brd,
-                                                                                                  self.player) * 10 - self.get_three_token_connect4(
-                        brd, ai_player) * 50 - self.get_two_token(brd, ai_player) * 10)
-            elif brd.n == 5:
-                eval_score = (self.get_four_token(brd, self.player) * 500 + self.get_three_token_connect5(brd,
-                                                                                                    self.player) * 50 + self.get_two_token(
-                        brd, self.player) * 10 - self.get_four_token(brd, ai_player) * 500 - self.get_three_token_connect5(brd,
-                                                                                                         ai_player) * 50 - self.get_two_token(
-                        brd, ai_player) * 10)
+        if brd.n == 4:
+            eval_score = (self.get_three_token_connect4(brd, self.player) * 50 + self.get_two_token(brd,
+                                                                                              self.player) * 10 - self.get_three_token_connect4(
+                    brd, ai_player) * 50 - self.get_two_token(brd, ai_player) * 10)
+        elif brd.n == 5:
+            eval_score = (self.get_four_token(brd, self.player) * 500 + self.get_three_token_connect5(brd,
+                                                                                                self.player) * 50 + self.get_two_token(
+                    brd, self.player) * 10 - self.get_four_token(brd, ai_player) * 500 - self.get_three_token_connect5(brd,
+                                                                                                     ai_player) * 50 - self.get_two_token(
+                    brd, ai_player) * 10)
         return eval_score
 
 
