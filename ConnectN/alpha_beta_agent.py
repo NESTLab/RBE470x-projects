@@ -22,6 +22,8 @@ class AlphaBetaAgent(agent.Agent):
         self.moves = 0
         self.eval = 0
         self.ai_player = 0
+        self.first_move = True
+        self.max_time = 0
 
     # Pick a column.
     #
@@ -32,17 +34,24 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        if self.first_move:
+            self.first_move = False
+            return int(brd.w / 2)
         self.ai_player = (self.player % 2 + 1)
         self.moves += 1
-        if self.moves <= 5 and brd.w >= 9:
+        if self.moves <= 6 and brd.w >= 9:
             self.max_depth = 3
         else:
             self.max_depth = 4
         tik = time.perf_counter()
         move_col = self.alpha_beta_search(brd)
         tok = time.perf_counter()
+        new_time = tok - tik
+        if new_time > self.max_time:
+            self.max_time = new_time
         print(f"Made move in {tok - tik:0.4f} seconds")
         print("We called the eval " + str(self.eval) + " times")
+        print("We have a max time of " + str(self.max_time) + " seconds")
         return move_col
 
     def reorganize_successors(self, successors, brd):
@@ -102,8 +111,6 @@ class AlphaBetaAgent(agent.Agent):
         # If node is terminal, than we have lost
         if brd.get_outcome() == self.ai_player:
             return -math.inf
-        elif brd.get_outcome() == self.player:
-            return math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
             return self.get_evaluation(brd)
@@ -127,10 +134,7 @@ class AlphaBetaAgent(agent.Agent):
     # RETURN [float] minimum assured score
     def min_value(self, brd, depth, min_bound, max_bound):
         value = math.inf
-        # If node is terminal, than we have lost
-        if brd.get_outcome() == self.ai_player:
-            return -math.inf
-        elif brd.get_outcome() == self.player:
+        if brd.get_outcome() == self.player:
             return math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
@@ -182,16 +186,15 @@ class AlphaBetaAgent(agent.Agent):
         ai_player = self.player % 2 + 1
         if brd.n == 4:
             eval_score = (self.get_three_token_connect4(brd, self.player) * 50 + self.get_two_token(brd,
-                                                                                              self.player) * 10 - self.get_three_token_connect4(
-                    brd, ai_player) * 50 - self.get_two_token(brd, ai_player) * 10)
+                                                                                                    self.player) * 10 - self.get_three_token_connect4(
+                brd, ai_player) * 50 - self.get_two_token(brd, ai_player) * 10)
         elif brd.n == 5:
             eval_score = (self.get_four_token(brd, self.player) * 500 + self.get_three_token_connect5(brd,
-                                                                                                self.player) * 50 + self.get_two_token(
-                    brd, self.player) * 10 - self.get_four_token(brd, ai_player) * 500 - self.get_three_token_connect5(brd,
-                                                                                                     ai_player) * 50 - self.get_two_token(
-                    brd, ai_player) * 10)
+                                                                                                      self.player) * 50 + self.get_two_token(
+                brd, self.player) * 10 - self.get_four_token(brd, ai_player) * 500 - self.get_three_token_connect5(brd,
+                                                                                                                   ai_player) * 50 - self.get_two_token(
+                brd, ai_player) * 10)
         return eval_score
-
 
     def get_one_token(self, brd, player):
         score = 0
@@ -264,46 +267,59 @@ class AlphaBetaAgent(agent.Agent):
         # Check for row of 3 tokens horizontally
         for x in range(brd.w - 4):
             for y in range(brd.h - 1):
-                if ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == 0) and (
-                        brd.board[y][x + 3] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == player)):
+                if ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                            brd.board[y][x + 3] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == 0) and (
+                                    brd.board[y][x + 3] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == player)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == player)):
                     score += 1
         # Check for row of 3 tokens vertically
         for x in range(brd.w - 1):
             for y in range(brd.h - 4):
-                if brd.board[y][x] == player and brd.board[y + 1][x] == player and brd.board[y + 2][x] == player and brd.board[y + 3][x] == 0:
+                if brd.board[y][x] == player and brd.board[y + 1][x] == player and brd.board[y + 2][x] == player and \
+                        brd.board[y + 3][x] == 0:
                     score += 1
         # Check for row of 3 tokens bottom left to top right
         for x in range(brd.w - 4):
             for y in range(brd.h - 4):
-                if ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 3][x + 3] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player)):
+                if ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                            brd.board[y + 3][x + 3] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 3][x + 3] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == player)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == player)):
                     score += 1
         # Check for row of 3 tokens top left to bottom right
         for x in range(brd.w - 4):
             for y in range(brd.h - 4):
-                if ((brd.board[y + 3][x] == player) and (brd.board[y + 2][x + 1] == player) and (brd.board[y + 1][x + 2] == player) and (
-                        brd.board[y][x + 3] == 0)) \
+                if ((brd.board[y + 3][x] == player) and (brd.board[y + 2][x + 1] == player) and (
+                        brd.board[y + 1][x + 2] == player) and (
+                            brd.board[y][x + 3] == 0)) \
                         or (
-                        (brd.board[y + 3][x] == player) and (brd.board[y + 2][x + 1] == player) and (brd.board[y + 1][x + 2] == 0) and (
-                        brd.board[y][x + 3] == player)) \
+                        (brd.board[y + 3][x] == player) and (brd.board[y + 2][x + 1] == player) and (
+                        brd.board[y + 1][x + 2] == 0) and (
+                                brd.board[y][x + 3] == player)) \
                         or (
-                        (brd.board[y + 3][x] == player) and (brd.board[y + 2][x + 1] == 0) and (brd.board[y + 1][x + 2] == player) and (
-                        brd.board[y][x + 3] == player)) \
+                        (brd.board[y + 3][x] == player) and (brd.board[y + 2][x + 1] == 0) and (
+                        brd.board[y + 1][x + 2] == player) and (
+                                brd.board[y][x + 3] == player)) \
                         or (
-                        (brd.board[y + 3][x] == 0) and (brd.board[y + 2][x + 1] == player) and (brd.board[y + 1][x + 2] == player) and (
-                        brd.board[y][x + 3] == player)):
+                        (brd.board[y + 3][x] == 0) and (brd.board[y + 2][x + 1] == player) and (
+                        brd.board[y + 1][x + 2] == player) and (
+                                brd.board[y][x + 3] == player)):
                     score += 1
         return score
 
@@ -312,86 +328,117 @@ class AlphaBetaAgent(agent.Agent):
         # Check for row of 3 tokens horizontally
         for x in range(brd.w - 5):
             for y in range(brd.h - 1):
-                if ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == 0) and (
-                        brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == 0) and (
-                        brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == 0) and (
+                if ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                            brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == 0) and (
+                                    brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == 0) and (
+                                    brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        or (
+                        (brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == 0) and (
                         brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == player) and (
+                        or (
+                        (brd.board[y][x] == 0) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == player) and (
                         brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == 0) and (
+                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        or (
+                        (brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == 0) and (
                         brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)):
                     score += 1
         # Check for row of 3 tokens vertically
         for x in range(brd.w - 1):
             for y in range(brd.h - 5):
-                if brd.board[y][x] == player and brd.board[y + 1][x] == player and brd.board[y + 2][x] == player and brd.board[y + 3][
-                    x] == 0 and brd.board[y + 4][x] == 0:
+                if brd.board[y][x] == player and brd.board[y + 1][x] == player and brd.board[y + 2][x] == player and \
+                        brd.board[y + 3][
+                            x] == 0 and brd.board[y + 4][x] == 0:
                     score += 1
         # Check for row of 3 tokens bottom left to top right
         for x in range(brd.w - 5):
             for y in range(brd.h - 5):
-                if ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)):
+                if ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                            brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)):
                     score += 1
         # Check for row of 3 tokens top left to bottom right
         for x in range(brd.w - 5):
             for y in range(brd.h - 5):
-                if ((brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == 0)) \
+                if ((brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                            brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == 0)) \
                         or (
-                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
                         or (
-                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
                         or (
-                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
                         or (
-                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
+                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        or ((brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
+                        or ((brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
                         or (
-                        (brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                        (brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
                         or (
-                        (brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)):
+                        (brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        or ((brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)):
                     score += 1
         return score
 
@@ -400,53 +447,69 @@ class AlphaBetaAgent(agent.Agent):
         # Check for row of 4 tokens horizontally
         for x in range(brd.w - 5):
             for y in range(brd.h - 1):
-                if ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == 0) and (
-                        brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (brd.board[y][x + 2] == player) and (
-                        brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)):
+                if ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                            brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == 0) and (
+                                    brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y][x + 1] == 0) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y][x + 1] == player) and (
+                        brd.board[y][x + 2] == player) and (
+                                    brd.board[y][x + 3] == player) and (brd.board[y][x + 4] == player)):
                     score += 1
         # Check for row of 4 tokens vertically
         for x in range(brd.w - 1):
             for y in range(brd.h - 5):
-                if brd.board[y][x] == player and brd.board[y + 1][x] == player and brd.board[y + 2][x] == player and brd.board[y + 3][
-                    x] == player and brd.board[y + 4][x] == 0:
+                if brd.board[y][x] == player and brd.board[y + 1][x] == player and brd.board[y + 2][x] == player and \
+                        brd.board[y + 3][
+                            x] == player and brd.board[y + 4][x] == 0:
                     score += 1
         # Check for row of 4 tokens bottom left to top right
         for x in range(brd.w - 5):
             for y in range(brd.h - 5):
-                if ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
+                if ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                            brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == 0)) \
                         or (
-                        (brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
-                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)):
+                        (brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                brd.board[y + 3][x + 3] == 0) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == player) and (brd.board[y + 1][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)) \
+                        or ((brd.board[y][x] == 0) and (brd.board[y + 1][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                    brd.board[y + 3][x + 3] == player) and (brd.board[y + 4][x + 4] == player)):
                     score += 1
         # Check for row of 4 tokens top left to bottom right
         for x in range(brd.w - 5):
             for y in range(brd.h - 5):
-                if ((brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
+                if ((brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                            brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == 0)) \
                         or ((brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (
-                        brd.board[y + 2][x + 2] == player) and (brd.board[y + 1][x + 3] == 0) and (brd.board[y][x + 4] == player)) \
+                        brd.board[y + 2][x + 2] == player) and (brd.board[y + 1][x + 3] == 0) and (
+                                    brd.board[y][x + 4] == player)) \
                         or (
-                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == 0) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
+                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == 0) and (
+                                brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
                         or (
-                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
+                        (brd.board[y + 4][x] == player) and (brd.board[y + 3][x + 1] == 0) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)) \
                         or (
-                        (brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (brd.board[y + 2][x + 2] == player) and (
-                        brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)):
+                        (brd.board[y + 4][x] == 0) and (brd.board[y + 3][x + 1] == player) and (
+                        brd.board[y + 2][x + 2] == player) and (
+                                brd.board[y + 1][x + 3] == player) and (brd.board[y][x + 4] == player)):
                     score += 1
         return score

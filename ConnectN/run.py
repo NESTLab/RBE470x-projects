@@ -11,15 +11,15 @@ games.append(game.Game(7, 6, 4, aba.AlphaBetaAgent("alphabeta"), agent.RandomAge
 games.append(game.Game(7, 6, 5, aba.AlphaBetaAgent("alphabeta"), agent.RandomAgent("random")))
 games.append(game.Game(10, 8, 4, aba.AlphaBetaAgent("alphabeta"), agent.RandomAgent("random")))
 games.append(game.Game(10, 8, 5, aba.AlphaBetaAgent("alphabeta"), agent.RandomAgent("random")))
-for i in range(25):
-    width = random.randint(7, 10)
-    height = random.randint(6, 8)
-    token = random.randint(4, 5)
-    randomPlayer = random.randint(1, 2)
-    if randomPlayer == 1:
-        games.append(game.Game(width, height, token, agent.RandomAgent("random"), aba.AlphaBetaAgent("alphabeta")))
-    else:
-        games.append(game.Game(width, height, token, aba.AlphaBetaAgent("alphabeta"), agent.RandomAgent("random")))
+# for i in range(46):
+#     width = random.randint(7, 10)
+#     height = random.randint(6, 8)
+#     token = random.randint(4, 5)
+#     randomPlayer = random.randint(1, 2)
+#     if randomPlayer == 1:
+#         games.append(game.Game(width, height, token, agent.RandomAgent("random"), aba.AlphaBetaAgent("alphabeta")))
+#     else:
+#         games.append(game.Game(width, height, token, aba.AlphaBetaAgent("alphabeta"), agent.RandomAgent("random")))
 # Execute the game
 wins = 0
 ties = 0
@@ -37,7 +37,6 @@ for game in games:
         wins += 1
     elif outcome == 0:
         ties += 1
-    if game_num >= 20 and wins / game_num < 0.85:
-        break
-print("We won " + str(wins) + " out of " + str(game_num) + " games with depth 4")
-print("We tied " + str(ties) + " times with depth 4")
+print("We won " + str(wins) + " out of " + str(game_num) + " games")
+print("We tied " + str(ties) + " times")
+
