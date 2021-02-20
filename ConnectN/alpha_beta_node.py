@@ -3,9 +3,7 @@ class AlphaBetaNode(object):
     #
     # PARAM [board.Board] brd: the board state
     # PARAM [int]         col: column where last token was added
-    # PARAM [int]         evaluation: The likely hood of either player winning.
-    #
-    # Note: Evaluation is from 0-1; 1 meaning AI will win and 0 meaning the other player will win
+    # PARAM [int]         evaluation: The evaluation score.
     def __init__(self, board, col, evaluation):
         # Board used in node
         self.board = board
