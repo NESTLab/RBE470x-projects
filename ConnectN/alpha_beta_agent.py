@@ -73,8 +73,8 @@ class AlphaBetaAgent(agent.Agent):
             # check if the move wins and if so return immediately
             if new_node.evaluation == math.inf:
                 return new_node.col
-            # elif new_node.evaluation > alpha:
-            #     alpha = new_node.evaluation
+            elif new_node.evaluation > alpha:
+                alpha = new_node.evaluation
             # Add to the array
             possible_moves.append(new_node)
         # Assign Starting Vals to find the best move
