@@ -19,11 +19,8 @@ class AlphaBetaAgent(agent.Agent):
         super().__init__(name)
         # Max search depth
         self.max_depth = 0
-        self.moves = 0
-        self.eval = 0
-        self.ai_player = 0
+        self.ai_player = (self.player % 2 + 1)
         self.first_move = True
-        self.max_time = 0
 
     # Pick a column.
     #
@@ -33,24 +30,24 @@ class AlphaBetaAgent(agent.Agent):
     # NOTE: make sure the column is legal, or you'll lose the game.
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
-        # Your code here
+        # Set Dynamic depth based on board size
+        if brd.w <= 6:
+            self.max_depth = 5
+        else:
+            self.max_depth = 4
+        # Don't calculate first move, just play in the middle (takes too long)
         if self.first_move:
             self.first_move = False
             return int(brd.w / 2)
-        self.ai_player = (self.player % 2 + 1)
-        self.moves += 1
-        self.max_depth = 5
-        tik = time.perf_counter()
-        move_col = self.alpha_beta_search(brd)
-        tok = time.perf_counter()
-        new_time = tok - tik
-        if new_time > self.max_time:
-            self.max_time = new_time
-        print(f"Made move in {tok - tik:0.4f} seconds")
-        print("We called the eval " + str(self.eval) + " times")
-        print("We have a max time of " + str(self.max_time) + " seconds")
-        return move_col
+        return self.alpha_beta_search(brd)
 
+    # Shuffle the successors of the given board.  Should move the middle moves to the first entries in the array.
+    #
+    # PARAM [board.Board] brd: the board state
+    # PARAM [list of (board.Board, int)] successors: a list of the successor boards,
+    #                                                along with the column where the last
+    #                                                token was added in it
+    # RETURN [list of (board.Board, int)]: successors shuffled so that middle options are evaluated first
     @staticmethod
     def reorganize_successors(successors, brd):
         new_successors = []
@@ -78,19 +75,18 @@ class AlphaBetaAgent(agent.Agent):
         for successor in successors:
             brd = successor[0]
             col = successor[1]
-            if col in brd.free_cols():
-                # create new node, evaluation created by alpha-beta searching all possible children to max_depth
-                new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.min_value(brd, self.max_depth - 1, alpha, beta))
-                # check if the move wins and if so return immediately
-                if new_node.evaluation == math.inf:
-                    return new_node.col
-                elif new_node.evaluation > alpha:
-                    alpha = new_node.evaluation
-                # Add to the array
-                possible_moves.append(new_node)
+            # create new node, evaluation created by alpha-beta searching all possible children to max_depth
+            new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.min_value(brd, self.max_depth - 1, alpha, beta))
+            # check if the move wins and if so return immediately
+            if new_node.evaluation == math.inf:
+                return new_node.col
+            elif new_node.evaluation > alpha:
+                alpha = new_node.evaluation
+            # Add to the array
+            possible_moves.append(new_node)
         # Assign Starting Vals to find the best move
-        highest_move_val = 0
-        move_col = 1
+        highest_move_val = -math.inf
+        move_col = 0
         # Find the column associated with the best move
         for move in possible_moves:
             if move.evaluation >= highest_move_val:
@@ -181,7 +177,6 @@ class AlphaBetaAgent(agent.Agent):
     # PARAM [board.Board] brd: the board state
     # RETURN [float] eval: The evaluation score.
     def get_evaluation(self, brd):
-        self.eval += 1
         eval_score = 0
         if brd.n == 4:
             (player_3, player_2, player_1, opponent_3, opponent_2, opponent_1) = self.connect_4_possibilities(brd)
@@ -215,64 +210,64 @@ class AlphaBetaAgent(agent.Agent):
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
                 # Check Vertical
                 (current_player, match_score) = self.is_line_at(brd, x, y, 0, 1)
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
                 # Check Up Diagonal
                 (current_player, match_score) = self.is_line_at(brd, x, y, 1, 1)
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
                 # Check Down Diagonal
                 (current_player, match_score) = self.is_line_at(brd, x, y, 1, -1)
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
         return player_3, player_2, player_1, opponent_3, opponent_2, opponent_1
 
@@ -300,80 +295,80 @@ class AlphaBetaAgent(agent.Agent):
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         player_4 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         opponent_4 += 1
                 # Check Vertical
                 (current_player, match_score) = self.is_line_at(brd, x, y, 0, 1)
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         player_4 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         opponent_4 += 1
                 # Check Up Diagonal
                 (current_player, match_score) = self.is_line_at(brd, x, y, 1, 1)
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         player_4 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         opponent_4 += 1
                 # Check Down Diagonal
                 (current_player, match_score) = self.is_line_at(brd, x, y, 1, -1)
                 if current_player == self.player:
                     if match_score == 1:
                         player_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         player_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         player_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         player_4 += 1
                 elif current_player == self.ai_player:
                     if match_score == 1:
                         opponent_1 += 1
-                    if match_score == 2:
+                    elif match_score == 2:
                         opponent_2 += 1
-                    if match_score == 3:
+                    elif match_score == 3:
                         opponent_3 += 1
-                    if match_score == 4:
+                    elif match_score == 4:
                         opponent_4 += 1
         return player_4, player_3, player_2, player_1, opponent_4, opponent_3, opponent_2, opponent_1
 
@@ -410,3 +405,6 @@ class AlphaBetaAgent(agent.Agent):
             elif current_location_val == current_player:  # if players do match
                 match_length += 1
         return current_player, match_length
+
+
+THE_AGENT = AlphaBetaAgent("Group17")
