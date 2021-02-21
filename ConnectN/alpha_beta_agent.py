@@ -39,10 +39,7 @@ class AlphaBetaAgent(agent.Agent):
             return int(brd.w / 2)
         self.ai_player = (self.player % 2 + 1)
         self.moves += 1
-        if self.moves <= 6 and brd.w >= 9:
-            self.max_depth = 3
-        else:
-            self.max_depth = 4
+        self.max_depth = 5
         tik = time.perf_counter()
         move_col = self.alpha_beta_search(brd)
         tok = time.perf_counter()
