@@ -78,15 +78,16 @@ class AlphaBetaAgent(agent.Agent):
         for successor in successors:
             brd = successor[0]
             col = successor[1]
-            # create new node, evaluation created by alpha-beta searching all possible children to max_depth
-            new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.min_value(brd, self.max_depth-1, alpha, beta))
-            # check if the move wins and if so return immediately
-            if new_node.evaluation == math.inf:
-                return new_node.col
-            elif new_node.evaluation > alpha:
-                alpha = new_node.evaluation
-            # Add to the array
-            possible_moves.append(new_node)
+            if col in brd.free_cols():
+                # create new node, evaluation created by alpha-beta searching all possible children to max_depth
+                new_node = alpha_beta_node.AlphaBetaNode(brd, col, self.min_value(brd, self.max_depth - 1, alpha, beta))
+                # check if the move wins and if so return immediately
+                if new_node.evaluation == math.inf:
+                    return new_node.col
+                elif new_node.evaluation > alpha:
+                    alpha = new_node.evaluation
+                # Add to the array
+                possible_moves.append(new_node)
         # Assign Starting Vals to find the best move
         highest_move_val = 0
         move_col = 1
