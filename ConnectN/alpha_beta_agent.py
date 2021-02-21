@@ -45,22 +45,24 @@ class AlphaBetaAgent(agent.Agent):
         for (child_state, col) in self.get_successors(state):
             if maximize:
                 # MAX_VALUE option
-                value = max(value, self.minmax_value(child_state, alpha, beta, level + 1, False))
+                v, b  = self.minmax_value(child_state, alpha, beta, level + 1, False)
+                value = max(value, v)
                 if value >= alpha:
                     alpha = value
                     bestCol = col
             else:
                 # MIN_VALUE option
-                value = min(value, self.minmax_value(child_state, alpha, beta, level + 1, True))
+                v, b = self.minmax_value(child_state, alpha, beta, level + 1, True)
+                value = min(value, v)
                 if value <= beta:
                     beta = value
                     bestCol = col
 
             # check pruning condition
             if alpha >= beta:
-                return value, bestCol
+                return (value, bestCol)
 
-        return value, bestCol
+        return (value, bestCol)
 
     # Get the successors of the given board.
     #
@@ -86,11 +88,36 @@ class AlphaBetaAgent(agent.Agent):
             # Add board to list of successors
             succ.append((nb,col))
         return succ
-
+    
+    def distance_from_center(self, col, brd):
+        return abs(col - (int(brd.w / 2)))
+    
+    def get_list_of_lines (self, brd, player):
+        directions = [(1, 0), (0, 1), (1,1), (1, -1)]
+        lines = []
+        blacklist ={}
+        for y in range(brd.h):
+            for x in range(brd.w):
+                for dir in directions:
+                    j = y
+                    i = x
+                    l = 0
+                    for k in range(brd.n):
+                        if not (j, i) in blacklist:
+                            blacklist[(j, i)] = []
+                        if (brd[j][i] != player) or ((i >= len(brd.w) or i < 0) or (j >= len(brd.h) or j < 0)) or (dir in blacklist[(j, i)]):
+                            break
+                        blacklist[(j, i)].append(dir)
+                        i += dir[0]
+                        j += dir[1]
+                        l = k
+                    lines.append(k+1) #save line
+            
+        
+        
     def heuristic(self, state, maximize):
         # initialize result value
         result = 0
-
         # check board for 1, 2, or 3-in a row formations (4 if connect 5)
         # use jason's function here
 
