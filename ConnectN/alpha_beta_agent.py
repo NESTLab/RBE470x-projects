@@ -36,7 +36,7 @@ class AlphaBetaAgent(agent.Agent):
     #                       corresponding move choice
     def minmax_value(self, state, alpha, beta, level, maximize):
         if level >= self.max_depth:
-            return heuristic(state)
+            return self.heuristic(state, maximize)
 
         # -inf if max level, +inf if min level
         value = -math.inf if maximize else math.inf
@@ -86,3 +86,14 @@ class AlphaBetaAgent(agent.Agent):
             # Add board to list of successors
             succ.append((nb,col))
         return succ
+
+    def heuristic(self, state, maximize):
+        # initialize result value
+        result = 0
+
+        # check board for 1, 2, or 3-in a row formations
+
+        # backup win/loss check - heavily weighted
+        # 1 for Player 1, 2 for Player 2, 0 for neither
+        end_check = state.get_outcome()
+        return 0
