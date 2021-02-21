@@ -1,7 +1,6 @@
 import math
 import agent
-import time
-import alpha_beta_node
+from . import alpha_beta_node
 
 
 ###########################
