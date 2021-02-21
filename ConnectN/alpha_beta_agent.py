@@ -26,6 +26,41 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
+        (value, col) = self.minmax_value(brd, -math.inf, math.inf, 0, True)
+        return col
+
+    # Maximize or minimize value of next move
+    #
+    # PARAM
+    # RETURN [(int, int)] : tuple with the best possible value and the
+    #                       corresponding move choice
+    def minmax_value(self, state, alpha, beta, level, maximize):
+        if level >= self.max_depth:
+            return heuristic(state)
+
+        # -inf if max level, +inf if min level
+        value = -math.inf if maximize else math.inf
+        bestCol = -1
+        # test each column choice
+        for (child_state, col) in self.get_successors(state):
+            if maximize:
+                # MAX_VALUE option
+                value = max(value, self.minmax_value(child_state, alpha, beta, level + 1, False))
+                if value >= alpha:
+                    alpha = value
+                    bestCol = col
+            else:
+                # MIN_VALUE option
+                value = min(value, self.minmax_value(child_state, alpha, beta, level + 1, True))
+                if value <= beta:
+                    beta = value
+                    bestCol = col
+
+            # check pruning condition
+            if alpha >= beta:
+                return value, bestCol
+
+        return value, bestCol
 
     # Get the successors of the given board.
     #
