@@ -106,3 +106,4 @@ class AlphaBetaAgent(agent.Agent):
             result += -1000
 
         return result
+THE_AGENT = AlphaBetaAgent ("Group19Agent", 5)
