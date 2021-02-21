@@ -36,7 +36,7 @@ class AlphaBetaAgent(agent.Agent):
     #                       corresponding move choice
     def minmax_value(self, state, alpha, beta, level, maximize):
         if level >= self.max_depth:
-            return self.heuristic(state, maximize)
+            return (self.heuristic(state, maximize), -1)
 
         # -inf if max level, +inf if min level
         value = -math.inf if maximize else math.inf
@@ -45,7 +45,7 @@ class AlphaBetaAgent(agent.Agent):
         for (child_state, col) in self.get_successors(state):
             if maximize:
                 # MAX_VALUE option
-                v, b  = self.minmax_value(child_state, alpha, beta, level + 1, False)
+                v, b = self.minmax_value(child_state, alpha, beta, level + 1, False)
                 value = max(value, v)
                 if value >= alpha:
                     alpha = value
@@ -60,9 +60,9 @@ class AlphaBetaAgent(agent.Agent):
 
             # check pruning condition
             if alpha >= beta:
-                return (value, bestCol)
+                return value, bestCol
 
-        return (value, bestCol)
+        return value, bestCol
 
     # Get the successors of the given board.
     #
