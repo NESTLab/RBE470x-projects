@@ -91,9 +91,18 @@ class AlphaBetaAgent(agent.Agent):
         # initialize result value
         result = 0
 
-        # check board for 1, 2, or 3-in a row formations
+        # check board for 1, 2, or 3-in a row formations (4 if connect 5)
+        # use jason's function here
 
         # backup win/loss check - heavily weighted
         # 1 for Player 1, 2 for Player 2, 0 for neither
         end_check = state.get_outcome()
-        return 0
+        if end_check == 0:
+            return result
+
+        if (maximize and end_check == self.player) or (not maximize and end_check == (self.player + 1) % 2):
+            result += 1000
+        else:
+            result += -1000
+
+        return result
