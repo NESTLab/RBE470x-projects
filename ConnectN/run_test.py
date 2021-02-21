@@ -59,5 +59,3 @@ print("Player 2 won %d / %d times", wins[1], n)
 #               agent.InteractiveAgent("human2"))   # player 2
 
 # Execute the game
-outcome = g.go()
-print(outcome)
