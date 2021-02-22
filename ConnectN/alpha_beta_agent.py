@@ -1,6 +1,7 @@
 import math
 import agent
 
+
 ###########################
 # Alpha-Beta Search Agent #
 ###########################
@@ -26,7 +27,7 @@ class AlphaBetaAgent(agent.Agent):
     def go(self, brd):
         """Search for the best move (choice of column for the token)"""
         # Your code here
-        (value, col) = self.minmax_value(brd, -math.inf, math.inf, 0, True)
+        (value, col) = self.minmax_value(brd, -1, -math.inf, math.inf, 0, True)
         return col
 
     # Maximize or minimize value of next move
@@ -34,29 +35,29 @@ class AlphaBetaAgent(agent.Agent):
     # PARAM
     # RETURN [(int, int)] : tuple with the best possible value and the
     #                       corresponding move choice
-    def minmax_value(self, state, alpha, beta, level, maximize):
+    def minmax_value(self, state, col, alpha, beta, level, maximize):
         if level >= self.max_depth:
-            return (self.heuristic(state, maximize), -1)
+            return (self.heuristic(state, col, maximize), col)
 
         # -inf if max level, +inf if min level
         value = -math.inf if maximize else math.inf
         bestCol = -1
         # test each column choice
-        for (child_state, col) in self.get_successors(state):
+        for (child_state, child_col) in self.get_successors(state):
             if maximize:
                 # MAX_VALUE option
-                v, b = self.minmax_value(child_state, alpha, beta, level + 1, False)
+                v, b = self.minmax_value(child_state, child_col, alpha, beta, level + 1, False)
                 value = max(value, v)
                 if value >= alpha:
                     alpha = value
-                    bestCol = col
+                    bestCol = child_col
             else:
                 # MIN_VALUE option
-                v, b = self.minmax_value(child_state, alpha, beta, level + 1, True)
+                v, b = self.minmax_value(child_state, child_col, alpha, beta, level + 1, True)
                 value = min(value, v)
                 if value <= beta:
                     beta = value
-                    bestCol = col
+                    bestCol = child_col
 
             # check pruning condition
             if alpha >= beta:
@@ -86,16 +87,16 @@ class AlphaBetaAgent(agent.Agent):
             # (This internally changes nb.player, check the method definition!)
             nb.add_token(col)
             # Add board to list of successors
-            succ.append((nb,col))
+            succ.append((nb, col))
         return succ
-    
+
     def distance_from_center(self, col, brd):
         return abs(col - (int(brd.w / 2)))
-    
-    def get_list_of_lines (self, brd, player):
-        directions = [(1, 0), (0, 1), (1,1), (1, -1)]
+
+    def get_list_of_lines(self, brd, player):
+        directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
         lines = []
-        blacklist ={}
+        blacklist = {}
         for y in range(brd.h):
             for x in range(brd.w):
                 for dir in directions:
@@ -105,21 +106,35 @@ class AlphaBetaAgent(agent.Agent):
                     for k in range(brd.n):
                         if not (j, i) in blacklist:
                             blacklist[(j, i)] = []
-                        if (brd[j][i] != player) or ((i >= len(brd.w) or i < 0) or (j >= len(brd.h) or j < 0)) or (dir in blacklist[(j, i)]):
+                        if (brd[j][i] != player) or ((i >= len(brd.w) or i < 0) or (j >= len(brd.h) or j < 0)) or (
+                                dir in blacklist[(j, i)]):
                             break
                         blacklist[(j, i)].append(dir)
                         i += dir[0]
                         j += dir[1]
                         l = k
-                    lines.append(k+1) #save line
-            
-        
-        
-    def heuristic(self, state, maximize):
+                    lines.append(k + 1)  # save line
+
+    def heuristic(self, state, col, maximize):
         # initialize result value
         result = 0
+
         # check board for 1, 2, or 3-in a row formations (4 if connect 5)
-        # use jason's function here
+        lines_agt = self.get_list_of_lines(state, self.player)
+        lines_opp = self.get_list_of_lines(state, (self.player + 1) % 2)
+        line_weights = (0, 0)
+
+        for x in range(1, state.n):
+            weight = 3 ** (x - 1)
+            line_weights += (lines_agt.count(x) * weight, lines_opp.count(x) * weight)
+
+        result += line_weights[0] - line_weights[1] if maximize else line_weights[1] - line_weights[0]
+
+        # favor plays towards the center of the board - low weight
+        if maximize:
+            result += 10 - self.distance_from_center(col, state)
+        else:
+            result -= 10 - self.distance_from_center(col, state)
 
         # backup win/loss check - heavily weighted
         # 1 for Player 1, 2 for Player 2, 0 for neither
@@ -128,9 +143,11 @@ class AlphaBetaAgent(agent.Agent):
             return result
 
         if (maximize and end_check == self.player) or (not maximize and end_check == (self.player + 1) % 2):
-            result += 1000
+            result += 100
         else:
-            result += -1000
+            result += -100
 
         return result
-THE_AGENT = AlphaBetaAgent ("Group19Agent", 5)
+
+
+THE_AGENT = AlphaBetaAgent("Group19Agent", 5)
