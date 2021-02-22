@@ -92,7 +92,7 @@ class AlphaBetaAgent(agent.Agent):
     def distance_from_center(self, col, brd):
         return abs(col - (int(brd.w / 2)))
     
-    def get_list_of_lines (self, brd, player):
+    def get_list_of_lines (self, brd):
         directions = [(1, 0), (0, 1), (1,1), (1, -1)]
         lines = []
         blacklist ={}
@@ -105,14 +105,14 @@ class AlphaBetaAgent(agent.Agent):
                     for k in range(brd.n):
                         if not (j, i) in blacklist:
                             blacklist[(j, i)] = []
-                        if (brd[j][i] != player) or ((i >= len(brd.w) or i < 0) or (j >= len(brd.h) or j < 0)) or (dir in blacklist[(j, i)]):
+                        if ((i >= brd.w or i < 0) or (j >= brd.h or j < 0)) or (brd.board[j][i] != self.player) or (dir in blacklist[(j, i)]):
                             break
                         blacklist[(j, i)].append(dir)
                         i += dir[0]
                         j += dir[1]
                         l = k
                     lines.append(k+1) #save line
-            
+        return lines
         
         
     def heuristic(self, state, maximize):
@@ -120,7 +120,12 @@ class AlphaBetaAgent(agent.Agent):
         result = 0
         # check board for 1, 2, or 3-in a row formations (4 if connect 5)
         # use jason's function here
-
+        list = self.get_list_of_lines (state)
+        sum = 0;
+        for run in list:
+            if run > 1:
+                sum += 1
+        result += sum
         # backup win/loss check - heavily weighted
         # 1 for Player 1, 2 for Player 2, 0 for neither
         end_check = state.get_outcome()
