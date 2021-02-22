@@ -98,20 +98,27 @@ class AlphaBetaAgent(agent.Agent):
         blacklist = {}
         for y in range(brd.h):
             for x in range(brd.w):
-                for dir in directions:
-                    j = y
-                    i = x
-                    l = 0
-                    for k in range(brd.n):
-                        if not (j, i) in blacklist:
-                            blacklist[(j, i)] = []
-                        if ((i >= brd.w or i < 0) or (j >= brd.h or j < 0)) or (brd.board[j][i] != player) or (dir in blacklist[(j, i)]):
-                            break
-                        blacklist[(j, i)].append(dir)
-                        i += dir[0]
-                        j += dir[1]
-                        l = k
-                    lines.append(k + 1)  # save line
+                if (brd.board[y][x] == player):
+                    #print("Looking starting from (%d, %d)" % (x, y))
+                    for dir in directions:
+                        j = y
+                        i = x
+                        l = 0
+                        #print("\tLooking in direction X=%d Y=%d" % (dir[0], dir[1]))
+                        for k in range(brd.n):
+                            if (i < brd.w and i >= 0 and j < brd.h and j >= 0) and (brd.board[j][i] == player): #if correct player and in bounds
+                                if not (j, i) in blacklist:
+                                    blacklist[(j, i)] = []
+                                if dir in blacklist[(j, i)]:
+                                    break
+                                blacklist[(j, i)].append(dir)
+                                i += dir[0]
+                                j += dir[1]
+                                l = k+1
+                                #print("\t\t%d" % l)
+                        if(l > 1):
+                            lines.append(l)  # save line
+                        #print("Path of length %d found from (%d, %d) to (%d, %d)" % (l, x, y, i, j))
         return lines
 
     def heuristic(self, state, col, maximize):
@@ -124,6 +131,9 @@ class AlphaBetaAgent(agent.Agent):
         lines_opp = self.get_list_of_lines(state, (self.player + 1) % 2)
         line_weight_agt = 0
         line_weight_opp = 0
+        print("Lines: %d" % len(lines_agt))
+        #for i in lines:
+        #    print("\t%d" % i)
 
         for x in range(1, state.n):
             weight = 3 ** (x - 1)
