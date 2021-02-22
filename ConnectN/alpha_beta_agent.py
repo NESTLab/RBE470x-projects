@@ -47,14 +47,14 @@ class AlphaBetaAgent(agent.Agent):
                 # MAX_VALUE option
                 v, b = self.minmax_value(child_state, child_col, alpha, beta, level + 1, False)
                 value = max(value, v)
-                if value >= alpha:
+                if value > alpha:
                     alpha = value
                     bestCol = child_col
             else:
                 # MIN_VALUE option
                 v, b = self.minmax_value(child_state, child_col, alpha, beta, level + 1, True)
                 value = min(value, v)
-                if value <= beta:
+                if value < beta:
                     beta = value
                     bestCol = child_col
 
@@ -119,21 +119,24 @@ class AlphaBetaAgent(agent.Agent):
         result = 0
 
         # check board for 1, 2, or 3-in a row formations (4 if connect 5)
+        # exponential increase in value for longer lines
         lines_agt = self.get_list_of_lines(state, self.player)
         lines_opp = self.get_list_of_lines(state, (self.player + 1) % 2)
-        line_weights = (0, 0)
+        line_weight_agt = 0
+        line_weight_opp = 0
 
         for x in range(1, state.n):
             weight = 3 ** (x - 1)
-            line_weights += (lines_agt.count(x) * weight, lines_opp.count(x) * weight)
+            line_weight_agt += lines_agt.count(x) * weight
+            line_weight_opp += lines_opp.count(x) * weight
 
-        result += line_weights[0] - line_weights[1] if maximize else line_weights[1] - line_weights[0]
+        result += line_weight_agt - line_weight_opp #if maximize else line_weights[1] - line_weights[0]
 
         # favor plays towards the center of the board - low weight
         if maximize:
-            result += 10 - self.distance_from_center(col, state)
-        else:
-            result -= 10 - self.distance_from_center(col, state)
+            result += 100 / ((self.distance_from_center(col, state) + 1) ** 2)
+        #else:
+        #   result -= 100 / ((self.distance_from_center(col, state) + 1) ** 2)
 
         # backup win/loss check - heavily weighted
         # 1 for Player 1, 2 for Player 2, 0 for neither
@@ -141,10 +144,10 @@ class AlphaBetaAgent(agent.Agent):
         if end_check == 0:
             return result
 
-        if (maximize and end_check == self.player) or (not maximize and end_check == (self.player + 1) % 2):
-            result += 100
+        if (end_check == self.player): #or (not maximize and end_check == (self.player + 1) % 2):
+            result = 1000
         else:
-            result += -100
+            result = -1000
 
         return result
 
