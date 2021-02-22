@@ -34,7 +34,7 @@ for i in range(n):
               6, # height
               4, # tokens in a row to win
               aba.AlphaBetaAgent("alphabeta", 4),      # player 1
-              agent.RandomAgent("random")) # player 2
+              agent.InteractiveAgent("human")) # player 2
     outcome = g.go()
     wins[outcome-1] += 1
 print("Player 1 won %d / %d times", wins[0], n)

@@ -1,6 +1,7 @@
 import math
 import agent
 
+
 ###########################
 # Alpha-Beta Search Agent #
 ###########################
@@ -98,27 +99,30 @@ class AlphaBetaAgent(agent.Agent):
         blacklist = {}
         for y in range(brd.h):
             for x in range(brd.w):
-                if (brd.board[y][x] == player):
-                    #print("Looking starting from (%d, %d)" % (x, y))
-                    for dir in directions:
-                        j = y
-                        i = x
-                        l = 0
-                        #print("\tLooking in direction X=%d Y=%d" % (dir[0], dir[1]))
-                        for k in range(brd.n):
-                            if (i < brd.w and i >= 0 and j < brd.h and j >= 0) and (brd.board[j][i] == player): #if correct player and in bounds
-                                if not (j, i) in blacklist:
-                                    blacklist[(j, i)] = []
-                                if dir in blacklist[(j, i)]:
-                                    break
-                                blacklist[(j, i)].append(dir)
-                                i += dir[0]
-                                j += dir[1]
-                                l = k+1
-                                #print("\t\t%d" % l)
-                        if(l > 1):
-                            lines.append(l)  # save line
-                        #print("Path of length %d found from (%d, %d) to (%d, %d)" % (l, x, y, i, j))
+                if (brd.board[y][x] != player):
+                    continue
+                for dir in directions:
+                    j = y
+                    i = x
+                    l = 0
+                    # print("\tLooking in direction X=%d Y=%d" % (dir[0], dir[1]))
+                    for k in range(2, brd.n):
+                        i += dir[0]
+                        j += dir[1]
+                        if (i < brd.w and i >= 0 and j < brd.h and j >= 0) and (
+                                brd.board[j][i] == player):  # if correct player and in bounds
+                            if not (j, i) in blacklist:
+                                blacklist[(j, i)] = []
+                            if dir in blacklist[(j, i)]:
+                                break
+                            blacklist[(j, i)].append(dir)
+                            l = k
+                            # print("\t\t%d" % l)
+                        else:
+                            break
+                    if (l > 1):
+                        lines.append(l)  # save line
+                    # print("Path of length %d found from (%d, %d) to (%d, %d)" % (l, x, y, i, j))
         return lines
 
     def heuristic(self, state, col, maximize):
@@ -128,24 +132,21 @@ class AlphaBetaAgent(agent.Agent):
         # check board for 1, 2, or 3-in a row formations (4 if connect 5)
         # exponential increase in value for longer lines
         lines_agt = self.get_list_of_lines(state, self.player)
-        lines_opp = self.get_list_of_lines(state, (self.player + 1) % 2)
+        lines_opp = self.get_list_of_lines(state, (self.player % 2) + 1)
         line_weight_agt = 0
         line_weight_opp = 0
-        print("Lines: %d" % len(lines_agt))
-        #for i in lines:
-        #    print("\t%d" % i)
 
-        for x in range(1, state.n):
+        for x in range(2, state.n):
             weight = 3 ** (x - 1)
             line_weight_agt += lines_agt.count(x) * weight
             line_weight_opp += lines_opp.count(x) * weight
 
-        result += line_weight_agt - line_weight_opp #if maximize else line_weights[1] - line_weights[0]
+        result += line_weight_agt - line_weight_opp  # if maximize else line_weights[1] - line_weights[0]
 
         # favor plays towards the center of the board - low weight
         if maximize:
             result += 100 / ((self.distance_from_center(col, state) + 1) ** 2)
-        #else:
+        # else:
         #   result -= 100 / ((self.distance_from_center(col, state) + 1) ** 2)
 
         # backup win/loss check - heavily weighted
@@ -154,7 +155,7 @@ class AlphaBetaAgent(agent.Agent):
         if end_check == 0:
             return result
 
-        if (end_check == self.player): #or (not maximize and end_check == (self.player + 1) % 2):
+        if (end_check == self.player):  # or (not maximize and end_check == (self.player + 1) % 2):
             result = 1000
         else:
             result = -1000
