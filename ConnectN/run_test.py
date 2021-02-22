@@ -30,8 +30,8 @@ wins = [0, 0]
 n = 100
 for i in range(n):
     random.seed(i)
-    g = game.Game(7, # width
-              6, # height
+    g = game.Game(10, # width
+              8, # height
               4, # tokens in a row to win
               aba.AlphaBetaAgent("alphabeta", 5),      # player 1
               agent.RandomAgent("human")) # player 2
