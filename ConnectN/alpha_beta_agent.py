@@ -1,7 +1,6 @@
 import math
 import agent
 
-
 ###########################
 # Alpha-Beta Search Agent #
 ###########################
@@ -106,14 +105,14 @@ class AlphaBetaAgent(agent.Agent):
                     for k in range(brd.n):
                         if not (j, i) in blacklist:
                             blacklist[(j, i)] = []
-                        if (brd[j][i] != player) or ((i >= len(brd.w) or i < 0) or (j >= len(brd.h) or j < 0)) or (
-                                dir in blacklist[(j, i)]):
+                        if ((i >= brd.w or i < 0) or (j >= brd.h or j < 0)) or (brd.board[j][i] != player) or (dir in blacklist[(j, i)]):
                             break
                         blacklist[(j, i)].append(dir)
                         i += dir[0]
                         j += dir[1]
                         l = k
                     lines.append(k + 1)  # save line
+        return lines
 
     def heuristic(self, state, col, maximize):
         # initialize result value
