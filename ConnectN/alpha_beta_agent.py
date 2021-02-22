@@ -103,11 +103,10 @@ class AlphaBetaAgent(agent.Agent):
                     i = x
                     l = 0
                     for k in range(brd.n):
-                        
-                        if ((i >= brd.w or i < 0) or (j >= brd.h or j < 0)) or (brd.board[j][i] != player) or (dir in blacklist[(j, i)]):
-                            break
                         if not (j, i) in blacklist:
                             blacklist[(j, i)] = []
+                        if ((i >= brd.w or i < 0) or (j >= brd.h or j < 0)) or (brd.board[j][i] != player) or (dir in blacklist[(j, i)]):
+                            break
                         blacklist[(j, i)].append(dir)
                         i += dir[0]
                         j += dir[1]
