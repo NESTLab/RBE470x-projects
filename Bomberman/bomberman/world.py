@@ -58,7 +58,7 @@ class World:
                     self.characters_at(x,y))
 
     def exit_at(self, x, y):
-        """Returns True if there is a wall at (x,y)"""
+        """Returns True if there is an exit at (x,y)"""
         return self.exitcell == (x,y)
 
     def wall_at(self, x, y):
