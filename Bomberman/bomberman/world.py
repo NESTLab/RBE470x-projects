@@ -359,9 +359,9 @@ class World:
                 # Update position and check for events
                 ev2 = self.update_character_move(c, False)
                 ev = ev + ev2
-                # Character gets inserted in next step's list unless hit or
-                # escaped
-                if not (ev2 and ev2[0].tpe in [Event.BOMB_HIT_CHARACTER, Event.CHARACTER_FOUND_EXIT]):
+                # Character gets inserted in next step's list unless hit,
+                # escaped, or killed
+                if not (ev2 and ev2[0].tpe in [Event.BOMB_HIT_CHARACTER, Event.CHARACTER_FOUND_EXIT, Event.CHARACTER_KILLED_BY_MONSTER]):
                     # Update new index
                     ni = self.index(c.x, c.y)
                     np = ncharacters.get(ni, [])
