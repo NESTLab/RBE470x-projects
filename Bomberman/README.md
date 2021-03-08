@@ -187,7 +187,7 @@ evaluate each of them. You'd write something like this:
             #
             # Get first monster in the world
             #
-            m = next(iter(wrld.monsters().values()))
+            m = next(iter(wrld.monsters.values()))
             #
             # Go through the possible 8-moves of the monster
             #
