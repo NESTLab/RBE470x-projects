@@ -123,7 +123,7 @@ class Game:
     def done(self):
         # User Exit
         for event in pygame.event.get():
-            if event.tpe == pygame.QUIT:
+            if event.type == pygame.QUIT:
                 return True
         # Time's up
         if self.world.time <= 0:
