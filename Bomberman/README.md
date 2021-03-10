@@ -97,8 +97,8 @@ The most useful methods and attributes in this class are the following:
 - `wrld.wall_at(x, y)`: returns `True` if the cell `(x,y)` is a wall
 - `wrld.bomb_at(x, y)`: returns a `BombEntity` object if the cell `(x,y)` is occupied by a bomb; `None` otherwise
 - `wrld.explosion_at(x, y)`: returns an `ExplosionEntity` object if the cell `(x,y)` is occupied by an explosion; `None` otherwise
-- `wrld.monsters_at(x, y)`: returns a list of `MonsterEntity` objects if the cell `(x,y)` is occupied by monsters; the empty list `[]` otherwise
-- `wrld.characters_at(x, y)`: returns a list of `CharacterEntity` objects if the cell `(x,y)` is occupied by characters; the empty list `[]` otherwise
+- `wrld.monsters_at(x, y)`: returns a list of `MonsterEntity` objects if the cell `(x,y)` is occupied by monsters; `None` otherwise
+- `wrld.characters_at(x, y)`: returns a list of `CharacterEntity` objects if the cell `(x,y)` is occupied by characters; `None` otherwise
 - `wrld.printit()`: prints the current state of the world
 - `wrld.me(character)`: returns the object in the world that refers to the state of the current character. From your method `go()` call it as follows: `wrld.me(self)`
 - `wrld.scores` is a dictionary `{ character_name : score }` that contains the score of every character.
