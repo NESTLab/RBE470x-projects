@@ -31,7 +31,7 @@ class SelfPreservingMonster(MonsterEntity):
             (ny < 0) or (ny >= wrld.height())):
             return True
         # If these cells are an explosion, a wall, or a monster, go away
-        return (wrld.explosion_at(self.x, self.y) or
+        return (wrld.explosion_at(nx, ny) or
                 wrld.wall_at(nx, ny) or
                 wrld.monsters_at(nx, ny) or
                 wrld.exit_at(nx, ny))
