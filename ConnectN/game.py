@@ -73,6 +73,7 @@ class Game(object):
     def timed_go(self, limit):
         # Current player
         p = 0
+        self.board.print_it()
         while self.board.free_cols() and self.board.get_outcome() == 0:
             # Get start time
             st = time.time()
@@ -85,15 +86,25 @@ class Game(object):
                 outcome = 1
                 if p == 0:
                     outcome = 2
+                print(self.players[outcome - 1].name, "won!")
                 return outcome
             # Legal move, add token there
             self.board.add_token(x)
+            self.board.print_it()
+            print(self.players[p].name, "move:", x)
             # Switch player
             if p == 0:
                 p = 1
             else:
                 p = 0
-        # Return game outcome
+        # Print game outcome
+        self.board.print_it()
+        outcome = self.board.get_outcome()
+        print("Game over!")
+        if outcome == 0:
+            print("It's a tie!")
+        else:
+            print(self.players[outcome - 1].name, "won!")
         return self.board.get_outcome()
 
     # Execute a timed game.
