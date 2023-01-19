@@ -7,7 +7,7 @@ sys.path.insert(1, '..')
 from game import Game
 
 # TODO This is your code!
-sys.path.insert(1, '../groupNN')
+sys.path.insert(1, '../teamNN')
 
 # Uncomment this if you want the empty test character
 #from testcharacter import TestCharacter
