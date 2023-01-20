@@ -13,9 +13,9 @@ if you have both Python 2 and Python 3 installed on your system.
 
 # Running Bomberman #
 
-Go into the folder `scenario1/` or `scenario2/`:
+Go into the folder `project1/` or `project2/`:
 
-    $ cd scenario1
+    $ cd project1
 
 Both folders contain five Python files called `variant1.py`, `variant2.py`,
 `variant3.py`, `variant4.py`, and `variant5.py`. To run a specific variant, type
@@ -65,7 +65,7 @@ Each character has a score calculated as follows:
 ## Relevant Definitions ##
 
 Refer to the [example skeleton
-code](https://github.com/NESTLab/CS4341-projects/blob/master/Bomberman/groupNN/testcharacter.py),
+code](https://github.com/NESTLab/RBE470x-projects/blob/master/teamNN/testcharacter.py),
 also reported here:
 
     # This is necessary to find the main code
@@ -85,9 +85,9 @@ environment. The method `CharacterEntity.do(self, wrld)` is the only one that
 you have to implement to have your character do useful stuff.
 
 The parameter `wrld` has type `SensedWorld` (definition
-[here](https://github.com/NESTLab/CS4341-projects/blob/master/Bomberman/bomberman/sensed_world.py)),
+[here](https://github.com/NESTLab/RBE470x-projects/blob/master/Bomberman/sensed_world.py)),
 which in turn is a subclass of `World` (definition
-[here](https://github.com/NESTLab/CS4341-projects/blob/master/Bomberman/bomberman/world.py)).
+[here](https://github.com/NESTLab/RBE470x-projects/blob/master/Bomberman/world.py)).
 
 The most useful methods and attributes in this class are the following:
 - `wrld.width()`: returns the width of the world
@@ -156,7 +156,7 @@ methods to do this:
 ### About Events ###
 
 The relevant definitions for events is in
-[events.py](https://github.com/NESTLab/CS4341-projects/blob/master/Bomberman/bomberman/events.py). An
+[events.py](https://github.com/NESTLab/RBE470x-projects/blob/master/Bomberman/events.py). An
 event is an object of the `Event` class. The class contains the following attributes:
 
 - `Event.tpe`: the type of the event. It is one of `Event.BOMB_HIT_WALL`,
@@ -280,4 +280,3 @@ between to match the width defined by the first line.
   to the Last-Man-Standing mode.
 
 Any character or monster must be added in a Python file that runs the scenario.
-
