@@ -80,15 +80,12 @@ class TestCharacter(CharacterEntity):
         return return_list
 
     def do(self, wrld):
-        """Pick an action for the agent"""
-
-
         if self.firstTime:
-            print("Doing something")
             print("Character at", self.x, self.y)
             print("Exit at", wrld.exitcell)
             print("Explosions:", wrld.explosions)
             print("Monsters:", wrld.monsters)
+
             self.a_star_path = self.a_star(wrld)
             print("A* path:", self.a_star_path)
             for point in self.a_star_path:
@@ -97,11 +94,7 @@ class TestCharacter(CharacterEntity):
             self.firstTime = False
         else:
             nextCell = self.a_star_path.pop(0)
-            # print("Next cell:", nextCell)
             self.move(nextCell[0] - self.x, nextCell[1] - self.y)
-        
-
-
 
 
 def euclidean_dist(point_one, point_two):
