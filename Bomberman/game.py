@@ -4,7 +4,7 @@ import colorama
 import pygame
 import math
 
-x = 1350
+x = 1330
 y = 0
 import os
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
