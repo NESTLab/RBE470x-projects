@@ -1,4 +1,20 @@
-"""Utility functions for the teamNN package."""
+"""
+Utility functions for the teamNN package.
+Import to any file using: from teamNN.utility import *
+
+Includes:
+float euclidean_dist(point_one:tuple, point_two:tuple)
+bool is_cell_walkable(wrld:World, x:int, y:int)
+tuple[] eight_neighbors(wrld:World, x:int, y:int)
+tuple character_location(wrld:World) //Returns First Character
+tuple monster_location(wrld:World) //Returns First Monster
+int manhattan_distance_to_exit(wrld:World)
+int manhattan_distance_to_monster(wrld:World) //Returns Nearest Monster
+int euclidean_distance_to_exit(wrld:World)
+int euclidean_distance_to_monster(wrld:World) //Returns Nearest Monster
+
+"""
+from teamNN.PriorityQueue import PriorityQueue
 
 
 def euclidean_dist(point_one, point_two):
@@ -48,6 +64,48 @@ def eight_neighbors(wrld, x, y):
     return return_list
 
 
+def a_star(wrld, goal=None, start=None):
+    if start is None:
+        start = character_location(wrld)  # Start at current position
+    if goal is None:
+        goal = wrld.exitcell  # Goal is exit cell
+
+    cost_so_far = {start: 0}  # Dictionary of costs to get to each cell
+    came_from = {start: None}  # Dictionary of where each cell came from
+
+    frontier = PriorityQueue()  # Priority queue of cells to visit
+    frontier.put(start, 0)
+
+    while not frontier.empty():
+        current = frontier.get()
+
+        if current == goal:
+            break
+
+        # Check all walkable neighbors of current cell
+        for neighbor in eight_neighbors(wrld, current[0], current[1]):
+            # Calculate cost to get to neighbor - 1 or 1.4
+            new_cost = cost_so_far[current] + euclidean_dist(current, neighbor)
+
+            # If neighbor has no path or new path is better, update path
+            if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                cost_so_far[neighbor] = new_cost
+                priority = new_cost + euclidean_dist(neighbor, goal)
+                frontier.put(neighbor, priority)
+                came_from[neighbor] = current
+
+    # Reconstruct path using came_from dictionary
+    currPos = goal
+    finalPath = []
+    finalPath.append(goal)
+    while currPos != start:
+        currPos = came_from[currPos]
+        finalPath.append(currPos)
+
+    finalPath.reverse()
+    return finalPath
+
+
 def character_location(wrld):
     """Returns the location of the character in wrld.
     wrld: World object
@@ -57,8 +115,15 @@ def character_location(wrld):
     return wrld.characters[0][0].x, wrld.characters[0][0].y
 
 
+def exit_location(wrld):
+    """Returns the location of the exit in wrld.
+    wrld: World object
+    returns: (x, y) tuple"""
+    return wrld.exitcell[0], wrld.exitcell[1]
+
+
 def monster_location(wrld):
-    """Returns the location of the nearest monster in wrld.
+    """Returns the location of the first monster in wrld.
     wrld: World object
     returns: (x, y) tuple"""
     if len(wrld.monsters) == 0:
@@ -108,3 +173,19 @@ def euclidean_distance_to_monster(wrld):
     else:
         return min([((self[0] - monster[1][0].x) ** 2 + (self[1] - monster[1][0].y) ** 2) ** 0.5 for monster in
                     wrld.monsters.items()])
+
+
+def a_star_distance_to_exit(wrld):
+    """Returns the a* distance to the exit.
+    wrld: World object
+    returns: float"""
+
+    return len(a_star(wrld, goal=wrld.exitcell))
+
+
+def a_star_distance_to_monster(wrld):
+    """Returns the a* distance to the closest monster.
+    wrld: World object
+    returns: float"""
+
+    return len(a_star(wrld, goal=wrld.exitcell, start=monster_location(wrld)))
