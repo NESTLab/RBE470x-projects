@@ -1,58 +1,52 @@
 # This is necessary to find the main code
 import sys
+from teamNN.utility import *
 
 sys.path.insert(0, '../bomberman')
-# Import necessary stuff
-from testcharacter import CharacterEntity
-from colorama import Fore, Back
-from PriorityQueue import PriorityQueue
 from sys import maxsize
 
-
-class Node(object):
-    firstTime = True
-
-    def __init__(self, depth, player, distance, value, x, y, wrld):
-        self.depth = depth
-        self.player = player
-        self.distance = distance
-        self.value = value
-        self.x = x
-        self.y = y
-        self.wrld = wrld
-        self.children = []
-        self.makechildren()
-
-    def makechildren(self):
-        if self.depth >= 0:
-            neighbordlist = self.eight_neighbors(self.x, self.y)
-            for neighbord in neighbordlist:
-                if self.is_cell_walkable(neighbord):
-                    if self.look_for_monster(self.wrld):
-                        self.value = -100000000
-                    else:
-                        self.value = 10000 - self.euclidean_dist(self.wrld.exitcell, neighbord) - self.depth
-                        self.distance = self.euclidean_dist(self.wrld.exitcell, neighbord)
-                else:
-                    self.value = 0
-            self.children.append(
-                Node(self.depth - 1, -self.player, self.distance, self.value, neighbord.x, neighbord.y, self.wrld))
-
-    def minimax(node, depth, player):
-        if (depth == 0) or (node.value == -100000000):  # or game wine, game lose
-            return node.value
-        bestvalue = maxsize * -player
-
-        for child in node.children:
-            child = node.children[child]
-            value = minimax(child, depth - 1, -player)
-            if (abs(maxsize * player - value) < abs(maxsize * player - bestvalue)):
-                bestvalue = value
-        return bestvalue
-
-   
-
-        
+reccursionDepth = 2
 
 
+def getNextMove_MiniMax(wrld):
+    # Get the next move using minimax
+    possibleMoves = eight_neighbors(wrld, character_location(wrld)[0], character_location(wrld)[1])
+    possibleMoves.append(character_location(wrld))
+    # Get the value of each possible move
+    values = list(map(lambda move: getValue_of_State(wrld, move, 0), possibleMoves))
+    # Get the max value
+    maxValue = max(values)
+    # Get the index of the max value
+    maxIndex = values.index(maxValue)
+    # Return the location to move to
+    return possibleMoves[maxIndex]
 
+
+def getValue_of_State(wrld, pos, depth):
+    # Base case, depth has reached limit
+    if depth == reccursionDepth:
+        return evaluateState(wrld, pos)
+    # If depth is even, then it is a min node
+    possibleMoves = eight_neighbors(wrld, pos[0], pos[1])
+    possibleMoves.append(pos)
+    return max(map(lambda move: getValue_of_State(wrld, move, depth + 1), possibleMoves))
+    # if depth % 2 == 0:
+    #     # Find the smallest value of the possible moves using map reduce
+    #     return min(map(lambda move: getValue_of_State(wrld, move, depth + 1), possibleMoves))
+    # else:
+    #     # Find the largest value of the possible moves using map reduce
+    #     return max(map(lambda move: getValue_of_State(wrld, move, depth + 1), possibleMoves))
+
+
+def evaluateState(wrld, pos):
+    # Calculate the value of the state based on the distance to the exit and proximity to monsters
+    # The closer to the exit, the better, the closer to monsters, the worse
+    exitDist = a_star_distance_to_exit(wrld, start=pos)
+    mosnterDist = euclidean_distance_to_monster(wrld, start=pos)
+    print("Pos: " + str(pos))
+    print("Exit Dist: " + str(exitDist))
+    print("Monster Dist: " + str(mosnterDist))
+    print("Value: " + str((mosnterDist * 0.7) - exitDist))
+    if exitDist is 0:
+        return maxsize
+    return (mosnterDist * 0.7) - exitDist
