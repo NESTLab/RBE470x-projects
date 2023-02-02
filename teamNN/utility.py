@@ -112,7 +112,7 @@ def character_location(wrld):
     returns: (x, y) tuple"""
     if len(wrld.characters) == 0:
         Exception("No character in world")
-    return wrld.characters[0][0].x, wrld.characters[0][0].y
+    return next(iter(wrld.characters.items()))[1][0].x, next(iter(wrld.characters.items()))[1][0].y
 
 
 def exit_location(wrld):
