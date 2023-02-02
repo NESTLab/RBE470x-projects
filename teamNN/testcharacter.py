@@ -61,6 +61,7 @@ class TestCharacter(CharacterEntity):
             print("Exit at", wrld.exitcell)
             print("Explosions:", wrld.explosions)
             print("Monsters:", wrld.monsters)
+            print("Monster Location", monster_location(wrld))
             print("Euclidean distance to exit:", euclidean_distance_to_exit(wrld))
             print("Manhattan distance to exit:", manhattan_distance_to_exit(wrld))
             print("Euclidean distance to monster:", euclidean_distance_to_monster(wrld))

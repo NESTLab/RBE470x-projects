@@ -57,6 +57,15 @@ def character_location(wrld):
     return wrld.characters[0][0].x, wrld.characters[0][0].y
 
 
+def monster_location(wrld):
+    """Returns the location of the nearest monster in wrld.
+    wrld: World object
+    returns: (x, y) tuple"""
+    if len(wrld.monsters) == 0:
+        Exception("No monster in world")
+    return next(iter(wrld.monsters.items()))[1][0].x, next(iter(wrld.monsters.items()))[1][0].y
+
+
 def manhattan_distance_to_exit(wrld):
     """Returns the manhattan distance to the exit.
     wrld: World object
