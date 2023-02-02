@@ -131,61 +131,78 @@ def monster_location(wrld):
     return next(iter(wrld.monsters.items()))[1][0].x, next(iter(wrld.monsters.items()))[1][0].y
 
 
-def manhattan_distance_to_exit(wrld):
+def manhattan_distance_to_exit(wrld, start=None):
     """Returns the manhattan distance to the exit.
     wrld: World object
+    start (optional): (x, y) tuple to start from, defaults to character location
     returns: float"""
+    if start is None:
+        start = character_location(wrld)
 
-    self = character_location(wrld)
-    return abs(self[0] - wrld.exitcell[0]) + abs(self[1] - wrld.exitcell[1])
+    return abs(start[0] - wrld.exitcell[0]) + abs(start[1] - wrld.exitcell[1])
 
 
-def euclidean_distance_to_exit(wrld):
+def euclidean_distance_to_exit(wrld, start=None):
     """Returns the euclidean distance to the exit.
     wrld: World object
+    start (optional): (x, y) tuple to start from, defaults to character location
     returns: float"""
+    if start is None:
+        start = character_location(wrld)
 
-    self = character_location(wrld)
-    return ((self[0] - wrld.exitcell[0]) ** 2 + (self[1] - wrld.exitcell[1]) ** 2) ** 0.5
+    return ((start[0] - wrld.exitcell[0]) ** 2 + (start[1] - wrld.exitcell[1]) ** 2) ** 0.5
 
 
-def manhattan_distance_to_monster(wrld):
+def manhattan_distance_to_monster(wrld, start=None):
     """Returns the manhattan distance to the closest monster.
     wrld: World object
+    start (optional): (x, y) tuple to start from, defaults to character location
     returns: float"""
 
-    self = character_location(wrld)
+    if start is None:
+        start = character_location(wrld)
+
     if len(wrld.monsters) == 0:
         return 999
     else:
         return min(
-            [abs(self[0] - monster[1][0].x) + abs(self[1] - monster[1][0].y) for monster in wrld.monsters.items()])
+            [abs(start[0] - monster[1][0].x) + abs(start[1] - monster[1][0].y) for monster in wrld.monsters.items()])
 
 
-def euclidean_distance_to_monster(wrld):
+def euclidean_distance_to_monster(wrld, start=None):
     """Returns the euclidean distance to the closest monster.
     wrld: World object
+    start (optional): (x, y) tuple to start from, defaults to character location
     returns: float"""
 
-    self = character_location(wrld)
+    if start is None:
+        start = character_location(wrld)
+
     if len(wrld.monsters) == 0:
         return 999
     else:
-        return min([((self[0] - monster[1][0].x) ** 2 + (self[1] - monster[1][0].y) ** 2) ** 0.5 for monster in
+        return min([((start[0] - monster[1][0].x) ** 2 + (start[1] - monster[1][0].y) ** 2) ** 0.5 for monster in
                     wrld.monsters.items()])
 
 
-def a_star_distance_to_exit(wrld):
+def a_star_distance_to_exit(wrld, start=None):
     """Returns the a* distance to the exit.
     wrld: World object
+    start (optional): (x, y) tuple to start from, defaults to character location
     returns: float"""
+    if start is None:
+        return len(a_star(wrld, goal=wrld.exitcell))
+    else:
+        return len(a_star(wrld, goal=wrld.exitcell, start=start))
 
-    return len(a_star(wrld, goal=wrld.exitcell))
 
-
-def a_star_distance_to_monster(wrld):
+def a_star_distance_to_monster(wrld, start=None):
     """Returns the a* distance to the closest monster.
     wrld: World object
+    start (optional): (x, y) tuple to start from, defaults to character location
     returns: float"""
 
-    return len(a_star(wrld, goal=wrld.exitcell, start=monster_location(wrld)))
+    if start is None:
+        return len(a_star(wrld, goal=monster_location(wrld)))
+    else:
+        return len(a_star(wrld, goal=monster_location(wrld), start=start))
