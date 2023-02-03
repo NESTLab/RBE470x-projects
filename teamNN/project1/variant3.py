@@ -1,6 +1,8 @@
 # This is necessary to find the main code
 import sys
 
+from teamNN.interactivecharacter import InteractiveCharacter
+
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
@@ -27,6 +29,10 @@ g.add_character(TestCharacter("me",  # name
                               "C",  # avatar
                               0, 0  # position
                               ))
+# g.add_character(InteractiveCharacter("me",  # name
+#                                      "C",  # avatar
+#                                      0, 0  # position
+#                                      ))
 
 # Run!
-g.go(1)
+g.go(0)
