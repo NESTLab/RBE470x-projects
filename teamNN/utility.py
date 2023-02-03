@@ -14,7 +14,7 @@ int euclidean_distance_to_exit(wrld:World)
 int euclidean_distance_to_monster(wrld:World) //Returns Nearest Monster
 
 """
-from teamNN.PriorityQueue import PriorityQueue
+from PriorityQueue import PriorityQueue
 
 
 def euclidean_dist(point_one, point_two):
@@ -31,7 +31,7 @@ def is_cell_walkable(wrld, x, y):
     x: int
     y: int
     returns: bool"""
-    return wrld.exit_at(x, y) or wrld.empty_at(x, y) or wrld.monsters_at(x, y)
+    return wrld.exit_at(x, y) or wrld.empty_at(x, y) or wrld.monsters_at(x, y) or wrld.characters_at(x, y)
 
 
 def eight_neighbors(wrld, x, y):
@@ -206,3 +206,34 @@ def a_star_distance_to_monster(wrld, start=None):
         return len(a_star(wrld, goal=monster_location(wrld)))
     else:
         return len(a_star(wrld, goal=monster_location(wrld), start=start))
+
+
+def a_star_distance(wrld, start, goal):
+    """Returns the a* distance between two points.
+    wrld: World object
+    start: (x, y) tuple to start from
+    goal: (x, y) tuple to end at
+    returns: float"""
+    if not is_cell_walkable(wrld, goal[0], goal[1]):
+        print("Goal is not walkable!")
+        raise Exception("Goal is not walkable!", goal)
+    if not is_cell_walkable(wrld, start[0], start[1]):
+        print("Start is not walkable!")
+        raise Exception("Start is not walkable!", start)
+
+    return len(a_star(wrld, goal=goal, start=start))
+
+
+def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
+    """Returns a value for the current world state.
+    wrld: World object
+    returns: float"""
+    # print("Evaluating state with character location: " + str(characterLocation) + " and monster location: " + str(monsterLocation))
+    if characterLocation is None:
+        characterLocation = character_location(wrld)
+    if monsterLocation is None:
+        monsterLocation = monster_location(wrld)
+
+    distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
+    distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
+    return (distance_to_monster * 0.7) - distance_to_exit

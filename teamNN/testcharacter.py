@@ -1,14 +1,15 @@
 # This is necessary to find the main code
 import sys
 
-from teamNN.project1.minimax import getNextMove_MiniMax
-from teamNN.utility import *
-
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
 from colorama import Fore, Back
 from PriorityQueue import PriorityQueue
+
+sys.path.insert(1, '../teamNN')
+from utility import *
+from project1.minimax import getNextMove_MiniMax
 
 
 class TestCharacter(CharacterEntity):
@@ -16,8 +17,9 @@ class TestCharacter(CharacterEntity):
     a_star_path = []
 
     def do(self, wrld):
-        print(getNextMove_MiniMax(wrld))
+        # print(getNextMove_MiniMax(wrld))
         nextCell = getNextMove_MiniMax(wrld)
+        print("Selected Move: ", nextCell)
         self.move(nextCell[0] - self.x, nextCell[1] - self.y)
         # if self.firstTime:
         #     print("Character at", self.x, self.y)
