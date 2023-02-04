@@ -93,12 +93,3 @@ class TestCharacter(CharacterEntity):
             return (location[0] == 7 or location[0] == 6) and (location[1] == 6 or location[1] == 14)
         else:
             return (location[0] == 0 or location[0] == 1) and (location[1] == 2 or location[1] == 10)
-
-        # print(getNextMove_MiniMax(wrld))
-        # print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld)))
-        # nextCell = get_next_move_expectimax(wrld)
-        # print("Selected Move: ", nextCell)
-        #
-        # self.move(nextCell[0] - self.x, nextCell[1] - self.y)
-
-        # if self.firstTime:

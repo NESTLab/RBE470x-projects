@@ -2,7 +2,6 @@
 import sys
 
 sys.path.insert(0, '../bomberman')
-from sys import maxsize
 
 sys.path.insert(1, '../')
 from utility import *
