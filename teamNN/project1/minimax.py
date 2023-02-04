@@ -1,9 +1,11 @@
 # This is necessary to find the main code
 import sys
-from teamNN.utility import *
 
 sys.path.insert(0, '../bomberman')
 from sys import maxsize
+
+sys.path.insert(1, '../')
+from utility import *
 
 reccursionDepth = 2
 
@@ -12,41 +14,46 @@ def getNextMove_MiniMax(wrld):
     # Get the next move using minimax
     possibleMoves = eight_neighbors(wrld, character_location(wrld)[0], character_location(wrld)[1])
     possibleMoves.append(character_location(wrld))
-    # Get the value of each possible move
-    values = list(map(lambda move: getValue_of_State(wrld, move, 0), possibleMoves))
-    # Get the max value
-    maxValue = max(values)
-    # Get the index of the max value
-    maxIndex = values.index(maxValue)
-    # Return the location to move to
-    return possibleMoves[maxIndex]
+    print("get next move called! self move options: ", possibleMoves)
+    values = list(map(lambda move: getValue_of_State(wrld, move, monster_location(wrld), 0), possibleMoves))
+    print("Options Evaluated: ", possibleMoves)
+    print("Option Scores: ", values)
+    return possibleMoves[values.index(max(values))]
 
 
-def getValue_of_State(wrld, pos, depth):
+def getValue_of_State(wrld, self_pos, monster_pos, depth):
     # Base case, depth has reached limit
     if depth == reccursionDepth:
-        return evaluateState(wrld, pos)
+        sys.stdout.write("\t" * depth)
+        print("base case! (Rec-depth) self pos: ", self_pos, "monster pos: ", monster_pos, "depth: ", depth, "score: ",
+              evaluate_state(wrld, self_pos, monster_pos))
+        return evaluate_state(wrld, self_pos, monster_pos)
+
+    if self_pos in eight_neighbors(wrld, monster_pos[0], monster_pos[1]):
+        sys.stdout.write("\t" * depth)
+        print("base case! (Monster) self pos: ", self_pos, "monster pos: ", monster_pos, "depth: ", depth, "score: ",
+              -maxsize / 2)
+        return -maxsize / 2
+
+    if self_pos == wrld.exitcell:
+        sys.stdout.write("\t" * depth)
+        print("base case! (Exit) self pos: ", self_pos, "monster pos: ", monster_pos, "depth: ", depth, "score: ",
+              maxsize / 2)
+        return maxsize / 2
     # If depth is even, then it is a min node
-    possibleMoves = eight_neighbors(wrld, pos[0], pos[1])
-    possibleMoves.append(pos)
-    return max(map(lambda move: getValue_of_State(wrld, move, depth + 1), possibleMoves))
-    # if depth % 2 == 0:
-    #     # Find the smallest value of the possible moves using map reduce
-    #     return min(map(lambda move: getValue_of_State(wrld, move, depth + 1), possibleMoves))
-    # else:
-    #     # Find the largest value of the possible moves using map reduce
-    #     return max(map(lambda move: getValue_of_State(wrld, move, depth + 1), possibleMoves))
-
-
-def evaluateState(wrld, pos):
-    # Calculate the value of the state based on the distance to the exit and proximity to monsters
-    # The closer to the exit, the better, the closer to monsters, the worse
-    exitDist = a_star_distance_to_exit(wrld, start=pos)
-    mosnterDist = euclidean_distance_to_monster(wrld, start=pos)
-    print("Pos: " + str(pos))
-    print("Exit Dist: " + str(exitDist))
-    print("Monster Dist: " + str(mosnterDist))
-    print("Value: " + str((mosnterDist * 0.7) - exitDist))
-    if exitDist is 0:
-        return maxsize
-    return (mosnterDist * 0.7) - exitDist
+    if depth % 2 == 1:  # Max Node (self)
+        possible_moves = eight_neighbors(wrld, self_pos[0], self_pos[1])
+        possible_moves.append(self_pos)
+        sys.stdout.write("\t" * depth)
+        print("max node called! self pos: ", self_pos, "monster pos: ", monster_pos, "depth: ", depth)
+        sys.stdout.write("\t" * depth)
+        print("max node called! self move options: ", possible_moves)
+        return max(map(lambda self_move: getValue_of_State(wrld, self_move, monster_pos, depth + 1), possible_moves))
+    else:  # Min Node (monster)
+        possible_moves = eight_neighbors(wrld, monster_pos[0], monster_pos[1])
+        possible_moves.append(monster_pos)
+        sys.stdout.write("\t" * depth)
+        print("min node called! self pos: ", self_pos, "monster pos: ", monster_pos, "depth: ", depth)
+        sys.stdout.write("\t" * depth)
+        print("min node called! monster move options: ", possible_moves)
+        return min(map(lambda monster_move: getValue_of_State(wrld, self_pos, monster_move, depth + 1), possible_moves))
