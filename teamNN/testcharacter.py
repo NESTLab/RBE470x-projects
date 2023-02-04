@@ -1,5 +1,6 @@
 # This is necessary to find the main code
 import sys
+from enum import Enum
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
@@ -12,32 +13,41 @@ from utility import *
 from project1.minimax import getNextMove_MiniMax
 
 
+class State(Enum):
+    START = 1
+    MOVE_TO_EXIT = 2
+    RUN_FROM_MONSTER = 3
+    MOVE_TO_WALL = 4
+    PLACE_BOMB = 5
+    RUN_FROM_BOMB = 6
+    DONE = 7
+
+
 class TestCharacter(CharacterEntity):
-    firstTime = True
-    a_star_path = []
+    stateMachine = State.START
 
     def do(self, wrld):
+        # match self.stateMachine:
+        #     case State.START:
+        #         self.stateMachine = State.MOVE_TO_EXIT
+        #     case State.MOVE_TO_EXIT:
+        #         self.move_to_exit(wrld)
+        #     case State.RUN_FROM_MONSTER:
+        #         self.run_from_monster(wrld)
+        #     case State.MOVE_TO_WALL:
+        #         self.move_to_wall(wrld)
+        #     case State.PLACE_BOMB:
+        #         self.place_bomb(wrld)
+        #     case State.RUN_FROM_BOMB:
+        #         self.run_from_bomb(wrld)
+        #     case State.DONE:
+        #         return
+
         # print(getNextMove_MiniMax(wrld))
+        print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld)))
         nextCell = getNextMove_MiniMax(wrld)
         print("Selected Move: ", nextCell)
+
         self.move(nextCell[0] - self.x, nextCell[1] - self.y)
+
         # if self.firstTime:
-        #     print("Character at", self.x, self.y)
-        #     print("Exit at", wrld.exitcell)
-        #     print("Explosions:", wrld.explosions)
-        #     print("Monsters:", wrld.monsters)
-        #     print("Monster Location", monster_location(wrld))
-        #     print("Euclidean distance to exit:", euclidean_distance_to_exit(wrld))
-        #     print("Manhattan distance to exit:", manhattan_distance_to_exit(wrld))
-        #     print("Euclidean distance to monster:", euclidean_distance_to_monster(wrld))
-        #     print("Manhattan distance to monster:", manhattan_distance_to_monster(wrld))
-        #     self.a_star_path = a_star(wrld)
-        #     print("A* path to goal:", self.a_star_path)
-        #
-        #     for point in self.a_star_path:
-        #         # Mark path on world
-        #         self.set_cell_color(point[0], point[1], Fore.RED + Back.GREEN)
-        #     self.firstTime = False
-        # else:
-        #     nextCell = self.a_star_path.pop(0)
-        #     self.move(nextCell[0] - self.x, nextCell[1] - self.y)

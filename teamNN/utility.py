@@ -234,6 +234,8 @@ def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
     if monsterLocation is None:
         monsterLocation = monster_location(wrld)
 
+    number_of_move_options = len(eight_neighbors(wrld, characterLocation[0], characterLocation[1]))
+
     distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
     distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
-    return (distance_to_monster * 0.7) - distance_to_exit
+    return int((distance_to_monster * 3) - distance_to_exit * 5) + number_of_move_options
