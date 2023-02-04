@@ -16,7 +16,12 @@ class AI():
     nodes_explored_count: int = 0
 
     def get_next_move(self, wrld, alpha=-float("inf"), beta=float("inf")):
-        # Get the next move using minimax with alpha-beta pruning
+        # if there are no monsters, just go to the exit
+        if len(wrld.monsters) == 0:
+            path = a_star(wrld, (wrld.exitcell[0], wrld.exitcell[1]),
+                          (character_location(wrld)[0], character_location(wrld)[1]))
+            return path[1]
+            # Get the next move using minimax with alpha-beta pruning
         possible_moves = eight_neighbors(wrld, character_location(wrld)[0], character_location(wrld)[1])
         # possible_moves.append(character_location(wrld))
         prioritize_moves_for_self(wrld, possible_moves)
@@ -105,5 +110,7 @@ def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
     number_of_move_options = len(eight_neighbors(wrld, characterLocation[0], characterLocation[1]))
 
     distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
+    if len(wrld.monsters) == 0:
+        return int(distance_to_exit * 5) + number_of_move_options * 10
     distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
-    return int((distance_to_monster * 5) - distance_to_exit * 6) + number_of_move_options * 20
+    return int((distance_to_monster * 5) - distance_to_exit * 6) + number_of_move_options * 10

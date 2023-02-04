@@ -65,6 +65,7 @@ def eight_neighbors(wrld, x, y):
 
 
 def a_star(wrld, goal=None, start=None):
+    found = False
     if start is None:
         start = character_location(wrld)  # Start at current position
     if goal is None:
@@ -80,6 +81,7 @@ def a_star(wrld, goal=None, start=None):
         current = frontier.get()
 
         if current == goal:
+            found = True
             break
 
         # Check all walkable neighbors of current cell
@@ -94,6 +96,8 @@ def a_star(wrld, goal=None, start=None):
                 frontier.put(neighbor, priority)
                 came_from[neighbor] = current
 
+    if not found:
+        return None
     # Reconstruct path using came_from dictionary
     currPos = goal
     finalPath = []
@@ -127,7 +131,8 @@ def monster_location(wrld):
     wrld: World object
     returns: (x, y) tuple"""
     if len(wrld.monsters) == 0:
-        Exception("No monster in world")
+        print("No monster in world")
+        return 1, 0
     realMonsters = []
     monsters = list(wrld.monsters.values())
     for monster in monsters:
@@ -227,7 +232,10 @@ def a_star_distance(wrld, start, goal):
         print("Start is not walkable!")
         raise Exception("Start is not walkable!", start)
 
-    return len(a_star(wrld, goal=goal, start=start))
+    try:
+        return len(a_star(wrld, goal=goal, start=start))
+    except:  # When A* fails and returns None, return a large number
+        return 999
 
 
 def monster_travel_direction(wrld):

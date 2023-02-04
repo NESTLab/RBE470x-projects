@@ -51,9 +51,9 @@ class TestCharacter(CharacterEntity):
             case State.WAIT_FOR_BOMB:
                 self.move(0, 0)
                 self.waitCount += 1
-                if self.waitCount > 1:
+                if self.waitCount > 2:
                     self.bombCount += 1
-                    self.bombCoolDown = 5
+                    self.bombCoolDown = 7
                     self.stateMachine = State.FAR_FROM_MONSTER
             case State.FAR_FROM_MONSTER:
                 self.ai.reccursionDepth = 2
