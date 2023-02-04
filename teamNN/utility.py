@@ -123,12 +123,18 @@ def exit_location(wrld):
 
 
 def monster_location(wrld):
-    """Returns the location of the first monster in wrld.
+    """Returns the location of the nearest monster in wrld.
     wrld: World object
     returns: (x, y) tuple"""
     if len(wrld.monsters) == 0:
         Exception("No monster in world")
-    return next(iter(wrld.monsters.items()))[1][0].x, next(iter(wrld.monsters.items()))[1][0].y
+    realMonsters = []
+    monsters = list(wrld.monsters.values())
+    for monster in monsters:
+        realMonsters.append(monster[0])
+    monsters = realMonsters
+    monsters.sort(key=lambda m: euclidean_dist(character_location(wrld), (m.x, m.y)))
+    return monsters[0].x, monsters[0].y
 
 
 def manhattan_distance_to_exit(wrld, start=None):
@@ -224,18 +230,10 @@ def a_star_distance(wrld, start, goal):
     return len(a_star(wrld, goal=goal, start=start))
 
 
-def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
-    """Returns a value for the current world state.
+def monster_travel_direction(wrld):
+    """Returns the direction the monster is moving in.
     wrld: World object
-    returns: float"""
-    # print("Evaluating state with character location: " + str(characterLocation) + " and monster location: " + str(monsterLocation))
-    if characterLocation is None:
-        characterLocation = character_location(wrld)
-    if monsterLocation is None:
-        monsterLocation = monster_location(wrld)
-
-    number_of_move_options = len(eight_neighbors(wrld, characterLocation[0], characterLocation[1]))
-
-    distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
-    distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
-    return int((distance_to_monster * 3) - distance_to_exit * 5) + number_of_move_options
+    returns: (x, y) tuple"""
+    if len(wrld.monsters) == 0:
+        Exception("No monster in world")
+    return next(iter(wrld.monsters.items()))[1][0].dx, next(iter(wrld.monsters.items()))[1][0].dy

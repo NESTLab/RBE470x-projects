@@ -15,29 +15,26 @@ sys.path.insert(1, '../teamNN')
 from testcharacter import TestCharacter
 
 # Create the game
-random.seed(123)  # TODO Change this if you want different random choices
-g = Game.fromfile('map.txt')
-g.add_monster(StupidMonster("stupid",  # name
-                            "S",  # avatar
-                            3, 5,  # position
-                            ))
-g.add_monster(SelfPreservingMonster("aggressive",  # name
-                                    "A",  # avatar
-                                    3, 13,  # position
-                                    1  # detection range
-                                    ))
+scores = []
+for i in range(100):
+    random.seed(i)
+    g = Game.fromfile('map.txt')
+    g.add_monster(StupidMonster("stupid",  # name
+                                "S",  # avatar
+                                3, 5,  # position
+                                ))
+    # g.add_monster(SelfPreservingMonster("aggressive",  # name
+    #                                     "A",  # avatar
+    #                                     3, 13,  # position
+    #                                     1  # detection range
+    #                                     ))
 
-# TODO Add your character
-# g.add_character(TestCharacter("me",  # name
-#                               "C",  # avatar
-#                               0, 0  # position
-#                               ))
+    g.add_character(TestCharacter("me",  # name
+                                  "C",  # avatar
+                                  0, 0  # position
+                                  ))
 
-# Uncomment this if you want the test character
-g.add_character(TestCharacter("me",  # name
-                              "C",  # avatar
-                              0, 0  # position
-                              ))
+    g.go(200)
+    scores.append(g.scores['me'])
 
-# Run!
-g.go(200)
+average_score = sum(scores) / len(scores)
