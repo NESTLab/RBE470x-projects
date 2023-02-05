@@ -1,6 +1,6 @@
 # This is necessary to find the main code
 import sys
-from teamNN.utility import *
+from utility import *
 
 sys.path.insert(0, '../bomberman')
 from sys import maxsize

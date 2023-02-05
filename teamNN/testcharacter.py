@@ -9,7 +9,7 @@ from PriorityQueue import PriorityQueue
 
 sys.path.insert(1, '../teamNN')
 from utility import *
-from project1.minimax import getNextMove_MiniMax
+from minimax import getNextMove_MiniMax
 
 
 class TestCharacter(CharacterEntity):
