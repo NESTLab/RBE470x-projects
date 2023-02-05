@@ -9,7 +9,7 @@ from PriorityQueue import PriorityQueue
 
 sys.path.insert(1, '../teamNN')
 from utility import *
-from minimax import getNextMove_MiniMax
+from minimaxnode import getNextMove_MiniMax2
 
 
 class TestCharacter(CharacterEntity):
@@ -18,7 +18,7 @@ class TestCharacter(CharacterEntity):
 
     def do(self, wrld):
         # print(getNextMove_MiniMax(wrld))
-        nextCell = getNextMove_MiniMax(wrld)
+        nextCell = getNextMove_MiniMax2(wrld)
         print("Selected Move: ", nextCell)
         self.move(nextCell[0] - self.x, nextCell[1] - self.y)
         # if self.firstTime:

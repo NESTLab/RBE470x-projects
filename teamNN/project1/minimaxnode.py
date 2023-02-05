@@ -7,7 +7,7 @@ from testcharacter import CharacterEntity
 from colorama import Fore, Back
 from PriorityQueue import PriorityQueue
 from sys import maxsize
-from teamNN.utility import *
+from utility import *
 
 
 class Node(object):
