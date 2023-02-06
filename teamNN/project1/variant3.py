@@ -37,10 +37,10 @@ from testcharacter import TestCharacter
 # # Run!
 # g.go(200)
 
-numberOfGames = 10
+numberOfGames = 1
 scores = []
 for i in range(numberOfGames):
-    random.seed(i)
+    random.seed(14)
     g = Game.fromfile('map.txt')
     g.add_monster(SelfPreservingMonster("selfpreserving",  # name
                                         "S",  # avatar
@@ -53,7 +53,7 @@ for i in range(numberOfGames):
                                   0, 0  # position
                                   ))
 
-    g.go(100)
+    g.go(1000)
     scores.append(g.world.scores['me'])
 
 average_score = sum(scores) / len(scores)

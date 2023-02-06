@@ -19,6 +19,8 @@ class AI():
         if len(wrld.monsters) == 0:
             path = a_star(wrld, (wrld.exitcell[0], wrld.exitcell[1]),
                           (character_location(wrld)[0], character_location(wrld)[1]))
+            if path is None:  # Blocked in by explosion, wait until it goes away
+                return character_location(wrld)
             return path[1]
             # Get the next move using minimax with alpha-beta pruning
         possible_moves = eight_neighbors(wrld, character_location(wrld)[0], character_location(wrld)[1])
@@ -34,12 +36,20 @@ class AI():
         print("Pruned", round(self.nodes_explored_count / 9 ** (self.reccursionDepth + 1) * 100), "% of the tree.",
               self.nodes_explored_count, "nodes explored.")
         self.nodes_explored_count = 0
+        if len(values) == 0:
+            return character_location(wrld)
+        print(max(values), values)
+        if min(values) < 0:
+            print("No good moves")
         return possible_moves[values.index(max(values))]
 
     def get_value_of_state(self, wrld, self_pos, monster_pos, depth, alpha, beta):
         self.nodes_explored_count += 1
         if self_pos == wrld.exitcell:
             return 300 - depth
+
+        if wrld.explosion_at(self_pos[0], self_pos[1]):
+            return -100 - depth
 
         if self_pos in eight_neighbors(wrld, monster_pos[0], monster_pos[1]) or self_pos == monster_pos:
             return -100 - depth
@@ -107,9 +117,10 @@ def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
         monsterLocation = monster_location(wrld)
 
     number_of_move_options = len(eight_neighbors(wrld, characterLocation[0], characterLocation[1]))
-
     distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
     if len(wrld.monsters) == 0:
         return int(distance_to_exit * 5) + number_of_move_options * 10
     distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
-    return int((distance_to_monster * 5) - distance_to_exit * 6) + number_of_move_options * 10
+    if distance_to_monster <= 2:  # The monster is within one tile away
+        return -100
+    return int((distance_to_monster * 5) - distance_to_exit * 6) + number_of_move_options * 5

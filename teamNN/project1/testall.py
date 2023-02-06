@@ -20,7 +20,7 @@ from testcharacter import TestCharacter
 
 numberOfGames = 10  # Number of games to play for each variant
 seedOffset = 10  # Offset for the random seed
-waitTimeMS = 100  # Wait time between frames in ms
+waitTimeMS = 1000  # Wait time between frames in ms
 
 pygame.display.set_caption('V1 G1 LastS: ' + str(0))
 g = Game.fromfile('map.txt')
@@ -51,7 +51,7 @@ for i in range(numberOfGames):
 scores3 = []
 pygame.display.set_caption('V3 G1 S: ' + str(scores2[numberOfGames - 1]))
 for i in range(numberOfGames):
-    random.seed(i)
+    random.seed(seedOffset + i)
     g = Game.fromfile('map.txt')
     g.add_monster(SelfPreservingMonster("selfpreserving",  # name
                                         "S",  # avatar
@@ -71,7 +71,7 @@ for i in range(numberOfGames):
 scores4 = []
 pygame.display.set_caption('V4 G1 S: ' + str(scores3[numberOfGames - 1]))
 for i in range(numberOfGames):
-    random.seed(i)
+    random.seed(seedOffset + i)
     g = Game.fromfile('map.txt')
     g.add_monster(SelfPreservingMonster("aggressive",  # name
                                         "A",  # avatar
@@ -91,7 +91,7 @@ for i in range(numberOfGames):
 scores5 = []
 pygame.display.set_caption('V5 G1 S: ' + str(scores4[numberOfGames - 1]))
 for i in range(numberOfGames):
-    random.seed(i)
+    random.seed(seedOffset + i)
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("stupid",  # name
                                 "S",  # avatar

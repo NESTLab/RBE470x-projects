@@ -34,6 +34,15 @@ def is_cell_walkable(wrld, x, y):
     return wrld.exit_at(x, y) or wrld.empty_at(x, y) or wrld.monsters_at(x, y) or wrld.characters_at(x, y)
 
 
+def is_cell_in_range(wrld, x, y):
+    """Returns True if the cell at (x, y) is in range.
+    wrld: World object
+    x: int
+    y: int
+    returns: bool"""
+    return wrld.width() > x >= 0 and wrld.height() > y >= 0
+
+
 def eight_neighbors(wrld, x, y):
     """
     Returns the walkable 8-neighbors cells of (x,y) in wrld
@@ -97,7 +106,7 @@ def a_star(wrld, goal=None, start=None):
                 came_from[neighbor] = current
 
     if not found:
-        return None
+        return [(start), (start)]
     # Reconstruct path using came_from dictionary
     currPos = goal
     finalPath = []

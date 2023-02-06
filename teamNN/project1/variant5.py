@@ -15,10 +15,10 @@ sys.path.insert(1, '../teamNN')
 from testcharacter import TestCharacter
 
 # Create the game
-numberOfGames = 10
+numberOfGames = 1
 scores = []
 for i in range(numberOfGames):
-    random.seed(i)
+    random.seed(14)
     g = Game.fromfile('map.txt')
     g.add_monster(StupidMonster("stupid",  # name
                                 "S",  # avatar
@@ -35,7 +35,7 @@ for i in range(numberOfGames):
                                   0, 0  # position
                                   ))
 
-    g.go(100)
+    g.go(500)
     scores.append(g.world.scores['me'])
 
 average_score = sum(scores) / len(scores)
