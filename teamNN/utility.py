@@ -34,6 +34,15 @@ def is_cell_walkable(wrld, x, y):
     return wrld.exit_at(x, y) or wrld.empty_at(x, y) or wrld.monsters_at(x, y) or wrld.characters_at(x, y)
 
 
+def is_cell_in_range(wrld, x, y):
+    """Returns True if the cell at (x, y) is in range.
+    wrld: World object
+    x: int
+    y: int
+    returns: bool"""
+    return wrld.width() > x >= 0 and wrld.height() > y >= 0
+
+
 def eight_neighbors(wrld, x, y):
     """
     Returns the walkable 8-neighbors cells of (x,y) in wrld
@@ -65,6 +74,7 @@ def eight_neighbors(wrld, x, y):
 
 
 def a_star(wrld, goal=None, start=None):
+    found = False
     if start is None:
         start = character_location(wrld)  # Start at current position
     if goal is None:
@@ -80,6 +90,7 @@ def a_star(wrld, goal=None, start=None):
         current = frontier.get()
 
         if current == goal:
+            found = True
             break
 
         # Check all walkable neighbors of current cell
@@ -94,6 +105,8 @@ def a_star(wrld, goal=None, start=None):
                 frontier.put(neighbor, priority)
                 came_from[neighbor] = current
 
+    if not found:
+        return [(start), (start)]
     # Reconstruct path using came_from dictionary
     currPos = goal
     finalPath = []
@@ -123,12 +136,19 @@ def exit_location(wrld):
 
 
 def monster_location(wrld):
-    """Returns the location of the first monster in wrld.
+    """Returns the location of the nearest monster in wrld.
     wrld: World object
     returns: (x, y) tuple"""
     if len(wrld.monsters) == 0:
-        Exception("No monster in world")
-    return next(iter(wrld.monsters.items()))[1][0].x, next(iter(wrld.monsters.items()))[1][0].y
+        print("No monster in world")
+        return 1, 0
+    realMonsters = []
+    monsters = list(wrld.monsters.values())
+    for monster in monsters:
+        realMonsters.append(monster[0])
+    monsters = realMonsters
+    monsters.sort(key=lambda m: euclidean_dist(character_location(wrld), (m.x, m.y)))
+    return monsters[0].x, monsters[0].y
 
 
 def manhattan_distance_to_exit(wrld, start=None):
@@ -222,19 +242,16 @@ def a_star_distance(wrld, start, goal):
         print("Start is not walkable!")
         raise Exception("Start is not walkable!", start)
 
-    return len(a_star(wrld, goal=goal, start=start))
+    try:
+        return len(a_star(wrld, goal=goal, start=start))
+    except:  # When A* fails and returns None, return a large number
+        return 999
 
 
-def evaluate_state(wrld, characterLocation=None, monsterLocation=None):
-    """Returns a value for the current world state.
+def monster_travel_direction(wrld):
+    """Returns the direction the monster is moving in.
     wrld: World object
-    returns: float"""
-    # print("Evaluating state with character location: " + str(characterLocation) + " and monster location: " + str(monsterLocation))
-    if characterLocation is None:
-        characterLocation = character_location(wrld)
-    if monsterLocation is None:
-        monsterLocation = monster_location(wrld)
-
-    distance_to_exit = a_star_distance(wrld, characterLocation, wrld.exitcell)
-    distance_to_monster = a_star_distance(wrld, characterLocation, monsterLocation)
-    return (distance_to_monster * 0.7) - distance_to_exit
+    returns: (x, y) tuple"""
+    if len(wrld.monsters) == 0:
+        Exception("No monster in world")
+    return next(iter(wrld.monsters.items()))[1][0].dx, next(iter(wrld.monsters.items()))[1][0].dy

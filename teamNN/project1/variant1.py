@@ -8,7 +8,7 @@ sys.path.insert(1, '..')
 from game import Game
 
 # TODO This is your code!
-sys.path.insert(1, '../teamNN')
+sys.path.insert(2, '../teamNN')
 
 # Uncomment this if you want the empty test character
 from testcharacter import TestCharacter
@@ -39,4 +39,4 @@ g.add_character(TestCharacter("me",  # name
 #g.go(0)
 
 # Use this if you want to proceed automatically
-g.go(10)
+g.go(300)
