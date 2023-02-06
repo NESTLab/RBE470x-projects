@@ -193,6 +193,7 @@ def a_star_distance_to_exit(wrld, start=None):
     if start is None:
         return len(a_star(wrld, goal=wrld.exitcell))
     else:
+        
         return len(a_star(wrld, goal=wrld.exitcell, start=start))
 
 

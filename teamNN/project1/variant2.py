@@ -1,7 +1,6 @@
 # This is necessary to find the main code
 import sys
 
-from teamNN.interactivecharacter import InteractiveCharacter
 
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
@@ -14,6 +13,8 @@ from monsters.stupid_monster import StupidMonster
 # TODO This is your code!
 sys.path.insert(1, '../teamNN')
 from testcharacter import TestCharacter
+from interactivecharacter import InteractiveCharacter
+
 
 # Create the game
 random.seed(123)  # TODO Change this if you want different random choices
@@ -36,4 +37,4 @@ g.add_character(TestCharacter("me",  # name
                               ))
 
 # Run!
-g.go(0)
+g.go(1)
