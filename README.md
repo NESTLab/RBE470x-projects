@@ -1,3 +1,6 @@
+# Overview #
+We are some Robotics Engineers trying to make an AI for the classical game Bomberman. Was it fun? Yeah. Did it work? Just find out!
+
 # Required Software #
 
 To run Bomberman, you'll need Python 3 with the `colorama` and `pygame`
