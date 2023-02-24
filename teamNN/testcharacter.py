@@ -24,9 +24,9 @@ class TestCharacter(CharacterEntity):
     bombCoolDown = 0
     stateMachine = State.START
     ai = AI()
-
     #Function starts here
     def do(self, wrld):
+        monsterNum = len(wrld.monsters.values())
         print("Current State: ", self.stateMachine)
         self.bombCoolDown -= 1
         #State Machines starts here
@@ -78,10 +78,7 @@ class TestCharacter(CharacterEntity):
             case State.CLOSE_TO_MONSTER:
                 #Using expectimax
                 self.ai.reccursionDepth = 3
-                self.ai.isExpectimax = True
-                #If more than 1 monsters -> run
-                if len(wrld.monsters.values()) > 1:
-                    self.ai.isExpectimax = False
+                self.ai.isExpectimax = False
                 nextCell = self.ai.get_next_move(wrld)
                 self.move(nextCell[0] - self.x, nextCell[1] - self.y)
 
@@ -90,8 +87,6 @@ class TestCharacter(CharacterEntity):
 
                 # Evaluating states and current position to place bomb if possible
                 if evaluate_state(wrld, character_location(wrld), monster_location(wrld)) < -20:
-                    self.stateMachine = State.PLACE_BOMB
-                if self.can_place_bomb(nextCell):
                     self.stateMachine = State.PLACE_BOMB
                 if self.can_place_bomb(nextCell):
                     self.stateMachine = State.PLACE_BOMB

@@ -1,15 +1,14 @@
 # Your goal #
 
 In this scenario, you must plan the route of your agent from the top-left
-corner to the exit. However, your route is obstructed - you need to use the bomb
-to create a path to the exit.
+corner to the exit.
 
 ## Variant 1: Alone in the world ##
 
 In the first variant of this scenario, the world is deterministic and your agent
 is alone in the environment.
 
-## Variant 2: Random monster ##
+## Variant 2: Stupid monster ##
 
 In the second variant of this scenario, a stupid monster is present. The monster
 chooses its next cell uniformly at random among the possible reachable cells.
