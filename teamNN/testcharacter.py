@@ -17,6 +17,7 @@ class State(Enum):
     WAIT_FOR_BOMB = 4
     FAR_FROM_MONSTER = 5
     CLOSE_TO_MONSTER = 6
+    EXPLORATION = 7;
 
 
 class TestCharacter(CharacterEntity):
@@ -54,10 +55,41 @@ class TestCharacter(CharacterEntity):
                     self.bombCoolDown = 7
                     self.stateMachine = State.FAR_FROM_MONSTER
             #State where the monster is >= 8 distance from the character
+            case State.EXPLORATION:
+                # print("Exploring")
+                # w = wrld.width
+                # h = wrld.height
+                # print(w)
+                # print(h)
+                #
+                # for x in range(7):
+                #     for y in range(17):
+                #
+                #         if wrld.wall_at(x, y):
+                #             print(x, y)
+                #             path = a_star(wrld, (x, y), character_location(wrld))
+                #             if path.pop(len(path) - 1) != wrld.exitcell:
+                #                 goal = (x, y)
+                #                 break
+                if a_star_distance_to_monster(wrld, (self.x, self.y + 1)) < 8 and len(wrld.monsters) > 0:
+                    self.stateMachine = State.CLOSE_TO_MONSTER
+
+                if is_cell_walkable(wrld, self.x, self.y + 1):
+                    print("cell walkable")
+                    self.move(self.x, self.y + 1)
+                else:
+                    self.stateMachine = State.PLACE_BOMB
+
             case State.FAR_FROM_MONSTER:
                 #Running minimax, depth = 2
                 self.ai.reccursionDepth = 2
                 self.ai.isExpectimax = False
+
+                print("a_star distance", a_star_distance_to_exit(wrld, character_location(wrld)))
+
+                if a_star_distance_to_exit(wrld, character_location(wrld)) < 0:
+                    print("No path to exit")
+                    self.stateMachine = State.EXPLORATION
 
                 #Generate AI move
                 nextCell = self.ai.get_next_move(wrld)
@@ -66,19 +98,22 @@ class TestCharacter(CharacterEntity):
                 print("Score of current world", evaluate_state(wrld, character_location(wrld), monster_location(wrld)))
                 print("Selected Move: ", nextCell)
 
-                #If can place bomb -> placebomb
-                if self.can_place_bomb(nextCell):
-                    self.stateMachine = State.PLACE_BOMB
-                if self.can_place_bomb(nextCell):
-                    self.stateMachine = State.PLACE_BOMB
+                # #If can place bomb -> placebomb
+                # if self.can_place_bomb(nextCell):
+                #     self.stateMachine = State.PLACE_BOMB
                 #If distance to monster < 8 -> close to monster
-                if a_star_distance_to_monster(wrld, (nextCell[0], nextCell[1])) < 8:
+                if a_star_distance_to_monster(wrld, (nextCell[0], nextCell[1])) < 8 and len(wrld.monsters) > 0:
                     self.stateMachine = State.CLOSE_TO_MONSTER
 
             case State.CLOSE_TO_MONSTER:
                 #Using expectimax
                 self.ai.reccursionDepth = 3
                 self.ai.isExpectimax = False
+                print("a_star distance", a_star_distance_to_exit(wrld, character_location(wrld)))
+
+                if a_star_distance_to_exit(wrld, character_location(wrld)) < 0:
+                    print("No path to exit")
+                    self.stateMachine = State.PLACE_BOMB
                 nextCell = self.ai.get_next_move(wrld)
                 self.move(nextCell[0] - self.x, nextCell[1] - self.y)
 
@@ -92,6 +127,7 @@ class TestCharacter(CharacterEntity):
                     self.stateMachine = State.PLACE_BOMB
                 if a_star_distance_to_monster(wrld, (nextCell[0], nextCell[1])) > 8:
                     self.stateMachine = State.FAR_FROM_MONSTER
+
 
     def can_place_bomb(self, location, ):
         """

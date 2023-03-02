@@ -39,4 +39,4 @@ g.add_character(TestCharacter("me",  # name
 #g.go(0)
 
 # Use this if you want to proceed automatically
-g.go(300)
+g.go(100)

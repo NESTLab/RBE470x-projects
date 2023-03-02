@@ -1,24 +1,24 @@
 max_time 5000
 bomb_time 1
 expl_duration 1
-expl_range 4
+expl_range 10
 +--------+
 |        |
 |        |
 |        |
-|WWWW    |
+|WWWWWWWW|
 |        |
 |        |
 |        |
-|    WWWW|
+|WWWWWWWW|
 |        |
 |        |
 |        |
-|WWWW    |
+|WWWWWWWW|
 |        |
 |        |
 |        |
-|    WWWW|
+|WWWWWWWW|
 |        |
 |        |
 |       E|

@@ -35,7 +35,7 @@ for i in range(numberOfGames):
                                   0, 0  # position
                                   ))
 
-    g.go(1000)
+    g.go(10)
     scores.append(g.world.scores['me'])
 
 average_score = sum(scores) / len(scores)

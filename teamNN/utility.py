@@ -117,11 +117,10 @@ def a_star(wrld, goal=None, start=None):
                 came_from[successor] = current
 
     if not found:
-        return [(start), (start)]
+        return [start, start]
     # Reconstruct path using came_from dictionary
     currPos = goal
-    finalPath = []
-    finalPath.append(goal)
+    finalPath = [goal]
     while currPos != start:
         currPos = came_from[currPos]
         finalPath.append(currPos)
@@ -169,10 +168,10 @@ def jump(current, dx, dy, wrld, goal):
 
             if not is_cell_walkable(wrld, ox, oy):
                 return None
-            if (ox,oy) == goal:
-                return (ox,oy)
+            if (ox, oy) == goal:
+                return (ox, oy)
     else:
-        #Moving in y-axis
+        # Moving in y-axis
         if dx != 0:
             while True:
                 if is_cell_walkable(wrld, ox + dx, ny + 1) \
@@ -181,11 +180,11 @@ def jump(current, dx, dy, wrld, goal):
                         and not is_cell_walkable(wrld, ox, ny - 1):
                     return ox, ny
                 ox += dx
-                if (ox,ny) == goal:
-                    return (ox,ny)
-                if not is_cell_walkable(wrld,ox,ny):
+                if (ox, ny) == goal:
+                    return (ox, ny)
+                if not is_cell_walkable(wrld, ox, ny):
                     return None
-        #Moving in x-axis
+        # Moving in x-axis
         else:
             while True:
                 if is_cell_walkable(wrld, nx + 1, oy + dy) \
@@ -194,9 +193,9 @@ def jump(current, dx, dy, wrld, goal):
                         and not is_cell_walkable(wrld, nx - 1, oy):
                     return nx, oy
                 oy += dy
-                if (nx,oy) == goal:
-                    return (nx,oy)
-                if not is_cell_walkable(wrld,nx,oy):
+                if (nx, oy) == goal:
+                    return (nx, oy)
+                if not is_cell_walkable(wrld, nx, oy):
                     return None
     return jump(current, dx, dy, wrld, goal)
 
@@ -351,8 +350,13 @@ def a_star_distance_to_exit(wrld, start=None):
     if start is None:
         return len(a_star(wrld, goal=wrld.exitcell))
     else:
-
-        return len(a_star(wrld, goal=wrld.exitcell, start=start))
+        path = a_star(wrld, goal=wrld.exitcell, start=start);
+        # print("astar is")
+        # print(path.pop(len(path)-1))
+        if path.pop(len(path) - 1) != wrld.exitcell:
+            return -1
+        else:
+            return len(path)
 
 
 def a_star_distance_to_monster(wrld, start=None):
