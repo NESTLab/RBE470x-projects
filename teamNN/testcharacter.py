@@ -36,9 +36,9 @@ class TestCharacter(CharacterEntity):
             #Start state -> When game begins, character will jump into this state
             case State.START:
                 self.move(0, 1)
-                #If at corner
-                if self.x == 0 and self.y == 2:
-                    self.stateMachine = State.PLACE_BOMB
+                # #If at corner
+                # if self.x == 0 and self.y == 2:
+                self.stateMachine = State.PLACE_BOMB
 
             #Place bomb, dodge and move onto WaitForBomb state
             case State.PLACE_BOMB:
@@ -99,8 +99,8 @@ class TestCharacter(CharacterEntity):
                 print("Selected Move: ", nextCell)
 
                 # #If can place bomb -> placebomb
-                # if self.can_place_bomb(nextCell):
-                #     self.stateMachine = State.PLACE_BOMB
+                if self.can_place_bomb(nextCell):
+                    self.stateMachine = State.PLACE_BOMB
                 #If distance to monster < 8 -> close to monster
                 if a_star_distance_to_monster(wrld, (nextCell[0], nextCell[1])) < 8 and len(wrld.monsters) > 0:
                     self.stateMachine = State.CLOSE_TO_MONSTER
