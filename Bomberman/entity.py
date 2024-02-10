@@ -27,6 +27,7 @@ class PositionalEntity(Entity):
     ###################
 
     def __eq__(self, other):
+        if(not other) return False
         return (self.x, self.y) == (other.x, other.y)
 
     def __ne__(self, other):
@@ -73,6 +74,7 @@ class MovableEntity(PositionalEntity):
     ###################
 
     def __eq__(self, other):
+        if(not other) return False
         return (super().__eq__(other) and
                 (self.dx, self.dy) == (other.dx, other.dy))
 
@@ -102,6 +104,7 @@ class TimedEntity(Entity):
     ###################
 
     def __eq__(self, other):
+        if(not other) return False
         return self.timer == other.timer
 
     def __ne__(self, other):
@@ -129,6 +132,7 @@ class AIEntity(Entity):
     ###################
 
     def __eq__(self, other):
+        if(not other) return False
         return self.name == other.name
 
     def __ne__(self, other):
@@ -149,6 +153,7 @@ class OwnedEntity(Entity):
     ###################
 
     def __eq__(self, other):
+        if(not other) return False
         return self.owner == other.owner
 
     def __ne__(self, other):
@@ -171,6 +176,7 @@ class BombEntity(PositionalEntity, TimedEntity, OwnedEntity):
     ###################
 
     def __eq__(self, other):
+        if(not other) return False
         return (super(PositionalEntity, self).__eq__(other) and
                 super(TimedEntity, self).__eq__(other) and
                 super(OwnedEntity, self).__eq__(other))
@@ -195,6 +201,7 @@ class ExplosionEntity(PositionalEntity, TimedEntity, OwnedEntity):
     ###################
 
     def __eq__(self, other):
+        if(not other) return False
         return (super(PositionalEntity, self).__eq__(other) and
                 super(TimedEntity, self).__eq__(other) and
                 super(OwnedEntity, self).__eq__(other))
@@ -233,6 +240,7 @@ class MonsterEntity(AIEntity, MovableEntity):
         return hash((self.name, self.x, self.y))
 
     def __eq__(self, other):
+        if(not other) return False
         return (super(MovableEntity, self).__eq__(other) and
                 super(AIEntity, self).__eq__(other))
 
@@ -282,6 +290,7 @@ class CharacterEntity(AIEntity, MovableEntity):
         return hash((self.name, self.x, self.y))
 
     def __eq__(self, other):
+        if(not other) return False
         return (self.maybe_place_bomb == other.maybe_place_bomb and
                 super(MovableEntity, self).__eq__(other) and
                 super(AIEntity, self).__eq__(other))
