@@ -389,3 +389,5 @@ class World:
         for k,clist in self.characters.items():
             for c in clist:
                 self.scores[c.name] = self.scores[c.name] + 1
+
+
